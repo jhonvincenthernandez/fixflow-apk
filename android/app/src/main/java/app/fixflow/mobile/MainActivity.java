@@ -1,4 +1,4 @@
-﻿package app.fixflow.mobile;
+package app.fixflow.mobile;
 
 import com.getcapacitor.BridgeActivity;
 
