@@ -79,7 +79,7 @@ const averageRating = computed(() => {
   <div class="ff-stack ff-stack--loose">
     <section class="ff-stack ff-stack--tight" aria-labelledby="dash-title">
       <p class="ff-overline">{{ BUSINESS.name }}</p>
-      <h1 id="dash-title" class="ff-h1">Shop dashboard</h1>
+      <h1 id="dash-title" class="ff-h1">Shop dashboards</h1>
     </section>
 
     <AppLink to="/availability" class="ff-card ff-card--interactive schedule">
