@@ -97,12 +97,30 @@ jobs:
       - name: Build release APK
         if: env.SIGNED == 'true'
         working-directory: android
-        run: ./gradlew assembleRelease
+        run: |
+          set -o pipefail
+          ./gradlew assembleRelease --stacktrace 2>&1 | tee ../gradle-release.log
 
       - name: Build debug APK
         if: env.SIGNED != 'true'
         working-directory: android
-        run: ./gradlew assembleDebug
+        run: |
+          set -o pipefail
+          ./gradlew assembleDebug --stacktrace 2>&1 | tee ../gradle-debug.log
+
+      - name: Show Gradle failure
+        if: failure()
+        run: |
+          for log in gradle-release.log gradle-debug.log; do
+            if [ -f "$log" ]; then
+              {
+                echo "### Gradle failure: $log"
+                echo '```'
+                tail -n 200 "$log"
+                echo '```'
+              } >> "$GITHUB_STEP_SUMMARY"
+            fi
+          done
 
       - name: Collect APK
         run: |
