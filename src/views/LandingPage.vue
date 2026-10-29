@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { Component } from 'vue'
-import { IonContent, IonPage } from '@ionic/vue'
+import { ref, type Component } from 'vue'
+import { IonContent, IonPage, IonPopover } from '@ionic/vue'
 import {
   ArrowRight,
   CalendarCheck,
@@ -8,6 +8,7 @@ import {
   ClipboardList,
   ReceiptText,
   Stethoscope,
+  SunMoon,
 } from '@lucide/vue'
 import AppLink from '@/components/AppLink.vue'
 import AppLogo from '@/components/AppLogo.vue'
@@ -45,6 +46,8 @@ const STEPS: readonly Step[] = [
   },
 ]
 
+const appearanceOpen = ref(false)
+
 /** Smooth scroll inside Ionic content, where native anchor jumps do not apply. */
 function scrollToSection(id: string): void {
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -67,7 +70,19 @@ function scrollToSection(id: string): void {
             <a href="#faq" @click.prevent="scrollToSection('faq')">FAQ</a>
           </nav>
           <div class="landing__actions">
-            <AppLink to="/auth" class="ff-btn ff-btn--primary">
+            <button
+              id="landing-appearance-trigger"
+              type="button"
+              class="landing__appearance-trigger"
+              aria-haspopup="dialog"
+              :aria-expanded="appearanceOpen"
+              aria-controls="landing-appearance-popover"
+              aria-label="Appearance"
+            >
+              <SunMoon class="ff-icon" aria-hidden="true" />
+              <span class="landing__appearance-trigger-label">Appearance</span>
+            </button>
+            <AppLink to="/auth" class="ff-btn ff-btn--primary landing__cta">
               Get started
               <ArrowRight class="ff-icon ff-icon--sm" aria-hidden="true" />
             </AppLink>
@@ -224,11 +239,28 @@ function scrollToSection(id: string): void {
             <AppLogo />
             <p class="ff-meta">Request it. Quote it. Book it. Track it.</p>
           </div>
-
-          <AppearancePanel heading-id="landing-appearance" class="landing__appearance" />
         </div>
       </footer>
     </ion-content>
+
+    <ion-popover
+      id="landing-appearance-popover"
+      trigger="landing-appearance-trigger"
+      trigger-action="click"
+      side="bottom"
+      alignment="end"
+      :arrow="false"
+      :dismiss-on-select="false"
+      class="landing__appearance-popover"
+      role="dialog"
+      aria-label="Appearance"
+      @didPresent="appearanceOpen = true"
+      @didDismiss="appearanceOpen = false"
+    >
+      <div class="landing__appearance-popover-body">
+        <AppearancePanel heading-id="landing-appearance" variant="plain" />
+      </div>
+    </ion-popover>
   </ion-page>
 </template>
 
@@ -247,6 +279,9 @@ function scrollToSection(id: string): void {
   padding-top: var(--safe-top);
   background: var(--color-surface);
   border-bottom: 1px solid var(--color-border);
+  transition:
+    background-color var(--transition-base),
+    border-color     var(--transition-base);
 }
 
 .landing__bar-inner {
@@ -278,7 +313,71 @@ function scrollToSection(id: string): void {
 .landing__actions {
   display: flex;
   align-items: center;
+  gap: var(--space-2);
   margin-inline-start: auto;
+}
+
+.landing__appearance-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-width: var(--touch-min);
+  min-height: var(--touch-min);
+  padding: 0 var(--space-2);
+  background: var(--color-surface);
+  border: 1px solid var(--color-control-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    color            var(--transition-fast),
+    background-color var(--transition-fast),
+    border-color     var(--transition-fast);
+}
+
+.landing__appearance-trigger-label {
+  display: none;
+}
+
+@media (hover: hover) {
+  .landing__appearance-trigger:hover {
+    background: var(--color-overlay);
+    border-color: var(--color-text-secondary);
+    color: var(--color-text-primary);
+  }
+}
+
+.landing__appearance-trigger:active {
+  background: var(--color-track);
+}
+
+/* The header stays actionable on the narrowest phones; the hero CTA remains. */
+@media (max-width: 22rem) {
+  .landing__cta {
+    display: none;
+  }
+}
+
+.landing__appearance-popover {
+  --width: min(24rem, calc(100vw - 2 * var(--page-pad)));
+  --max-width: calc(100vw - 2 * var(--page-pad));
+  --min-width: 0;
+  --background: var(--color-surface);
+  --box-shadow: var(--shadow-lg);
+  --backdrop-opacity: 0.18;
+}
+
+.landing__appearance-popover::part(content) {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.landing__appearance-popover-body {
+  padding: var(--space-4);
 }
 
 .landing__hero {
@@ -439,10 +538,6 @@ function scrollToSection(id: string): void {
   gap: var(--space-3);
 }
 
-.landing__appearance {
-  width: 100%;
-}
-
 @media (min-width: 48rem) {
   .landing__shell {
     max-width: var(--content-max-wide);
@@ -476,13 +571,17 @@ function scrollToSection(id: string): void {
     justify-content: space-between;
     gap: var(--space-8);
   }
-
-  .landing__appearance {
-    max-width: 24rem;
-  }
 }
 
 @media (min-width: 64rem) {
+  .landing__appearance-trigger {
+    padding-inline: var(--space-3);
+  }
+
+  .landing__appearance-trigger-label {
+    display: inline;
+  }
+
   .landing__hero {
     padding-block: var(--space-12) var(--space-10);
   }

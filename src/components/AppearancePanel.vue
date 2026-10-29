@@ -1,13 +1,22 @@
 <script setup lang="ts">
 import AppearanceControl from '@/components/AppearanceControl.vue'
 
-defineProps<{
-  headingId: string
-}>()
+withDefaults(
+  defineProps<{
+    headingId: string
+    /** Card is used on pages. Plain is used inside surfaces that already provide the frame. */
+    variant?: 'card' | 'plain'
+  }>(),
+  { variant: 'card' },
+)
 </script>
 
 <template>
-  <section class="ff-card appearance-panel" :aria-labelledby="headingId">
+  <section
+    class="appearance-panel"
+    :class="variant === 'card' ? 'ff-card' : 'appearance-panel--plain'"
+    :aria-labelledby="headingId"
+  >
     <div class="appearance-panel__body">
       <div class="ff-stack ff-stack--tight">
         <h2 :id="headingId" class="ff-h3">Appearance</h2>
