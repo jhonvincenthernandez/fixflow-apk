@@ -7,9 +7,11 @@ import AppButton from '@/components/AppButton.vue'
 import AppLogo from '@/components/AppLogo.vue'
 import FormField from '@/components/FormField.vue'
 import SegmentedControl from '@/components/SegmentedControl.vue'
+import TypewriterHeading from '@/components/TypewriterHeading.vue'
 import { useAsyncAction } from '@/composables/useAsyncAction'
 import { useNavigate } from '@/composables/useNavigate'
 import { register, signIn } from '@/composables/useSession'
+import { HERO_TITLE } from '@/content'
 import { ValidationError, userMessage } from '@/domain/errors'
 
 type Mode = 'signin' | 'register'
@@ -66,7 +68,7 @@ function switchMode(): void {
       <main class="ff-container auth" tabindex="-1">
         <header class="auth__intro ff-stack">
           <AppLogo />
-          <h1 class="ff-h1">Repairs, quoted and booked in one place</h1>
+          <TypewriterHeading id="auth-title" class="ff-h1" :text="HERO_TITLE" loop />
           <p class="ff-lead">Send a request, review the quotation, pick a time, and follow the repair to the end.</p>
         </header>
 

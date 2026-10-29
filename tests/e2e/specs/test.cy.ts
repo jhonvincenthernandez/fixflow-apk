@@ -6,7 +6,9 @@ describe('FixFlow public experience', () => {
 
   it('opens the appearance panel from the landing header and changes the preference', () => {
     cy.visit('/')
-    cy.contains('h1', 'Repairs, quoted and booked in one place').should('be.visible')
+    cy.get('#landing-title').should('be.visible')
+    cy.get('#landing-title').should('have.attr', 'aria-label', 'Repairs, quoted and booked in one place')
+    cy.get('.ff-typewriter__live', { timeout: 5000 }).should('have.text', 'Repairs, quoted and booked in one place')
     cy.get('footer').find('[data-appearance-opt]').should('not.exist')
 
     cy.get('#landing-appearance-trigger')
@@ -38,7 +40,7 @@ describe('FixFlow public experience', () => {
   it('keeps the header appearance panel usable on a phone', () => {
     cy.viewport(320, 800)
     cy.visit('/')
-    cy.contains('h1', 'Repairs, quoted and booked in one place').should('be.visible')
+    cy.get('#landing-title').should('be.visible')
     cy.get('.landing__cta').should('not.be.visible')
     cy.get('.landing__bar-inner').should(($bar) => {
       expect($bar[0].scrollWidth).to.be.lte($bar[0].clientWidth + 1)
@@ -60,6 +62,10 @@ describe('FixFlow public experience', () => {
 
   it('validates the sign-in form before contacting the database', () => {
     cy.visit('/auth')
+    cy.get('#auth-title').should('have.attr', 'aria-label', 'Repairs, quoted and booked in one place')
+    cy.get('.ff-typewriter__live', { timeout: 5000 })
+      .should('be.visible')
+      .and('have.text', 'Repairs, quoted and booked in one place')
     cy.get('form button[type="submit"]').click()
     cy.contains('Enter your email address').should('be.visible')
     cy.contains('Enter your password').should('be.visible')

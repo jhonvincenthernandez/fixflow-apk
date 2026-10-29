@@ -15,6 +15,8 @@ import AppLogo from '@/components/AppLogo.vue'
 import AppearancePanel from '@/components/AppearancePanel.vue'
 import DisclosureSection from '@/components/DisclosureSection.vue'
 import ServiceIcon from '@/components/ServiceIcon.vue'
+import TypewriterHeading from '@/components/TypewriterHeading.vue'
+import { HERO_TITLE } from '@/content'
 import { SERVICES } from '@/domain/services'
 
 interface Step {
@@ -93,7 +95,7 @@ function scrollToSection(id: string): void {
       <main id="main-content" class="landing__shell" tabindex="-1">
         <section class="landing__hero" aria-labelledby="landing-title">
           <p class="ff-badge ff-badge--brand">Local repair bookings in one place</p>
-          <h1 id="landing-title" class="landing__title">Repairs, quoted and booked in one place</h1>
+          <TypewriterHeading id="landing-title" class="landing__title" :text="HERO_TITLE" loop />
           <p class="ff-lead">
             Send a request, review the quotation, pick a time, and follow the repair to completion.
             FixFlow keeps customers and local shops aligned at every step.
@@ -393,7 +395,6 @@ function scrollToSection(id: string): void {
   font-weight: var(--weight-extrabold);
   line-height: var(--leading-tight);
   letter-spacing: -0.02em;
-  text-wrap: balance;
 }
 
 .landing__hero-cta {
