@@ -1,0 +1,7 @@
+{
+  "name": "fixflow",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "vue-vite"
+}

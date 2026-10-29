@@ -1,0 +1,13 @@
+specVersion: "v1"
+serviceId: "fixflow-5d7c5-service"
+location: "asia-southeast1"
+schemas:
+  - source: "./schema"
+    datasource:
+      postgresql:
+        database: "fixflow-5d7c5-database"
+        cloudSql:
+          instanceId: "fixflow-5d7c5-instance"
+          # schemaValidation: "STRICT"     # STRICT mode makes Postgres schema match Data Connect exactly.
+          # schemaValidation: "COMPATIBLE" # COMPATIBLE mode makes Postgres schema compatible with Data Connect.
+connectorDirs: ["./example"]

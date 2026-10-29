@@ -1,0 +1,238 @@
+# Read operations used by the FixFlow client.
+# This prototype does not use Firebase Authentication, so the client needs
+# PUBLIC access. The demo accounts are intentionally readable for sign-in.
+
+query CheckConnection @auth(
+  level: PUBLIC
+  insecureReason: "Read-only health check; returns no private app data."
+) {
+  appMetas(limit: 1) {
+    key
+  }
+}
+
+query GetFixflowUser($id: UUID!) @auth(
+  level: PUBLIC
+  insecureReason: "Demo only: the client restores its session from PostgreSQL."
+) {
+  fixflowUser(id: $id) {
+    id
+    role
+    name
+    email
+    phone
+    createdAt
+  }
+}
+
+query GetFixflowUserForLogin($email: String!) @auth(
+  level: PUBLIC
+  insecureReason: "Demo only: email and password sign-in happens in the client."
+) {
+  fixflowUsers(where: { email: { eq: $email } }, limit: 1) {
+    id
+    role
+    name
+    email
+    phone
+    passwordHash
+    salt
+    iterations
+    createdAt
+  }
+}
+
+query ListFixflowUsersByRole($role: String!) @auth(
+  level: PUBLIC
+  insecureReason: "Demo only: the shop owner needs customer contact details."
+) {
+  fixflowUsers(where: { role: { eq: $role } }) {
+    id
+    role
+    name
+    email
+    phone
+    createdAt
+  }
+}
+
+query ListAllFixflowUsers @auth(
+  level: PUBLIC
+  insecureReason: "Demo only: the reset action clears the shared demo dataset."
+) {
+  fixflowUsers {
+    id
+    role
+    name
+    email
+    phone
+    createdAt
+  }
+}
+
+query GetServiceRequest($id: UUID!) @auth(
+  level: PUBLIC
+  insecureReason: "Demo only: request records are intentionally shared by the prototype."
+) {
+  serviceRequest(id: $id) {
+    id
+    ref
+    customerId
+    serviceId
+    itemName
+    description
+    mode
+    address
+    status
+    quotationJson
+    appointmentJson
+    feedbackJson
+    closureJson
+    historyJson
+    imageIdsJson
+    createdAt
+    updatedAt
+  }
+}
+
+query ListAllServiceRequests @auth(
+  level: PUBLIC
+  insecureReason: "Demo only: the shop owner sees every request in the shared dataset."
+) {
+  serviceRequests(orderBy: [{ updatedAt: DESC }]) {
+    id
+    ref
+    customerId
+    serviceId
+    itemName
+    description
+    mode
+    address
+    status
+    quotationJson
+    appointmentJson
+    feedbackJson
+    closureJson
+    historyJson
+    imageIdsJson
+    createdAt
+    updatedAt
+  }
+}
+
+query ListServiceRequestsByCustomer($customerId: UUID!) @auth(
+  level: PUBLIC
+  insecureReason: "Demo only: customers read their own requests from the shared dataset."
+) {
+  serviceRequests(where: { customerId: { eq: $customerId } }, orderBy: [{ updatedAt: DESC }]) {
+    id
+    ref
+    customerId
+    serviceId
+    itemName
+    description
+    mode
+    address
+    status
+    quotationJson
+    appointmentJson
+    feedbackJson
+    closureJson
+    historyJson
+    imageIdsJson
+    createdAt
+    updatedAt
+  }
+}
+
+query ListScheduledServiceRequests @auth(
+  level: PUBLIC
+  insecureReason: "Demo only: appointment times are needed to prevent double booking."
+) {
+  serviceRequests(where: { status: { eq: "scheduled" } }) {
+    id
+    appointmentJson
+    status
+  }
+}
+
+query ListRequestImages($requestId: UUID!) @auth(
+  level: PUBLIC
+  insecureReason: "Demo only: photos belong to the shared demo requests."
+) {
+  requestImages(where: { requestId: { eq: $requestId } }) {
+    id
+    requestId
+    name
+    mimeType
+    dataUrl
+  }
+}
+
+query ListAllRequestImages @auth(
+  level: PUBLIC
+  insecureReason: "Demo only: the reset action clears photos from the shared dataset."
+) {
+  requestImages {
+    id
+  }
+}
+
+query GetNotification($id: UUID!) @auth(
+  level: PUBLIC
+  insecureReason: "Demo only: notifications are read by their owning client."
+) {
+  notification(id: $id) {
+    id
+    userId
+    requestId
+    title
+    body
+    createdAt
+    readAt
+  }
+}
+
+query ListNotifications($userId: UUID!) @auth(
+  level: PUBLIC
+  insecureReason: "Demo only: notifications are read by their owning client."
+) {
+  notifications(where: { userId: { eq: $userId } }, orderBy: [{ createdAt: DESC }]) {
+    id
+    userId
+    requestId
+    title
+    body
+    createdAt
+    readAt
+  }
+}
+
+query ListAllNotifications @auth(
+  level: PUBLIC
+  insecureReason: "Demo only: the reset action clears notifications from the shared dataset."
+) {
+  notifications {
+    id
+  }
+}
+
+query GetAppMeta($key: String!) @auth(
+  level: PUBLIC
+  insecureReason: "Demo only: request counter and shop hours are shared settings."
+) {
+  appMetas(where: { key: { eq: $key } }, limit: 1) {
+    id
+    key
+    value
+  }
+}
+
+query ListAllAppMetas @auth(
+  level: PUBLIC
+  insecureReason: "Demo only: the reset action clears shared settings."
+) {
+  appMetas {
+    id
+  }
+}

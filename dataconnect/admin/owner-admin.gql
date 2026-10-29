@@ -1,0 +1,25 @@
+# Administrative operations for the single shop owner.
+# This file is outside connectorDirs, so it is never deployed to the client.
+# The Firebase CLI executes these operations with admin credentials.
+
+query ListOwnerAccounts @auth(level: NO_ACCESS) {
+  fixflowUsers(where: { role: { eq: "owner" } }) {
+    id
+    role
+    name
+    email
+  }
+}
+
+query GetAccountByEmail($email: String!) @auth(level: NO_ACCESS) {
+  fixflowUsers(where: { email: { eq: $email } }, limit: 1) {
+    id
+    role
+    name
+    email
+  }
+}
+
+mutation SetUserRole($email: String!, $role: String!) @auth(level: NO_ACCESS) {
+  fixflowUser_updateMany(where: { email: { eq: $email } }, data: { role: $role })
+}

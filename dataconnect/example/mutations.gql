@@ -1,0 +1,193 @@
+# Write operations used by the FixFlow client.
+
+mutation CreateFixflowUser(
+  $id: UUID!
+  $role: String!
+  $name: String!
+  $email: String!
+  $phone: String!
+  $passwordHash: String!
+  $salt: String!
+  $iterations: Int!
+  $createdAt: Timestamp!
+) @auth(
+  level: PUBLIC
+  insecureReason: "Demo only: account registration happens in the client."
+) {
+  fixflowUser_insert(data: {
+    id: $id
+    role: $role
+    name: $name
+    email: $email
+    phone: $phone
+    passwordHash: $passwordHash
+    salt: $salt
+    iterations: $iterations
+    createdAt: $createdAt
+  })
+}
+
+mutation CreateServiceRequest(
+  $id: UUID!
+  $ref: String!
+  $customerId: UUID!
+  $serviceId: String!
+  $itemName: String!
+  $description: String!
+  $mode: String!
+  $address: String!
+  $status: String!
+  $quotationJson: String
+  $appointmentJson: String
+  $feedbackJson: String
+  $closureJson: String
+  $historyJson: String!
+  $imageIdsJson: String!
+  $createdAt: Timestamp!
+  $updatedAt: Timestamp!
+) @auth(
+  level: PUBLIC
+  insecureReason: "Demo only: customers create requests in the shared dataset."
+) {
+  serviceRequest_insert(data: {
+    id: $id
+    ref: $ref
+    customerId: $customerId
+    serviceId: $serviceId
+    itemName: $itemName
+    description: $description
+    mode: $mode
+    address: $address
+    status: $status
+    quotationJson: $quotationJson
+    appointmentJson: $appointmentJson
+    feedbackJson: $feedbackJson
+    closureJson: $closureJson
+    historyJson: $historyJson
+    imageIdsJson: $imageIdsJson
+    createdAt: $createdAt
+    updatedAt: $updatedAt
+  })
+}
+
+mutation UpdateServiceRequest(
+  $id: UUID!
+  $status: String!
+  $quotationJson: String
+  $appointmentJson: String
+  $feedbackJson: String
+  $closureJson: String
+  $historyJson: String!
+  $updatedAt: Timestamp!
+) @auth(
+  level: PUBLIC
+  insecureReason: "Demo only: workflow actions update the shared request record."
+) {
+  serviceRequest_update(id: $id, data: {
+    status: $status
+    quotationJson: $quotationJson
+    appointmentJson: $appointmentJson
+    feedbackJson: $feedbackJson
+    closureJson: $closureJson
+    historyJson: $historyJson
+    updatedAt: $updatedAt
+  })
+}
+
+mutation CreateRequestImage(
+  $id: UUID!
+  $requestId: UUID!
+  $name: String!
+  $mimeType: String!
+  $dataUrl: String!
+  $createdAt: Timestamp!
+) @auth(
+  level: PUBLIC
+  insecureReason: "Demo only: customers attach photos to their requests."
+) {
+  requestImage_insert(data: {
+    id: $id
+    requestId: $requestId
+    name: $name
+    mimeType: $mimeType
+    dataUrl: $dataUrl
+    createdAt: $createdAt
+  })
+}
+
+mutation CreateNotification(
+  $id: UUID!
+  $userId: UUID!
+  $requestId: UUID!
+  $title: String!
+  $body: String!
+  $createdAt: Timestamp!
+) @auth(
+  level: PUBLIC
+  insecureReason: "Demo only: workflow events notify the other side of the request."
+) {
+  notification_insert(data: {
+    id: $id
+    userId: $userId
+    requestId: $requestId
+    title: $title
+    body: $body
+    createdAt: $createdAt
+  })
+}
+
+mutation MarkNotificationRead($id: UUID!, $readAt: Timestamp!) @auth(
+  level: PUBLIC
+  insecureReason: "Demo only: the owning client marks its notification as read."
+) {
+  notification_update(id: $id, data: { readAt: $readAt })
+}
+
+mutation CreateAppMeta($key: String!, $value: String!, $updatedAt: Timestamp!) @auth(
+  level: PUBLIC
+  insecureReason: "Demo only: shared settings such as the request counter live in PostgreSQL."
+) {
+  appMeta_insert(data: { key: $key, value: $value, updatedAt: $updatedAt })
+}
+
+mutation UpdateAppMeta($id: UUID!, $value: String!, $updatedAt: Timestamp!) @auth(
+  level: PUBLIC
+  insecureReason: "Demo only: shared settings such as the request counter live in PostgreSQL."
+) {
+  appMeta_update(id: $id, data: { value: $value, updatedAt: $updatedAt })
+}
+
+mutation DeleteFixflowUser($id: UUID!) @auth(
+  level: PUBLIC
+  insecureReason: "Demo only: the reset action clears the shared demo dataset."
+) {
+  fixflowUser_delete(id: $id)
+}
+
+mutation DeleteServiceRequest($id: UUID!) @auth(
+  level: PUBLIC
+  insecureReason: "Demo only: the reset action clears the shared demo dataset."
+) {
+  serviceRequest_delete(id: $id)
+}
+
+mutation DeleteRequestImage($id: UUID!) @auth(
+  level: PUBLIC
+  insecureReason: "Demo only: the reset action clears the shared demo dataset."
+) {
+  requestImage_delete(id: $id)
+}
+
+mutation DeleteNotification($id: UUID!) @auth(
+  level: PUBLIC
+  insecureReason: "Demo only: the reset action clears the shared demo dataset."
+) {
+  notification_delete(id: $id)
+}
+
+mutation DeleteAppMeta($id: UUID!) @auth(
+  level: PUBLIC
+  insecureReason: "Demo only: the reset action clears the shared demo dataset."
+) {
+  appMeta_delete(id: $id)
+}

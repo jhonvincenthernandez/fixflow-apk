@@ -1,0 +1,71 @@
+# Administrative account operations. This file is outside connectorDirs, so it is
+# never deployed to the client. The Firebase CLI executes these operations with
+# admin credentials.
+
+query GetAccountByEmail($email: String!) @auth(level: NO_ACCESS) {
+  fixflowUsers(where: { email: { eq: $email } }, limit: 1) {
+    id
+    role
+    name
+    email
+  }
+}
+
+query ListAccountRequests($customerId: UUID!) @auth(level: NO_ACCESS) {
+  serviceRequests(where: { customerId: { eq: $customerId } }) {
+    id
+    ref
+  }
+}
+
+query ListAccountRequestImages($requestId: UUID!) @auth(level: NO_ACCESS) {
+  requestImages(where: { requestId: { eq: $requestId } }) {
+    id
+  }
+}
+
+query ListAccountNotifications($userId: UUID!) @auth(level: NO_ACCESS) {
+  notifications(where: { userId: { eq: $userId } }) {
+    id
+  }
+}
+
+query ListAccountRequestNotifications($requestIds: [UUID!]!) @auth(level: NO_ACCESS) {
+  notifications(where: { requestId: { in: $requestIds } }) {
+    id
+  }
+}
+
+query ListAccountOwners @auth(level: NO_ACCESS) {
+  fixflowUsers(where: { role: { eq: "owner" } }) {
+    id
+    email
+  }
+}
+
+mutation DeleteAccountData(
+  $userId: UUID!
+  $requestIds: [UUID!]!
+  $imageIds: [UUID!]!
+) @auth(level: NO_ACCESS) @transaction {
+  requestImage_deleteMany(where: { id: { in: $imageIds } })
+  serviceRequest_deleteMany(where: { id: { in: $requestIds } })
+  userNotifications: notification_deleteMany(where: { userId: { eq: $userId } })
+  requestNotifications: notification_deleteMany(where: { requestId: { in: $requestIds } })
+  fixflowUser_delete(id: $userId)
+}
+
+mutation DeleteAccountRequests(
+  $userId: UUID!
+  $requestIds: [UUID!]!
+) @auth(level: NO_ACCESS) @transaction {
+  serviceRequest_deleteMany(where: { id: { in: $requestIds } })
+  userNotifications: notification_deleteMany(where: { userId: { eq: $userId } })
+  requestNotifications: notification_deleteMany(where: { requestId: { in: $requestIds } })
+  fixflowUser_delete(id: $userId)
+}
+
+mutation DeleteAccountOnly($userId: UUID!) @auth(level: NO_ACCESS) @transaction {
+  userNotifications: notification_deleteMany(where: { userId: { eq: $userId } })
+  fixflowUser_delete(id: $userId)
+}
