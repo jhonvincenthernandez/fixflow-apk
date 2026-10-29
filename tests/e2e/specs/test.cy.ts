@@ -64,4 +64,16 @@ describe('FixFlow public experience', () => {
     cy.contains('Enter your email address').should('be.visible')
     cy.contains('Enter your password').should('be.visible')
   })
+
+  it('centers the sign-in content on the page', () => {
+    cy.viewport(1280, 1000)
+    cy.visit('/auth')
+    cy.get('main.auth').should(($main) => {
+      const box = $main[0].getBoundingClientRect()
+      const view = $main[0].ownerDocument.defaultView
+      if (view === null) throw new Error('Expected the auth page to have a window')
+      expect(Math.abs(box.top - (view.innerHeight - box.bottom))).to.be.lessThan(3)
+      expect(Math.abs(box.left + box.width / 2 - view.innerWidth / 2)).to.be.lessThan(3)
+    })
+  })
 })

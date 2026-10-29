@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { IonContent, IonPage, onIonViewWillEnter } from '@ionic/vue'
 import { CalendarClock, LogOut } from '@lucide/vue'
 import AppearancePanel from '@/components/AppearancePanel.vue'
@@ -7,6 +7,7 @@ import AppButton from '@/components/AppButton.vue'
 import AppLink from '@/components/AppLink.vue'
 import DisclosureSection from '@/components/DisclosureSection.vue'
 import PageHeader from '@/components/PageHeader.vue'
+import SheetModal from '@/components/SheetModal.vue'
 import { loadAvailability, useAvailability } from '@/composables/useAvailability'
 import { useNavigate } from '@/composables/useNavigate'
 import { signOut, useSession } from '@/composables/useSession'
@@ -19,6 +20,7 @@ import { formatLongDay } from '@/domain/format'
 const { user } = useSession()
 const { replace } = useNavigate()
 const { state: hoursState, availability } = useAvailability()
+const signOutOpen = ref(false)
 
 onIonViewWillEnter(() => {
   void loadAvailability({ silent: true })
@@ -34,6 +36,7 @@ const daysOffAhead = computed(() =>
 )
 
 function onSignOut(): void {
+  signOutOpen.value = false
   signOut()
   replace('/auth')
 }
@@ -114,7 +117,7 @@ function onSignOut(): void {
           </DisclosureSection>
 
           <div class="ff-stack ff-stack--tight">
-            <AppButton variant="secondary" block @click="onSignOut">
+            <AppButton variant="secondary" block aria-haspopup="dialog" @click="signOutOpen = true">
               <LogOut class="ff-icon ff-icon--sm" aria-hidden="true" />
               Sign out
             </AppButton>
@@ -122,6 +125,17 @@ function onSignOut(): void {
         </div>
       </main>
     </ion-content>
+
+    <SheetModal :open="signOutOpen" title="Sign out?" @close="signOutOpen = false">
+      <p>Signing out only ends this session. Your account and saved requests stay in place.</p>
+      <template #footer>
+        <AppButton variant="danger" block @click="onSignOut">
+          <LogOut class="ff-icon ff-icon--sm" aria-hidden="true" />
+          Sign out
+        </AppButton>
+        <AppButton variant="secondary" block @click="signOutOpen = false">Cancel</AppButton>
+      </template>
+    </SheetModal>
   </ion-page>
 </template>
 

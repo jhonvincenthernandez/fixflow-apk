@@ -62,7 +62,7 @@ function switchMode(): void {
 
 <template>
   <ion-page>
-    <ion-content>
+    <ion-content class="auth-content">
       <main class="ff-container auth" tabindex="-1">
         <header class="auth__intro ff-stack">
           <AppLogo />
@@ -163,7 +163,15 @@ function switchMode(): void {
 </template>
 
 <style scoped>
+/* Auto block margins center the content when it fits and step aside when the form is taller than the viewport. */
+.auth-content::part(scroll) {
+  display: flex;
+  flex-direction: column;
+}
+
 .auth {
+  flex: none;
+  margin-block: auto;
   display: flex;
   flex-direction: column;
   gap: var(--space-8);
