@@ -1,0 +1,6 @@
+# Copy this file to android/key.properties for a local signed release build.
+# Never commit android/key.properties or the keystore it points to.
+storeFile=fixflow-release.jks
+storePassword=change-me
+keyAlias=fixflow
+keyPassword=change-me

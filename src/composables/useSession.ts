@@ -1,6 +1,5 @@
 import { computed, readonly, shallowRef } from 'vue'
 import { authenticate, getUser, registerCustomer } from '@/data/repo'
-import { seedIfEmpty } from '@/data/seed'
 import { clearSession, readStoredSession, storeSession } from '@/data/session'
 import { AuthError, toAppError } from '@/domain/errors'
 import type { AppError } from '@/domain/errors'
@@ -22,7 +21,6 @@ let started = false
 async function bootstrap(): Promise<void> {
   state.value = { status: 'loading' }
   try {
-    await seedIfEmpty()
     const storedId = readStoredSession()
     if (storedId === null) {
       state.value = { status: 'signedOut' }
@@ -32,7 +30,7 @@ async function bootstrap(): Promise<void> {
       state.value = { status: 'signedIn', user: await getUser(storedId) }
     } catch (error) {
       if (!(error instanceof AuthError)) throw error
-      // The stored user no longer exists (for example after a data reset): start signed out.
+      // The stored user no longer exists (for example after the account is deleted): start signed out.
       clearSession()
       state.value = { status: 'signedOut' }
     }

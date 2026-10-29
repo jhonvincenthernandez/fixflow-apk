@@ -24,17 +24,20 @@ const needsAttention = computed(() =>
 </script>
 
 <template>
-  <div class="ff-stack ff-stack--loose">
-    <section class="ff-stack" aria-labelledby="home-greeting">
-      <h1 id="home-greeting" class="ff-h1">Hello, {{ firstName }}</h1>
-      <p class="ff-lead">What needs fixing today?</p>
-      <AppLink to="/request/new" class="ff-btn ff-btn--primary ff-btn--block">
+  <div class="ff-stack ff-stack--loose home">
+    <section class="home__hero" aria-labelledby="home-greeting">
+      <div class="ff-stack ff-stack--tight">
+        <p class="ff-overline">Customer portal</p>
+        <h1 id="home-greeting" class="ff-h1">Hello, {{ firstName }}</h1>
+        <p class="ff-lead">What needs fixing today?</p>
+      </div>
+      <AppLink to="/request/new" class="ff-btn ff-btn--primary home__cta">
         <Plus class="ff-icon ff-icon--sm" aria-hidden="true" />
         New repair request
       </AppLink>
     </section>
 
-    <section class="ff-stack" aria-labelledby="home-attention">
+    <section class="ff-stack home__attention" aria-labelledby="home-attention">
       <h2 id="home-attention" class="ff-h2">Needs your attention</h2>
 
       <SkeletonList v-if="state.status === 'loading' || state.status === 'idle'" :count="2" />
@@ -58,7 +61,7 @@ const needsAttention = computed(() =>
       </template>
     </section>
 
-    <section class="ff-stack" aria-labelledby="home-services">
+    <section class="ff-stack home__services" aria-labelledby="home-services">
       <h2 id="home-services" class="ff-h2">Browse services</h2>
       <ul class="services">
         <li v-for="service in SERVICES" :key="service.id">
@@ -74,6 +77,16 @@ const needsAttention = computed(() =>
 </template>
 
 <style scoped>
+.home__hero {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.home__cta {
+  width: 100%;
+}
+
 .caught-up {
   display: flex;
   align-items: center;
@@ -102,5 +115,31 @@ const needsAttention = computed(() =>
 .service__name {
   font-size: var(--text-base);
   font-weight: var(--weight-bold);
+}
+
+@media (min-width: 64rem) {
+  .home {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+    gap: var(--space-6);
+    align-items: start;
+  }
+
+  .home__hero {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-6);
+    padding: var(--space-6);
+    background: var(--color-brand-light);
+    border: 1px solid var(--color-brand-border);
+    border-radius: var(--radius-xl);
+  }
+
+  .home__cta {
+    width: auto;
+    flex: none;
+  }
 }
 </style>

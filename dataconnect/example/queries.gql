@@ -1,6 +1,6 @@
 # Read operations used by the FixFlow client.
-# This prototype does not use Firebase Authentication, so the client needs
-# PUBLIC access. The demo accounts are intentionally readable for sign-in.
+# The client performs app-level password sign-in today, so these operations are
+# PUBLIC. See the security section in README.md before using real customer data.
 
 query CheckConnection @auth(
   level: PUBLIC
@@ -13,7 +13,7 @@ query CheckConnection @auth(
 
 query GetFixflowUser($id: UUID!) @auth(
   level: PUBLIC
-  insecureReason: "Demo only: the client restores its session from PostgreSQL."
+  insecureReason: "Public: the client restores its session by reading the app user row."
 ) {
   fixflowUser(id: $id) {
     id
@@ -27,7 +27,7 @@ query GetFixflowUser($id: UUID!) @auth(
 
 query GetFixflowUserForLogin($email: String!) @auth(
   level: PUBLIC
-  insecureReason: "Demo only: email and password sign-in happens in the client."
+  insecureReason: "Public: email and password sign-in is handled by the client today; move it behind Firebase Auth before public launch."
 ) {
   fixflowUsers(where: { email: { eq: $email } }, limit: 1) {
     id
@@ -44,7 +44,7 @@ query GetFixflowUserForLogin($email: String!) @auth(
 
 query ListFixflowUsersByRole($role: String!) @auth(
   level: PUBLIC
-  insecureReason: "Demo only: the shop owner needs customer contact details."
+  insecureReason: "Public: the shop owner needs customer contact details; restrict this before public launch."
 ) {
   fixflowUsers(where: { role: { eq: $role } }) {
     id
@@ -56,23 +56,9 @@ query ListFixflowUsersByRole($role: String!) @auth(
   }
 }
 
-query ListAllFixflowUsers @auth(
-  level: PUBLIC
-  insecureReason: "Demo only: the reset action clears the shared demo dataset."
-) {
-  fixflowUsers {
-    id
-    role
-    name
-    email
-    phone
-    createdAt
-  }
-}
-
 query GetServiceRequest($id: UUID!) @auth(
   level: PUBLIC
-  insecureReason: "Demo only: request records are intentionally shared by the prototype."
+  insecureReason: "Public: request access is enforced in the client today; restrict this before public launch."
 ) {
   serviceRequest(id: $id) {
     id
@@ -97,7 +83,7 @@ query GetServiceRequest($id: UUID!) @auth(
 
 query ListAllServiceRequests @auth(
   level: PUBLIC
-  insecureReason: "Demo only: the shop owner sees every request in the shared dataset."
+  insecureReason: "Public: the shop owner sees every request; restrict this before public launch."
 ) {
   serviceRequests(orderBy: [{ updatedAt: DESC }]) {
     id
@@ -122,7 +108,7 @@ query ListAllServiceRequests @auth(
 
 query ListServiceRequestsByCustomer($customerId: UUID!) @auth(
   level: PUBLIC
-  insecureReason: "Demo only: customers read their own requests from the shared dataset."
+  insecureReason: "Public: customers read requests by customer id; restrict this before public launch."
 ) {
   serviceRequests(where: { customerId: { eq: $customerId } }, orderBy: [{ updatedAt: DESC }]) {
     id
@@ -147,7 +133,7 @@ query ListServiceRequestsByCustomer($customerId: UUID!) @auth(
 
 query ListScheduledServiceRequests @auth(
   level: PUBLIC
-  insecureReason: "Demo only: appointment times are needed to prevent double booking."
+  insecureReason: "Public: appointment times are needed to prevent double booking; restrict this before public launch."
 ) {
   serviceRequests(where: { status: { eq: "scheduled" } }) {
     id
@@ -158,7 +144,7 @@ query ListScheduledServiceRequests @auth(
 
 query ListRequestImages($requestId: UUID!) @auth(
   level: PUBLIC
-  insecureReason: "Demo only: photos belong to the shared demo requests."
+  insecureReason: "Public: photos belong to a request; restrict this before public launch."
 ) {
   requestImages(where: { requestId: { eq: $requestId } }) {
     id
@@ -169,18 +155,9 @@ query ListRequestImages($requestId: UUID!) @auth(
   }
 }
 
-query ListAllRequestImages @auth(
-  level: PUBLIC
-  insecureReason: "Demo only: the reset action clears photos from the shared dataset."
-) {
-  requestImages {
-    id
-  }
-}
-
 query GetNotification($id: UUID!) @auth(
   level: PUBLIC
-  insecureReason: "Demo only: notifications are read by their owning client."
+  insecureReason: "Public: notifications are read by their owning client today; restrict this before public launch."
 ) {
   notification(id: $id) {
     id
@@ -195,7 +172,7 @@ query GetNotification($id: UUID!) @auth(
 
 query ListNotifications($userId: UUID!) @auth(
   level: PUBLIC
-  insecureReason: "Demo only: notifications are read by their owning client."
+  insecureReason: "Public: notifications are read by their owning client today; restrict this before public launch."
 ) {
   notifications(where: { userId: { eq: $userId } }, orderBy: [{ createdAt: DESC }]) {
     id
@@ -208,31 +185,13 @@ query ListNotifications($userId: UUID!) @auth(
   }
 }
 
-query ListAllNotifications @auth(
-  level: PUBLIC
-  insecureReason: "Demo only: the reset action clears notifications from the shared dataset."
-) {
-  notifications {
-    id
-  }
-}
-
 query GetAppMeta($key: String!) @auth(
   level: PUBLIC
-  insecureReason: "Demo only: request counter and shop hours are shared settings."
+  insecureReason: "Public: request counter and shop hours are shared settings; restrict this before public launch."
 ) {
   appMetas(where: { key: { eq: $key } }, limit: 1) {
     id
     key
     value
-  }
-}
-
-query ListAllAppMetas @auth(
-  level: PUBLIC
-  insecureReason: "Demo only: the reset action clears shared settings."
-) {
-  appMetas {
-    id
   }
 }

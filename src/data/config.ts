@@ -7,6 +7,4 @@
 export const dataConfig = {
   passwordIterations: 210_000,
   maxImageBytes: 5 * 1024 * 1024,
-  /** Demo data is on by default. Set VITE_DEMO_SEED=false for a clean production database. */
-  demoSeed: import.meta.env.VITE_DEMO_SEED !== 'false',
 }

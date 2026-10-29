@@ -7,11 +7,11 @@ import {
   CircleCheck,
   ClipboardList,
   ReceiptText,
-  ShieldCheck,
   Stethoscope,
 } from '@lucide/vue'
 import AppLink from '@/components/AppLink.vue'
 import AppLogo from '@/components/AppLogo.vue'
+import AppearanceControl from '@/components/AppearanceControl.vue'
 import DisclosureSection from '@/components/DisclosureSection.vue'
 import ServiceIcon from '@/components/ServiceIcon.vue'
 import { SERVICES } from '@/domain/services'
@@ -101,7 +101,7 @@ function scrollToSection(id: string): void {
             <h2 id="how-title" class="ff-h2">How FixFlow works</h2>
             <p class="ff-meta">Four steps from broken to fixed. Every step notifies the right person.</p>
           </div>
-          <ol class="landing__grid">
+          <ol class="landing__grid landing__grid--steps">
             <li v-for="(step, index) in STEPS" :key="step.title" class="ff-card landing__step">
               <div class="landing__step-top">
                 <span class="landing__step-num" aria-hidden="true">{{ index + 1 }}</span>
@@ -119,7 +119,7 @@ function scrollToSection(id: string): void {
             <h2 id="services-title" class="ff-h2">Services covered</h2>
             <p class="ff-meta">Choose a category to start. The shop confirms the scope in the quotation.</p>
           </div>
-          <ul class="landing__grid">
+          <ul class="landing__grid landing__grid--services">
             <li v-for="service in SERVICES" :key="service.id" class="ff-card landing__service">
               <ServiceIcon :service-id="service.id" />
               <h3 class="ff-h3">{{ service.name }}</h3>
@@ -171,19 +171,6 @@ function scrollToSection(id: string): void {
           </div>
         </section>
 
-        <section class="ff-inset landing__callout" aria-labelledby="trust-title">
-          <span class="landing__callout-icon" aria-hidden="true">
-            <ShieldCheck class="ff-icon ff-icon--lg" aria-hidden="true" />
-          </span>
-          <div class="landing__callout-body">
-            <h2 id="trust-title" class="ff-h3">Shared demo data for this preview</h2>
-            <p class="ff-meta">
-              Sample data is stored in a shared PostgreSQL database, so customers and shop owners see the same requests.
-              Try a demo account to see both sides of the workflow before you create your own account.
-            </p>
-          </div>
-        </section>
-
         <section id="faq" class="landing__section" aria-labelledby="faq-title" tabindex="-1">
           <div class="landing__heading">
             <p class="ff-overline">Answers</p>
@@ -192,7 +179,7 @@ function scrollToSection(id: string): void {
           <div class="landing__faq">
             <DisclosureSection title="Is FixFlow free to try?">
               <p class="ff-meta">
-                Yes. Browse services, create a request, and try the demo accounts without payment.
+                Yes. Browse services, create a request, and receive a quotation without payment.
                 Shops set their own repair prices inside each quotation.
               </p>
             </DisclosureSection>
@@ -218,8 +205,10 @@ function scrollToSection(id: string): void {
         </section>
 
         <section class="ff-card landing__final" aria-labelledby="final-title">
-          <h2 id="final-title" class="ff-h2">Ready when something breaks</h2>
-          <p class="ff-meta">Create an account, send your first request, and get a clear quotation.</p>
+          <div class="ff-stack ff-stack--tight">
+            <h2 id="final-title" class="ff-h2">Ready when something breaks</h2>
+            <p class="ff-meta">Create an account, send your first request, and get a clear quotation.</p>
+          </div>
           <div class="landing__hero-cta">
             <AppLink to="/auth" class="ff-btn ff-btn--primary">
               Get started
@@ -231,8 +220,18 @@ function scrollToSection(id: string): void {
 
       <footer class="landing__footer">
         <div class="landing__shell landing__footer-inner">
-          <AppLogo />
-          <p class="ff-meta">Request it. Quote it. Book it. Track it.</p>
+          <div class="landing__footer-brand">
+            <AppLogo />
+            <p class="ff-meta">Request it. Quote it. Book it. Track it.</p>
+          </div>
+
+          <section class="ff-card ff-stack landing__appearance" aria-labelledby="landing-appearance">
+            <div class="ff-stack ff-stack--tight">
+              <h2 id="landing-appearance" class="ff-h3">Appearance</h2>
+              <p class="ff-meta">Follow this device or choose a fixed light or dark look.</p>
+            </div>
+            <AppearanceControl />
+          </section>
         </div>
       </footer>
     </ion-content>
@@ -435,11 +434,26 @@ function scrollToSection(id: string): void {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--space-3);
+  gap: var(--space-6);
   padding-block: var(--space-6);
 }
 
+.landing__footer-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.landing__appearance {
+  width: 100%;
+}
+
 @media (min-width: 48rem) {
+  .landing__shell {
+    max-width: var(--content-max-wide);
+  }
+
   .landing__bar-inner {
     gap: var(--space-4);
   }
@@ -459,12 +473,65 @@ function scrollToSection(id: string): void {
   }
 
   .landing__grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .landing__footer-inner {
     flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-8);
+  }
+
+  .landing__appearance {
+    max-width: 24rem;
+  }
+}
+
+@media (min-width: 64rem) {
+  .landing__hero {
+    padding-block: var(--space-12) var(--space-10);
+  }
+
+  .landing__title {
+    max-width: 18ch;
+    font-size: var(--text-4xl);
+  }
+
+  .landing__hero .ff-lead {
+    max-width: 60ch;
+  }
+
+  .landing__section {
+    gap: var(--space-6);
+    padding-block: var(--space-10);
+  }
+
+  .landing__grid--steps {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .landing__grid--services {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .landing__faq {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3);
+    align-items: start;
+  }
+
+  .landing__callout-body {
+    max-width: 72ch;
+  }
+
+  .landing__final {
+    flex-direction: row;
     align-items: center;
+    justify-content: space-between;
+    gap: var(--space-6);
+    padding: var(--space-6);
   }
 }
 </style>

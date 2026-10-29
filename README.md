@@ -8,30 +8,13 @@ through completion and feedback.
 
 - Ionic Vue with Vite and TypeScript.
 - Firebase Data Connect on Cloud SQL for PostgreSQL.
-- Custom PBKDF2 email and password sign-in for the demo.
+- App-level PBKDF2 email and password accounts.
+- Capacitor Android shell with a GitHub Actions APK build.
 
-## Demo accounts
+## Accounts
 
-The first launch seeds these accounts, sample requests, notifications, and shop settings
-into the shared database. The password for every demo account is `fixflow123`.
-
-| Role           | Email               |
-| -------------- | ------------------- |
-| Customer       | `ana@fixflow.app`   |
-| Customer       | `ben@fixflow.app`   |
-| Business owner | `owner@fixflow.app` |
-
-The seed is for the demo database. For a real deployment, register the owner account in
-the app and promote it with the command in the next section. Do not rely on the demo
-owner credentials in production.
-
-Set `VITE_DEMO_SEED=false` in the build environment for a clean production database. That
-build skips the demo seed and hides the Reset demo data button.
-
-## Shop owner account
-
-The app serves one shop and has one owner. Customers sign up through the app. The owner
-account is created the same way, then promoted from the command line. Do not add an
+Customers create an account in the app. The app serves one shop and has one owner. The
+owner account is created the same way, then promoted from the command line. Do not add an
 owner creation form to the app.
 
 1. Register the owner email in the app as a customer.
@@ -77,7 +60,76 @@ if you need to remove the current owner.
 The admin operations live in `dataconnect/admin/account-admin.gql`. That directory is
 outside `connectorDirs`, so the operations are never deployed to the client.
 
+## Build the Android APK
+
+### GitHub Actions
+
+The workflow in `.github/workflows/build-apk.yaml` runs on every push to `main` and can
+also be started manually from the Actions tab.
+
+Add this repository secret before the first build:
+
+- `FIREBASE_ENV`: the full contents of the production `.env` file. It must define
+  `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, and
+  `VITE_FIREBASE_APP_ID`. See `.env.example` for the shape.
+
+Without signing secrets, the workflow produces an installable debug APK named
+`FixFlow-debug.apk`.
+
+For a signed release APK, add these repository secrets:
+
+- `ANDROID_KEYSTORE_BASE64`: the release keystore encoded as base64.
+- `ANDROID_KEYSTORE_PASSWORD`: the keystore password.
+- `ANDROID_KEY_ALIAS`: the key alias.
+- `ANDROID_KEY_PASSWORD`: the key password.
+
+Create a keystore once and keep it outside the repository:
+
+```bash
+keytool -genkeypair -v -keystore fixflow-release.jks -keyalg RSA -keysize 2048 -validity 10000 -alias fixflow
+base64 -w 0 fixflow-release.jks
+```
+
+On Windows PowerShell, encode the keystore with:
+
+```powershell
+[Convert]::ToBase64String([IO.File]::ReadAllBytes('fixflow-release.jks')) | Set-Clipboard
+```
+
+When all four signing secrets are present, the workflow builds `FixFlow-release.apk`.
+Otherwise it falls back to the debug APK. The resulting APK is uploaded as a workflow
+artifact for 30 days.
+
+### Local build
+
+Install Node.js 24, JDK 21, and Android SDK Platform 36. Then run:
+
+```bash
+npm ci
+npm run build
+npx cap sync android
+cd android
+./gradlew assembleDebug
+```
+
+The debug APK is written to `android/app/build/outputs/apk/debug/app-debug.apk`.
+
+For a local signed release build, create `android/key.properties` with the keystore
+details and run `./gradlew assembleRelease`:
+
+```properties
+storeFile=fixflow-release.jks
+storePassword=change-me
+keyAlias=fixflow
+keyPassword=change-me
+```
+
+Place the keystore beside `android/app/build.gradle`, or use an absolute path in
+`storeFile`. The keystore and `key.properties` are ignored by Git.
+
 ## Local development
+
+Copy `.env.example` to `.env` and fill in the Firebase web configuration, then run:
 
 ```bash
 npm install
@@ -118,17 +170,26 @@ browser and stored as data URLs in the `request_image` table.
 ## Storage notes
 
 - Application data lives in PostgreSQL through Data Connect.
-- The signed-in session is a per-tab handle in `sessionStorage` with an in-memory fallback.
+- The signed-in session is a device handle in `localStorage` with an in-memory fallback.
+  It persists across app launches until the user signs out.
 - The appearance preference is a device-only value in `localStorage`.
 - Repository reads use `SERVER_ONLY` so the SDK query cache cannot hide another device's changes.
 
-## Security note
+## Security status
 
-The connector marks its operations `PUBLIC` because Firebase Authentication is not
-configured. Anyone with the web API key can read and write the demo data, including the
-stored password hashes. Do not use this configuration with real customer data. Adding
-Firebase Authentication and per-user authorization rules is required before production use.
+The APK packaging is release-ready, but the current backend is not safe for real customer
+data. The Data Connect connector marks its operations `PUBLIC` because the app performs
+its own email and password check instead of using Firebase Authentication. Anyone with the
+web API key can call the connector directly, read stored password hashes, and write rows.
+The app-level role checks in the Vue client do not protect the database.
 
-The owner promotion and account delete commands keep those changes out of the app, but
-the public connector still accepts direct writes. Treat them as operational controls
-until Firebase Authentication and per-user authorization are in place.
+Before a public launch:
+
+1. Move sign-in and registration to Firebase Authentication.
+2. Add Data Connect `@auth` rules that bind each row to `auth.uid` and use a custom claim
+   for the single shop owner.
+3. Remove the password hash columns from the schema and migrate existing accounts.
+4. Enable Firebase App Check and restrict the web API key to the app.
+5. Add rate limiting, email verification, and server-side audit logging.
+
+Until those steps are deployed, treat the APK as a private build or an internal pilot.

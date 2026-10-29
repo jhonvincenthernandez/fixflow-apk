@@ -76,10 +76,10 @@ const averageRating = computed(() => {
 </script>
 
 <template>
-  <div class="ff-stack ff-stack--loose">
-    <section class="ff-stack ff-stack--tight" aria-labelledby="dash-title">
+  <div class="ff-stack ff-stack--loose dash">
+    <section class="ff-stack ff-stack--tight dash__hero" aria-labelledby="dash-title">
       <p class="ff-overline">{{ BUSINESS.name }}</p>
-      <h1 id="dash-title" class="ff-h1">Shop dashboards</h1>
+      <h1 id="dash-title" class="ff-h1">Shop dashboard</h1>
     </section>
 
     <AppLink to="/availability" class="ff-card ff-card--interactive schedule">
@@ -115,46 +115,48 @@ const averageRating = computed(() => {
         </ul>
       </section>
 
-      <section class="ff-stack" aria-labelledby="dash-action">
-        <h2 id="dash-action" class="ff-h2">Needs your action</h2>
-        <ul v-if="needsAction.length > 0" class="ff-stack">
-          <li v-for="request in needsAction" :key="request.id">
-            <RequestCard :request="request" role="owner" :customer-name="customerName(request.customerId)" :now="now" />
-          </li>
-        </ul>
-        <p v-else class="caught-up ff-meta">
-          <CircleCheck class="ff-icon ff-icon--sm" aria-hidden="true" />
-          Nothing is waiting on you right now.
-        </p>
-      </section>
-
-      <section class="ff-stack" aria-labelledby="dash-upcoming">
-        <h2 id="dash-upcoming" class="ff-h2">Upcoming appointments</h2>
-        <EmptyState
-          v-if="upcoming.length === 0"
-          :icon="CalendarCheck"
-          title="No appointments booked"
-          body="Booked visits appear here once customers pick a time."
-        />
-        <div v-else class="ff-card">
-          <ul>
-            <li v-for="request in upcoming" :key="request.id" class="row-item">
-              <AppLink :to="`/request/${request.id}`" class="row">
-                <span class="ff-grow">
-                  <span class="row__title">{{ formatDateTime(request.appointment.startAt) }}</span>
-                  <span class="ff-meta row__meta">{{ request.itemName }} for {{ customerName(request.customerId) }}</span>
-                </span>
-                <ChevronRight class="ff-icon row__chevron" aria-hidden="true" />
-              </AppLink>
+      <div class="dash__split">
+        <section class="ff-stack" aria-labelledby="dash-action">
+          <h2 id="dash-action" class="ff-h2">Needs your action</h2>
+          <ul v-if="needsAction.length > 0" class="ff-stack">
+            <li v-for="request in needsAction" :key="request.id">
+              <RequestCard :request="request" role="owner" :customer-name="customerName(request.customerId)" :now="now" />
             </li>
           </ul>
-        </div>
-      </section>
+          <p v-else class="caught-up ff-meta">
+            <CircleCheck class="ff-icon ff-icon--sm" aria-hidden="true" />
+            Nothing is waiting on you right now.
+          </p>
+        </section>
+
+        <section class="ff-stack" aria-labelledby="dash-upcoming">
+          <h2 id="dash-upcoming" class="ff-h2">Upcoming appointments</h2>
+          <EmptyState
+            v-if="upcoming.length === 0"
+            :icon="CalendarCheck"
+            title="No appointments booked"
+            body="Booked visits appear here once customers pick a time."
+          />
+          <div v-else class="ff-card">
+            <ul>
+              <li v-for="request in upcoming" :key="request.id" class="row-item">
+                <AppLink :to="`/request/${request.id}`" class="row">
+                  <span class="ff-grow">
+                    <span class="row__title">{{ formatDateTime(request.appointment.startAt) }}</span>
+                    <span class="ff-meta row__meta">{{ request.itemName }} for {{ customerName(request.customerId) }}</span>
+                  </span>
+                  <ChevronRight class="ff-icon row__chevron" aria-hidden="true" />
+                </AppLink>
+              </li>
+            </ul>
+          </div>
+        </section>
+      </div>
 
       <section class="ff-stack" aria-labelledby="dash-feedback">
         <h2 id="dash-feedback" class="ff-h2">Customer feedback</h2>
         <p v-if="feedback.length === 0" class="ff-meta">Feedback appears here after customers rate completed repairs.</p>
-        <div v-else class="ff-card ff-stack">
+        <div v-else class="ff-card ff-stack feedback">
           <div class="summary">
             <span class="summary__score">{{ averageRating.toFixed(1) }}</span>
             <div>
@@ -214,6 +216,31 @@ const averageRating = computed(() => {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: var(--space-3);
+}
+
+@media (min-width: 48rem) {
+  .tiles {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.dash__split {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+@media (min-width: 64rem) {
+  .dash {
+    gap: var(--space-8);
+  }
+
+  .dash__split {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+    gap: var(--space-6);
+    align-items: start;
+  }
 }
 
 .tiles li {
@@ -284,5 +311,15 @@ const averageRating = computed(() => {
   font-weight: var(--weight-extrabold);
   line-height: var(--leading-tight);
   color: var(--color-brand);
+}
+
+@media (min-width: 64rem) {
+  /* Score on the left, reviews on the right, so the wide card reads in one pass. */
+  .feedback {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    gap: var(--space-6);
+  }
 }
 </style>

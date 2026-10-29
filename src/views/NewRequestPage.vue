@@ -88,7 +88,7 @@ const formError = computed(() => {
 
 <template>
   <ion-page>
-    <PageHeader title="New request" back-href="/tabs/home" />
+    <PageHeader title="New request" back-href="/tabs/home" width="narrow" />
     <ion-content>
       <main class="ff-container" tabindex="-1">
         <form class="ff-stack ff-stack--loose" novalidate @submit.prevent="submit.run()">
@@ -232,5 +232,11 @@ const formError = computed(() => {
   font-size: var(--text-sm);
   font-weight: var(--weight-bold);
   line-height: var(--leading-tight);
+}
+
+@media (min-width: 48rem) {
+  .picker__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 </style>

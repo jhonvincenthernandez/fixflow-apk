@@ -96,7 +96,7 @@ function onUpdated(next: ServiceRequest): void {
     <PageHeader :title="request?.ref ?? 'Request'" back-href="/tabs/requests" />
 
     <ion-content>
-      <main class="ff-container ff-stack" tabindex="-1">
+      <main class="ff-container ff-container--wide ff-stack" tabindex="-1">
         <ErrorBoundary title="This request could not be shown">
           <SkeletonList v-if="detail.status === 'loading' || detail.status === 'idle'" :count="2" />
 
@@ -129,73 +129,79 @@ function onUpdated(next: ServiceRequest): void {
               </p>
             </section>
 
-            <section class="ff-card ff-stack" aria-labelledby="detail-problem">
-              <h2 id="detail-problem" class="ff-h3">The problem</h2>
-              <p class="problem">{{ request.description }}</p>
-              <dl class="facts">
-                <div>
-                  <dt class="ff-meta">Service</dt>
-                  <dd>{{ request.mode === 'home_visit' ? 'Home visit' : 'Drop off at the shop' }}</dd>
-                </div>
-                <div v-if="request.mode === 'home_visit'">
-                  <dt class="ff-meta">Address</dt>
-                  <dd>{{ request.address }}</dd>
-                </div>
-              </dl>
+            <div class="detail__layout">
+              <div class="detail__column ff-stack">
+                <section class="ff-card ff-stack" aria-labelledby="detail-problem">
+                  <h2 id="detail-problem" class="ff-h3">The problem</h2>
+                  <p class="problem">{{ request.description }}</p>
+                  <dl class="facts">
+                    <div>
+                      <dt class="ff-meta">Service</dt>
+                      <dd>{{ request.mode === 'home_visit' ? 'Home visit' : 'Drop off at the shop' }}</dd>
+                    </div>
+                    <div v-if="request.mode === 'home_visit'">
+                      <dt class="ff-meta">Address</dt>
+                      <dd>{{ request.address }}</dd>
+                    </div>
+                  </dl>
 
-              <template v-if="request.imageIds.length > 0">
-                <h3 class="ff-label">Photos</h3>
-                <SkeletonList v-if="images.status === 'loading' || images.status === 'idle'" :count="1" />
-                <template v-else-if="images.status === 'error'">
-                  <p class="ff-error-text" role="alert">{{ userMessage(images.error) }}</p>
-                  <AppButton variant="secondary" @click="loadImages">Try again</AppButton>
-                </template>
-                <ImageGallery v-else :images="images.data" />
-              </template>
-            </section>
+                  <template v-if="request.imageIds.length > 0">
+                    <h3 class="ff-label">Photos</h3>
+                    <SkeletonList v-if="images.status === 'loading' || images.status === 'idle'" :count="1" />
+                    <template v-else-if="images.status === 'error'">
+                      <p class="ff-error-text" role="alert">{{ userMessage(images.error) }}</p>
+                      <AppButton variant="secondary" @click="loadImages">Try again</AppButton>
+                    </template>
+                    <ImageGallery v-else :images="images.data" />
+                  </template>
+                </section>
 
-            <section v-if="role === 'owner'" class="ff-card ff-stack" aria-labelledby="detail-customer">
-              <h2 id="detail-customer" class="ff-h3">Customer</h2>
-              <dl class="facts">
-                <div>
-                  <dt class="ff-meta">Name</dt>
-                  <dd>{{ customer?.name ?? 'Customer' }}</dd>
-                </div>
-                <div v-if="customer">
-                  <dt class="ff-meta">Mobile</dt>
-                  <dd><a :href="`tel:${customer.phone}`">{{ customer.phone }}</a></dd>
-                </div>
-                <div v-if="customer">
-                  <dt class="ff-meta">Email</dt>
-                  <dd><a :href="`mailto:${customer.email}`">{{ customer.email }}</a></dd>
-                </div>
-              </dl>
-            </section>
+                <section v-if="role === 'owner'" class="ff-card ff-stack" aria-labelledby="detail-customer">
+                  <h2 id="detail-customer" class="ff-h3">Customer</h2>
+                  <dl class="facts">
+                    <div>
+                      <dt class="ff-meta">Name</dt>
+                      <dd>{{ customer?.name ?? 'Customer' }}</dd>
+                    </div>
+                    <div v-if="customer">
+                      <dt class="ff-meta">Mobile</dt>
+                      <dd><a :href="`tel:${customer.phone}`">{{ customer.phone }}</a></dd>
+                    </div>
+                    <div v-if="customer">
+                      <dt class="ff-meta">Email</dt>
+                      <dd><a :href="`mailto:${customer.email}`">{{ customer.email }}</a></dd>
+                    </div>
+                  </dl>
+                </section>
+              </div>
 
-            <section v-if="request.quotation" class="ff-card ff-stack" aria-labelledby="detail-quote">
-              <h2 id="detail-quote" class="ff-h3">Quotation</h2>
-              <QuotationSummary :quotation="request.quotation" :now="now" />
-            </section>
+              <aside class="detail__aside ff-stack" aria-label="Progress and documents">
+                <DisclosureSection title="Progress" default-open>
+                  <StatusStepper :request="request" />
+                </DisclosureSection>
 
-            <section v-if="request.appointment" class="ff-card ff-stack ff-stack--tight" aria-labelledby="detail-appointment">
-              <h2 id="detail-appointment" class="ff-h3">Appointment</h2>
-              <p class="appointment">{{ formatLongDay(request.appointment.startAt) }}</p>
-              <p class="ff-meta">
-                {{ formatTime(request.appointment.startAt) }},
-                {{ request.mode === 'home_visit' ? 'the technician will visit the address above' : 'bring the item to the shop' }}.
-              </p>
-            </section>
+                <section v-if="request.quotation" class="ff-card ff-stack" aria-labelledby="detail-quote">
+                  <h2 id="detail-quote" class="ff-h3">Quotation</h2>
+                  <QuotationSummary :quotation="request.quotation" :now="now" />
+                </section>
 
-            <section v-if="request.feedback" class="ff-card ff-stack ff-stack--tight" aria-labelledby="detail-feedback">
-              <h2 id="detail-feedback" class="ff-h3">Feedback</h2>
-              <RatingStars :rating="request.feedback.rating" />
-              <p v-if="request.feedback.comment.length > 0">{{ request.feedback.comment }}</p>
-              <p class="ff-meta">{{ formatDate(request.feedback.createdAt) }}</p>
-            </section>
+                <section v-if="request.appointment" class="ff-card ff-stack ff-stack--tight" aria-labelledby="detail-appointment">
+                  <h2 id="detail-appointment" class="ff-h3">Appointment</h2>
+                  <p class="appointment">{{ formatLongDay(request.appointment.startAt) }}</p>
+                  <p class="ff-meta">
+                    {{ formatTime(request.appointment.startAt) }},
+                    {{ request.mode === 'home_visit' ? 'the technician will visit the address above' : 'bring the item to the shop' }}.
+                  </p>
+                </section>
 
-            <DisclosureSection title="Progress" default-open>
-              <StatusStepper :request="request" />
-            </DisclosureSection>
+                <section v-if="request.feedback" class="ff-card ff-stack ff-stack--tight" aria-labelledby="detail-feedback">
+                  <h2 id="detail-feedback" class="ff-h3">Feedback</h2>
+                  <RatingStars :rating="request.feedback.rating" />
+                  <p v-if="request.feedback.comment.length > 0">{{ request.feedback.comment }}</p>
+                  <p class="ff-meta">{{ formatDate(request.feedback.createdAt) }}</p>
+                </section>
+              </aside>
+            </div>
           </template>
         </ErrorBoundary>
       </main>
@@ -245,5 +251,28 @@ function onUpdated(next: ServiceRequest): void {
 .appointment {
   font-size: var(--text-lg);
   font-weight: var(--weight-extrabold);
+}
+
+.detail__layout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.detail__column,
+.detail__aside {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+@media (min-width: 64rem) {
+  .detail__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.85fr);
+    gap: var(--space-6);
+    align-items: start;
+  }
 }
 </style>

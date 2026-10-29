@@ -1,8 +1,7 @@
 /* ============================================================
    DESIGN TOKENS: edit here to restyle the entire product.
    Every reusable value lives in :root. Component CSS must point to a token.
-   `npm run lint:policy` rejects raw hex/rgb/hsl colors, em dashes, emoji and
-   WCAG contrast failures for the pairs listed below.
+   Use `npm run lint` for static checks.
 
    Appearance:
      - System is the default. Color roles use light-dark(), and
@@ -18,8 +17,7 @@
      10% brand at full saturation (one primary action per view, active states)
    Hues: 1 brand (cobalt), 1 semantic pair (green, red), 1 neutral. Nothing else.
 
-   Contrast pairs (WCAG 2.1 AA) are checked in light and dark by
-   scripts/policy-check.mjs:
+   Contrast targets (WCAG 2.1 AA) for the core pairs:
      text-primary   on canvas / surface
      text-secondary on surface / overlay / track
      text-muted     on surface / canvas / overlay
@@ -107,6 +105,7 @@
   --text-xl:   24px;
   --text-2xl:  30px;
   --text-3xl:  40px;
+  --text-4xl:  52px;
 
   /* One font family only. Plus Jakarta Sans suits a utility product. */
   --font-sans: 'Plus Jakarta Sans Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -137,7 +136,8 @@
   --icon-lg: 24px;
   --avatar-size: 48px;
   --thumb-size:  72px;
-  --content-max: 640px;
+  --content-max: 640px;       /* Reading column: forms, quick check, sheets */
+  --content-max-wide: 1120px; /* Data pages, dashboards, landing */
   --sheet-max-height: 90vh;
   --stepper-marker: 24px;
   --switch-width: 44px;
@@ -167,6 +167,20 @@
 
 :root[data-appearance='dark'] {
   color-scheme: dark;
+}
+
+/* Tablet and desktop get a roomier rhythm without changing the phone layout. */
+@media (min-width: 48rem) {
+  :root {
+    --page-pad: var(--space-5);
+  }
+}
+
+@media (min-width: 64rem) {
+  :root {
+    --page-pad: var(--space-8);
+    --surface-pad: var(--space-4);
+  }
 }
 
 /* ------------------------------------------------------------
@@ -308,14 +322,33 @@ a,
   color: var(--color-text-muted);
 }
 
+@media (min-width: 64rem) {
+  .ff-h1 {
+    font-size: var(--text-3xl);
+  }
+
+  .ff-h2 {
+    font-size: var(--text-xl);
+  }
+
+  .ff-lead {
+    font-size: var(--text-lg);
+  }
+}
+
 /* ------------------------------------------------------------
    Layout
    ------------------------------------------------------------ */
 .ff-container {
   width: 100%;
-  max-width: var(--content-max);
+  max-width: var(--container-max, var(--content-max));
   margin-inline: auto;
   padding: var(--page-pad);
+}
+
+/* Wider working surface for lists, dashboards and two column pages. */
+.ff-container--wide {
+  --container-max: var(--content-max-wide);
 }
 
 .ff-stack {
@@ -737,6 +770,17 @@ ion-modal.ff-sheet {
   padding-bottom: calc(var(--surface-pad) + var(--safe-bottom));
   border-top: 1px solid var(--color-border);
   background: var(--color-surface);
+}
+
+/* On a large screen the bottom sheet becomes a centered dialog. */
+@media (min-width: 64rem) {
+  ion-modal.ff-sheet {
+    --width: min(calc(100% - var(--space-12)), var(--content-max));
+    --max-width: var(--content-max);
+    --max-height: var(--sheet-max-height);
+    --border-radius: var(--radius-xl);
+    align-items: center;
+  }
 }
 
 /* ------------------------------------------------------------

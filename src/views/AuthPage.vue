@@ -10,7 +10,6 @@ import SegmentedControl from '@/components/SegmentedControl.vue'
 import { useAsyncAction } from '@/composables/useAsyncAction'
 import { useNavigate } from '@/composables/useNavigate'
 import { register, signIn } from '@/composables/useSession'
-import { DEMO_ACCOUNTS, DEMO_PASSWORD } from '@/data/demo'
 import { ValidationError, userMessage } from '@/domain/errors'
 
 type Mode = 'signin' | 'register'
@@ -45,14 +44,9 @@ const submit = useAsyncAction(async () => {
   replace(afterSignIn())
 })
 
-const demo = useAsyncAction(async (accountEmail: string) => {
-  await signIn({ email: accountEmail, password: DEMO_PASSWORD })
-  replace(afterSignIn())
-})
-
 /** Field-level messages come from validation; anything else shows once, above the button. */
 const formError = computed(() => {
-  const error = submit.error.value ?? demo.error.value
+  const error = submit.error.value
   if (error === null || error instanceof ValidationError) return null
   return userMessage(error)
 })
@@ -69,114 +63,100 @@ function switchMode(): void {
 <template>
   <ion-page>
     <ion-content>
-      <main class="ff-container auth ff-stack ff-stack--loose" tabindex="-1">
-        <header class="ff-stack">
+      <main class="ff-container auth" tabindex="-1">
+        <header class="auth__intro ff-stack">
           <AppLogo />
           <h1 class="ff-h1">Repairs, quoted and booked in one place</h1>
           <p class="ff-lead">Send a request, review the quotation, pick a time, and follow the repair to the end.</p>
         </header>
 
-        <SegmentedControl v-model="mode" :options="MODE_OPTIONS" legend="Sign in or create an account" @update:model-value="switchMode" />
+        <div class="auth__panel ff-stack ff-stack--loose">
+          <SegmentedControl v-model="mode" :options="MODE_OPTIONS" legend="Sign in or create an account" @update:model-value="switchMode" />
 
-        <form class="ff-stack" novalidate @submit.prevent="submit.run()">
-          <FormField v-if="mode === 'register'" v-slot="field" label="Full name" :error="fieldError('name')">
-            <input
-              :id="field.id"
-              v-model="name"
-              class="ff-input"
-              type="text"
-              autocomplete="name"
-              :aria-invalid="field.invalid"
-              :aria-describedby="field.describedBy"
-            />
-          </FormField>
-
-          <FormField v-slot="field" label="Email" :error="fieldError('email')">
-            <input
-              :id="field.id"
-              v-model="email"
-              class="ff-input"
-              type="email"
-              inputmode="email"
-              autocomplete="email"
-              autocapitalize="none"
-              :aria-invalid="field.invalid"
-              :aria-describedby="field.describedBy"
-            />
-          </FormField>
-
-          <FormField
-            v-if="mode === 'register'"
-            v-slot="field"
-            label="Mobile number"
-            hint="Used by the shop to reach you about your repair."
-            :error="fieldError('phone')"
-          >
-            <input
-              :id="field.id"
-              v-model="phone"
-              class="ff-input"
-              type="tel"
-              inputmode="tel"
-              autocomplete="tel"
-              placeholder="0917 123 4567"
-              :aria-invalid="field.invalid"
-              :aria-describedby="field.describedBy"
-            />
-          </FormField>
-
-          <FormField
-            v-slot="field"
-            label="Password"
-            :hint="mode === 'register' ? 'At least 8 characters.' : undefined"
-            :error="fieldError('password')"
-          >
-            <div class="auth__password">
+          <form class="ff-stack" novalidate @submit.prevent="submit.run()">
+            <FormField v-if="mode === 'register'" v-slot="field" label="Full name" :error="fieldError('name')">
               <input
                 :id="field.id"
-                v-model="password"
+                v-model="name"
                 class="ff-input"
-                :type="showPassword ? 'text' : 'password'"
-                :autocomplete="mode === 'register' ? 'new-password' : 'current-password'"
+                type="text"
+                autocomplete="name"
                 :aria-invalid="field.invalid"
                 :aria-describedby="field.describedBy"
               />
-              <button
-                type="button"
-                class="ff-icon-btn auth__toggle"
-                :aria-label="showPassword ? 'Hide password' : 'Show password'"
-                :aria-pressed="showPassword"
-                @click="showPassword = !showPassword"
-              >
-                <EyeOff v-if="showPassword" class="ff-icon" aria-hidden="true" />
-                <Eye v-else class="ff-icon" aria-hidden="true" />
-              </button>
-            </div>
-          </FormField>
+            </FormField>
 
-          <p v-if="formError" class="ff-error-text" role="alert">{{ formError }}</p>
+            <FormField v-slot="field" label="Email" :error="fieldError('email')">
+              <input
+                :id="field.id"
+                v-model="email"
+                class="ff-input"
+                type="email"
+                inputmode="email"
+                autocomplete="email"
+                autocapitalize="none"
+                :aria-invalid="field.invalid"
+                :aria-describedby="field.describedBy"
+              />
+            </FormField>
 
-          <AppButton type="submit" block :loading="submit.loading.value">
-            <component :is="mode === 'signin' ? LogIn : UserPlus" class="ff-icon ff-icon--sm" aria-hidden="true" />
-            {{ mode === 'signin' ? 'Sign in' : 'Create account' }}
-          </AppButton>
-        </form>
+            <FormField
+              v-if="mode === 'register'"
+              v-slot="field"
+              label="Mobile number"
+              hint="Used by the shop to reach you about your repair."
+              :error="fieldError('phone')"
+            >
+              <input
+                :id="field.id"
+                v-model="phone"
+                class="ff-input"
+                type="tel"
+                inputmode="tel"
+                autocomplete="tel"
+                placeholder="0917 123 4567"
+                :aria-invalid="field.invalid"
+                :aria-describedby="field.describedBy"
+              />
+            </FormField>
 
-        <section class="ff-inset ff-stack ff-stack--tight" aria-labelledby="demo-heading">
-          <h2 id="demo-heading" class="ff-h3">Try a demo account</h2>
-          <p class="ff-meta">
-            Sample data is stored in a shared PostgreSQL database. Sign in as the customer to send requests, or as the
-            shop owner to quote and schedule them.
-          </p>
-          <div class="auth__demo">
-            <AppButton variant="secondary" :loading="demo.loading.value" @click="demo.run(DEMO_ACCOUNTS.customer.email)">
-              {{ DEMO_ACCOUNTS.customer.label }}
+            <FormField
+              v-slot="field"
+              label="Password"
+              :hint="mode === 'register' ? 'At least 8 characters.' : undefined"
+              :error="fieldError('password')"
+            >
+              <div class="auth__password">
+                <input
+                  :id="field.id"
+                  v-model="password"
+                  class="ff-input"
+                  :type="showPassword ? 'text' : 'password'"
+                  :autocomplete="mode === 'register' ? 'new-password' : 'current-password'"
+                  :aria-invalid="field.invalid"
+                  :aria-describedby="field.describedBy"
+                />
+                <button
+                  type="button"
+                  class="ff-icon-btn auth__toggle"
+                  :aria-label="showPassword ? 'Hide password' : 'Show password'"
+                  :aria-pressed="showPassword"
+                  @click="showPassword = !showPassword"
+                >
+                  <EyeOff v-if="showPassword" class="ff-icon" aria-hidden="true" />
+                  <Eye v-else class="ff-icon" aria-hidden="true" />
+                </button>
+              </div>
+            </FormField>
+
+            <p v-if="formError" class="ff-error-text" role="alert">{{ formError }}</p>
+
+            <AppButton type="submit" block :loading="submit.loading.value">
+              <component :is="mode === 'signin' ? LogIn : UserPlus" class="ff-icon ff-icon--sm" aria-hidden="true" />
+              {{ mode === 'signin' ? 'Sign in' : 'Create account' }}
             </AppButton>
-            <AppButton variant="secondary" :loading="demo.loading.value" @click="demo.run(DEMO_ACCOUNTS.owner.email)">
-              {{ DEMO_ACCOUNTS.owner.label }}
-            </AppButton>
-          </div>
-        </section>
+          </form>
+        </div>
       </main>
     </ion-content>
   </ion-page>
@@ -184,7 +164,22 @@ function switchMode(): void {
 
 <style scoped>
 .auth {
-  padding-block: var(--space-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  padding-block: var(--space-8) var(--space-10);
+}
+
+.auth__intro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.auth__panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
 }
 
 .auth__password {
@@ -202,15 +197,22 @@ function switchMode(): void {
   height: var(--control-height);
 }
 
-.auth__demo {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-2);
-}
+@media (min-width: 64rem) {
+  .auth {
+    --container-max: calc(var(--content-max-wide) - var(--space-12));
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 30rem);
+    align-items: center;
+    gap: var(--space-12);
+    padding-block: var(--space-12);
+  }
 
-@media (min-width: 28rem) {
-  .auth__demo {
-    grid-template-columns: 1fr 1fr;
+  .auth__panel {
+    padding: var(--space-6);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-md);
   }
 }
 </style>

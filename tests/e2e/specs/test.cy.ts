@@ -1,23 +1,24 @@
-describe('FixFlow sign in', () => {
+describe('FixFlow public experience', () => {
   beforeEach(() => {
+    cy.clearAllLocalStorage()
     cy.clearAllSessionStorage()
   })
 
-  it('signs in with the demo customer and opens the home tab', () => {
-    cy.visit('/auth')
-    cy.contains('FixFlow', { timeout: 60000 }).should('be.visible')
-    cy.contains('button', 'Customer', { timeout: 60000 }).click()
-    cy.location('pathname', { timeout: 60000 }).should('eq', '/tabs/home')
-    cy.contains('Home', { timeout: 60000 }).should('be.visible')
-    cy.contains('Lenovo IdeaPad 3', { timeout: 60000 }).click()
-    cy.location('pathname', { timeout: 60000 }).should('match', /^\/request\/[0-9a-f]{32}$/)
-    cy.contains('FF-0002', { timeout: 60000 }).should('be.visible')
+  it('shows the landing page and changes the appearance preference', () => {
+    cy.visit('/')
+    cy.contains('h1', 'Repairs, quoted and booked in one place').should('be.visible')
+
+    cy.get('[data-appearance-opt="dark"]').click()
+    cy.get('html').should('have.attr', 'data-appearance', 'dark')
+
+    cy.get('[data-appearance-opt="light"]').click()
+    cy.get('html').should('have.attr', 'data-appearance', 'light')
   })
 
-  it('signs in with the demo owner and opens the dashboard', () => {
+  it('validates the sign-in form before contacting the database', () => {
     cy.visit('/auth')
-    cy.contains('button', 'Business owner', { timeout: 60000 }).click()
-    cy.location('pathname', { timeout: 60000 }).should('eq', '/tabs/home')
-    cy.contains('Dashboard', { timeout: 60000 }).should('be.visible')
+    cy.get('form button[type="submit"]').click()
+    cy.contains('Enter your email address').should('be.visible')
+    cy.contains('Enter your password').should('be.visible')
   })
 })

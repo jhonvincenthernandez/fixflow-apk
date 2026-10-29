@@ -45,9 +45,9 @@ async function onOpen(id: string, alreadyRead: boolean): Promise<void> {
   <ion-page>
     <PageHeader title="Alerts" />
     <ion-content>
-      <main class="ff-container ff-stack" tabindex="-1">
+      <main class="ff-container ff-container--wide ff-stack" tabindex="-1">
         <ErrorBoundary title="Alerts could not load">
-          <SkeletonList v-if="state.status === 'loading' || state.status === 'idle'" :count="3" />
+          <SkeletonList v-if="state.status === 'loading' || state.status === 'idle'" :count="4" grid />
 
           <ErrorState
             v-else-if="state.status === 'error'"
@@ -83,7 +83,7 @@ async function onOpen(id: string, alreadyRead: boolean): Promise<void> {
                 {{ userMessage(markAll.error.value) }} Try again.
               </p>
 
-              <ul class="ff-stack ff-stack--tight">
+              <ul class="ff-stack ff-stack--tight alert-list">
                 <li v-for="item in list" :key="item.id">
                   <AppLink
                     :to="`/request/${item.requestId}`"
@@ -144,5 +144,21 @@ async function onOpen(id: string, alreadyRead: boolean): Promise<void> {
 
 .alert__body {
   display: block;
+}
+
+@media (min-width: 64rem) {
+  .alert-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3);
+  }
+
+  .alert-list > li {
+    display: flex;
+  }
+
+  .alert-list .alert {
+    flex: 1 1 auto;
+  }
 }
 </style>

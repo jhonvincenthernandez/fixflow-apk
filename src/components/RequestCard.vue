@@ -53,7 +53,7 @@ const yourTurn = computed(() => actionOwner(props.request.status) === props.role
       <span v-if="yourTurn" class="card__turn">Your turn</span>
       {{ nextStepText(request.status, role) }}
     </p>
-    <p class="ff-meta ff-muted">Updated {{ formatRelative(request.updatedAt, now) }}</p>
+    <p class="ff-meta ff-muted card__updated">Updated {{ formatRelative(request.updatedAt, now) }}</p>
   </AppLink>
 </template>
 
@@ -130,6 +130,11 @@ const yourTurn = computed(() => actionOwner(props.request.status) === props.role
 .card__hint.is-turn {
   color: var(--color-text-primary);
   font-weight: var(--weight-semibold);
+}
+
+/* Stretched grid rows keep the timestamp on the bottom edge. */
+.card__updated {
+  margin-top: auto;
 }
 
 .card__turn {

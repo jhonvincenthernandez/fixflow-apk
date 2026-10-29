@@ -1,4 +1,6 @@
 # Write operations used by the FixFlow client.
+# The client performs app-level password sign-in today, so these operations are
+# PUBLIC. See the security section in README.md before using real customer data.
 
 mutation CreateFixflowUser(
   $id: UUID!
@@ -12,7 +14,7 @@ mutation CreateFixflowUser(
   $createdAt: Timestamp!
 ) @auth(
   level: PUBLIC
-  insecureReason: "Demo only: account registration happens in the client."
+  insecureReason: "Public: account registration is handled by the client today; move it behind Firebase Auth before public launch."
 ) {
   fixflowUser_insert(data: {
     id: $id
@@ -47,7 +49,7 @@ mutation CreateServiceRequest(
   $updatedAt: Timestamp!
 ) @auth(
   level: PUBLIC
-  insecureReason: "Demo only: customers create requests in the shared dataset."
+  insecureReason: "Public: customers create requests from the client; restrict this before public launch."
 ) {
   serviceRequest_insert(data: {
     id: $id
@@ -81,7 +83,7 @@ mutation UpdateServiceRequest(
   $updatedAt: Timestamp!
 ) @auth(
   level: PUBLIC
-  insecureReason: "Demo only: workflow actions update the shared request record."
+  insecureReason: "Public: workflow actions update the request from the client; restrict this before public launch."
 ) {
   serviceRequest_update(id: $id, data: {
     status: $status
@@ -103,7 +105,7 @@ mutation CreateRequestImage(
   $createdAt: Timestamp!
 ) @auth(
   level: PUBLIC
-  insecureReason: "Demo only: customers attach photos to their requests."
+  insecureReason: "Public: customers attach photos from the client; restrict this before public launch."
 ) {
   requestImage_insert(data: {
     id: $id
@@ -124,7 +126,7 @@ mutation CreateNotification(
   $createdAt: Timestamp!
 ) @auth(
   level: PUBLIC
-  insecureReason: "Demo only: workflow events notify the other side of the request."
+  insecureReason: "Public: workflow events notify the other side of the request; restrict this before public launch."
 ) {
   notification_insert(data: {
     id: $id
@@ -138,56 +140,21 @@ mutation CreateNotification(
 
 mutation MarkNotificationRead($id: UUID!, $readAt: Timestamp!) @auth(
   level: PUBLIC
-  insecureReason: "Demo only: the owning client marks its notification as read."
+  insecureReason: "Public: the owning client marks its notification as read today; restrict this before public launch."
 ) {
   notification_update(id: $id, data: { readAt: $readAt })
 }
 
 mutation CreateAppMeta($key: String!, $value: String!, $updatedAt: Timestamp!) @auth(
   level: PUBLIC
-  insecureReason: "Demo only: shared settings such as the request counter live in PostgreSQL."
+  insecureReason: "Public: shared settings such as the request counter live in PostgreSQL; restrict this before public launch."
 ) {
   appMeta_insert(data: { key: $key, value: $value, updatedAt: $updatedAt })
 }
 
 mutation UpdateAppMeta($id: UUID!, $value: String!, $updatedAt: Timestamp!) @auth(
   level: PUBLIC
-  insecureReason: "Demo only: shared settings such as the request counter live in PostgreSQL."
+  insecureReason: "Public: shared settings such as the request counter live in PostgreSQL; restrict this before public launch."
 ) {
   appMeta_update(id: $id, data: { value: $value, updatedAt: $updatedAt })
-}
-
-mutation DeleteFixflowUser($id: UUID!) @auth(
-  level: PUBLIC
-  insecureReason: "Demo only: the reset action clears the shared demo dataset."
-) {
-  fixflowUser_delete(id: $id)
-}
-
-mutation DeleteServiceRequest($id: UUID!) @auth(
-  level: PUBLIC
-  insecureReason: "Demo only: the reset action clears the shared demo dataset."
-) {
-  serviceRequest_delete(id: $id)
-}
-
-mutation DeleteRequestImage($id: UUID!) @auth(
-  level: PUBLIC
-  insecureReason: "Demo only: the reset action clears the shared demo dataset."
-) {
-  requestImage_delete(id: $id)
-}
-
-mutation DeleteNotification($id: UUID!) @auth(
-  level: PUBLIC
-  insecureReason: "Demo only: the reset action clears the shared demo dataset."
-) {
-  notification_delete(id: $id)
-}
-
-mutation DeleteAppMeta($id: UUID!) @auth(
-  level: PUBLIC
-  insecureReason: "Demo only: the reset action clears the shared demo dataset."
-) {
-  appMeta_delete(id: $id)
 }

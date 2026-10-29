@@ -8,7 +8,7 @@ import PageHeader from '@/components/PageHeader.vue'
 
 <template>
   <ion-page>
-    <PageHeader title="Page not found" />
+    <PageHeader title="Page not found" width="narrow" />
     <ion-content>
       <main class="ff-container" tabindex="-1">
         <EmptyState

@@ -154,7 +154,7 @@ function onDiscard(): void {
     <PageHeader title="Shop schedule" back-href="/tabs/profile" />
 
     <ion-content>
-      <main ref="main" class="ff-container ff-stack" tabindex="-1">
+      <main ref="main" class="ff-container ff-container--wide ff-stack" tabindex="-1">
         <ErrorBoundary title="The schedule could not be shown">
           <SkeletonList v-if="state.status === 'idle' || (state.status === 'loading' && draft === null)" :count="3" />
           <ErrorState
@@ -192,90 +192,96 @@ function onDiscard(): void {
               <p v-if="affected.length > MAX_LISTED" class="ff-meta">And {{ affected.length - MAX_LISTED }} more.</p>
             </section>
 
-            <section class="ff-card ff-stack" aria-labelledby="av-week">
-              <div class="ff-stack ff-stack--tight">
-                <h2 id="av-week" class="ff-h3">Weekly hours</h2>
-                <p class="ff-meta">Switch a day to closed to keep the shop shut that day every week.</p>
+            <div class="schedule-grid">
+              <div class="schedule-col">
+                <section class="ff-card ff-stack" aria-labelledby="av-week">
+                  <div class="ff-stack ff-stack--tight">
+                    <h2 id="av-week" class="ff-h3">Weekly hours</h2>
+                    <p class="ff-meta">Switch a day to closed to keep the shop shut that day every week.</p>
+                  </div>
+                  <WeeklyHoursEditor v-model="draft.week" :errors="errors" />
+                </section>
+
+                <section class="ff-card ff-stack" aria-labelledby="av-off">
+                  <h2 id="av-off" class="ff-h3">Days off</h2>
+                  <DaysOffEditor v-model="draft.daysOff" :today="dateKey(now)" :errors="errors" />
+                </section>
               </div>
-              <WeeklyHoursEditor v-model="draft.week" :errors="errors" />
-            </section>
 
-            <section class="ff-card ff-stack" aria-labelledby="av-slots">
-              <h2 id="av-slots" class="ff-h3">Appointment slots</h2>
-              <FormField label="Slot length" hint="How long one booking takes. Customers pick a start time.">
-                <template #default="{ id, describedBy }">
-                  <ChoiceSelect :id="id" v-model="draft.slotMinutes" :choices="SLOT_CHOICES" :described-by="describedBy" />
-                </template>
-              </FormField>
-              <FormField
-                label="Jobs at the same time"
-                hint="For example, the number of technicians working at once. A slot closes when this many are booked."
-                :error="errors['capacity']?.[0]"
-              >
-                <template #default="{ id, describedBy, invalid }">
-                  <ChoiceSelect
-                    :id="id"
-                    v-model="draft.capacity"
-                    :choices="CAPACITY_CHOICES"
-                    :invalid="invalid"
-                    :described-by="describedBy"
-                  />
-                </template>
-              </FormField>
+              <div class="schedule-col">
+                <section class="ff-card ff-stack" aria-labelledby="av-slots">
+                  <h2 id="av-slots" class="ff-h3">Appointment slots</h2>
+                  <FormField label="Slot length" hint="How long one booking takes. Customers pick a start time.">
+                    <template #default="{ id, describedBy }">
+                      <ChoiceSelect :id="id" v-model="draft.slotMinutes" :choices="SLOT_CHOICES" :described-by="describedBy" />
+                    </template>
+                  </FormField>
+                  <FormField
+                    label="Jobs at the same time"
+                    hint="For example, the number of technicians working at once. A slot closes when this many are booked."
+                    :error="errors['capacity']?.[0]"
+                  >
+                    <template #default="{ id, describedBy, invalid }">
+                      <ChoiceSelect
+                        :id="id"
+                        v-model="draft.capacity"
+                        :choices="CAPACITY_CHOICES"
+                        :invalid="invalid"
+                        :described-by="describedBy"
+                      />
+                    </template>
+                  </FormField>
 
-              <div class="ff-stack ff-stack--tight">
-                <ToggleField v-model="draft.lunch.enabled" label="Lunch break" on-text="On" off-text="Off" />
-                <div v-if="draft.lunch.enabled" class="lunch">
-                  <TimeSelect v-model="draft.lunch.from" label="Break starts at" />
-                  <span class="lunch__to" aria-hidden="true">to</span>
-                  <TimeSelect
-                    v-model="draft.lunch.to"
-                    label="Break ends at"
-                    :invalid="errors['lunch.to'] !== undefined"
-                    :described-by="errors['lunch.to'] !== undefined ? 'av-lunch-error' : undefined"
-                  />
-                </div>
-                <p v-if="errors['lunch.to']?.[0]" id="av-lunch-error" class="ff-error-text" role="alert">
-                  {{ errors['lunch.to'][0] }}
-                </p>
-                <p class="ff-hint">No visit starts during the break or runs through it.</p>
+                  <div class="ff-stack ff-stack--tight">
+                    <ToggleField v-model="draft.lunch.enabled" label="Lunch break" on-text="On" off-text="Off" />
+                    <div v-if="draft.lunch.enabled" class="lunch">
+                      <TimeSelect v-model="draft.lunch.from" label="Break starts at" />
+                      <span class="lunch__to" aria-hidden="true">to</span>
+                      <TimeSelect
+                        v-model="draft.lunch.to"
+                        label="Break ends at"
+                        :invalid="errors['lunch.to'] !== undefined"
+                        :described-by="errors['lunch.to'] !== undefined ? 'av-lunch-error' : undefined"
+                      />
+                    </div>
+                    <p v-if="errors['lunch.to']?.[0]" id="av-lunch-error" class="ff-error-text" role="alert">
+                      {{ errors['lunch.to'][0] }}
+                    </p>
+                    <p class="ff-hint">No visit starts during the break or runs through it.</p>
+                  </div>
+                </section>
+
+                <section class="ff-card ff-stack" aria-labelledby="av-rules">
+                  <h2 id="av-rules" class="ff-h3">Booking rules</h2>
+                  <FormField label="Minimum notice" hint="Customers cannot book a time sooner than this from now.">
+                    <template #default="{ id, describedBy }">
+                      <ChoiceSelect
+                        :id="id"
+                        v-model="draft.noticeMinutes"
+                        :choices="NOTICE_CHOICES"
+                        :described-by="describedBy"
+                      />
+                    </template>
+                  </FormField>
+                  <FormField label="How far ahead customers can book">
+                    <template #default="{ id, describedBy }">
+                      <ChoiceSelect :id="id" v-model="draft.windowDays" :choices="WINDOW_CHOICES" :described-by="describedBy" />
+                    </template>
+                  </FormField>
+                </section>
+
+                <section v-if="preview" class="ff-card ff-stack ff-stack--tight" aria-labelledby="av-preview">
+                  <h2 id="av-preview" class="ff-h3">What customers see</h2>
+                  <dl class="preview">
+                    <div v-for="line in preview.lines" :key="line.days" class="preview__row">
+                      <dt>{{ line.days }}</dt>
+                      <dd :class="{ 'ff-muted': line.closed }">{{ line.hours }}</dd>
+                    </div>
+                  </dl>
+                  <p v-if="preview.lunch" class="ff-meta">{{ preview.lunch }}.</p>
+                </section>
               </div>
-            </section>
-
-            <section class="ff-card ff-stack" aria-labelledby="av-rules">
-              <h2 id="av-rules" class="ff-h3">Booking rules</h2>
-              <FormField label="Minimum notice" hint="Customers cannot book a time sooner than this from now.">
-                <template #default="{ id, describedBy }">
-                  <ChoiceSelect
-                    :id="id"
-                    v-model="draft.noticeMinutes"
-                    :choices="NOTICE_CHOICES"
-                    :described-by="describedBy"
-                  />
-                </template>
-              </FormField>
-              <FormField label="How far ahead customers can book">
-                <template #default="{ id, describedBy }">
-                  <ChoiceSelect :id="id" v-model="draft.windowDays" :choices="WINDOW_CHOICES" :described-by="describedBy" />
-                </template>
-              </FormField>
-            </section>
-
-            <section class="ff-card ff-stack" aria-labelledby="av-off">
-              <h2 id="av-off" class="ff-h3">Days off</h2>
-              <DaysOffEditor v-model="draft.daysOff" :today="dateKey(now)" :errors="errors" />
-            </section>
-
-            <section v-if="preview" class="ff-card ff-stack ff-stack--tight" aria-labelledby="av-preview">
-              <h2 id="av-preview" class="ff-h3">What customers see</h2>
-              <dl class="preview">
-                <div v-for="line in preview.lines" :key="line.days" class="preview__row">
-                  <dt>{{ line.days }}</dt>
-                  <dd :class="{ 'ff-muted': line.closed }">{{ line.hours }}</dd>
-                </div>
-              </dl>
-              <p v-if="preview.lunch" class="ff-meta">{{ preview.lunch }}.</p>
-            </section>
+            </div>
           </template>
         </ErrorBoundary>
       </main>
@@ -299,6 +305,7 @@ function onDiscard(): void {
 
 <style scoped>
 .intro {
+  max-width: 68ch;
   margin: 0;
 }
 
@@ -342,6 +349,28 @@ function onDiscard(): void {
   display: block;
 }
 
+.schedule-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.schedule-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+@media (min-width: 64rem) {
+  .schedule-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    gap: var(--space-6);
+    align-items: start;
+  }
+}
+
 .lunch {
   display: flex;
   align-items: center;
@@ -379,7 +408,10 @@ function onDiscard(): void {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  padding: var(--surface-pad);
+  width: 100%;
+  max-width: var(--content-max-wide);
+  margin-inline: auto;
+  padding: var(--surface-pad) var(--page-pad);
   padding-bottom: calc(var(--surface-pad) + var(--safe-bottom));
   background: var(--color-surface);
 }
@@ -391,5 +423,21 @@ function onDiscard(): void {
 
 .savebar__buttons > :last-child {
   flex: 1 1 auto;
+}
+
+@media (min-width: 64rem) {
+  .savebar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .savebar__buttons {
+    margin-inline-start: auto;
+  }
+
+  .savebar__buttons > :last-child {
+    flex: none;
+  }
 }
 </style>

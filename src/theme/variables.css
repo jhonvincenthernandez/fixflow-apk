@@ -4,7 +4,7 @@
    cannot be derived from light-dark() in CSS. The light triplets live in the
    root block and the dark triplets repeat in both dark contexts so Ionic's
    rgba(var(--ion-...-rgb), alpha) composition keeps working. Keep the values
-   in sync with global.css and verify them with `npm run lint:policy`.
+   in sync with global.css.
    ============================================================ */
 :root {
   --ion-font-family: var(--font-sans);
@@ -115,4 +115,47 @@ ion-footer.footer-md::before {
 ion-footer {
   background: var(--color-surface);
   border-top: 1px solid var(--color-border);
+}
+
+/* ------------------------------------------------------------
+   Large screens
+   The app chrome stops looking like a stretched phone: the header
+   becomes a surface bar and the tab bar becomes a centered dock.
+   ------------------------------------------------------------ */
+@media (min-width: 64rem) {
+  /* Both edges keep the scroll area centered under the full width toolbar. */
+  ion-content::part(scroll) {
+    scrollbar-gutter: stable both-edges;
+  }
+
+  ion-toolbar {
+    --background: var(--color-surface);
+    --min-height: 56px;
+    box-shadow: var(--shadow-xs);
+  }
+
+  ion-tab-bar {
+    --border: 0;
+    align-self: center;
+    width: min(calc(100% - var(--space-12)), 34rem);
+    margin-block-end: calc(var(--space-4) + var(--safe-bottom));
+    padding: var(--space-1);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+  }
+
+  ion-tab-button {
+    min-height: 56px;
+    border-radius: var(--radius-full);
+    font-size: var(--text-sm);
+  }
+
+  @media (hover: hover) {
+    ion-tab-button:not(.tab-selected):hover {
+      --background: var(--color-overlay);
+      --color: var(--color-text-primary);
+    }
+  }
 }

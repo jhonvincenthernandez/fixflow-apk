@@ -1,11 +1,11 @@
 <script setup lang="ts">
-withDefaults(defineProps<{ count?: number }>(), { count: 3 })
+withDefaults(defineProps<{ count?: number; grid?: boolean }>(), { count: 3, grid: false })
 </script>
 
 <template>
   <div role="status">
     <span class="ff-sr-only">Loading</span>
-    <ul class="skeleton-list" aria-hidden="true">
+    <ul class="skeleton-list" :class="{ 'skeleton-list--grid': grid }" aria-hidden="true">
       <li v-for="n in count" :key="n" class="ff-card skeleton-row">
         <span class="ff-skeleton skeleton-icon" />
         <span class="skeleton-lines">
@@ -23,6 +23,13 @@ withDefaults(defineProps<{ count?: number }>(), { count: 3 })
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+}
+
+@media (min-width: 64rem) {
+  .skeleton-list--grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .skeleton-row {

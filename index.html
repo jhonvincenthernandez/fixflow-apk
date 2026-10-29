@@ -3,16 +3,23 @@
   <head>
     <meta charset="utf-8" />
     <title>FixFlow</title>
+    <meta
+      name="description"
+      content="FixFlow keeps repair requests, quotations, bookings, and updates in one shared place for customers and local repair shops."
+    />
 
     <base href="/" />
 
     <meta name="color-scheme" content="light dark" />
     <meta
       name="viewport"
-      content="viewport-fit=cover, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"
+      content="viewport-fit=cover, width=device-width, initial-scale=1.0"
     />
     <meta name="format-detection" content="telephone=no" />
     <meta name="msapplication-tap-highlight" content="no" />
+
+    <meta name="theme-color" content="#fbfaf7" media="(prefers-color-scheme: light)" data-appearance="light" />
+    <meta name="theme-color" content="#11151a" media="(prefers-color-scheme: dark)" data-appearance="dark" />
 
     <link rel="shortcut icon" type="image/png" href="/favicon.png" />
 
@@ -20,12 +27,25 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="FixFlow" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+
+    <script>
+      // Apply a fixed light or dark preference before the first paint. System mode
+      // stays untouched so the CSS light-dark() tokens follow the device.
+      ;(() => {
+        try {
+          const value = localStorage.getItem('fixflow.appearance')
+          if (value === 'light' || value === 'dark') {
+            document.documentElement.dataset.appearance = value
+          }
+        } catch {
+          // Storage can be blocked; the app still follows the device preference.
+        }
+      })()
+    </script>
   </head>
 
   <body>
     <div id="app"></div>
     <script type="module" src="/src/main.ts"></script>
   </body>
-
 </html>
-

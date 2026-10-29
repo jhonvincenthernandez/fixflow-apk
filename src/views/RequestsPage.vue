@@ -132,9 +132,9 @@ async function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
         <ion-refresher-content />
       </ion-refresher>
 
-      <main class="ff-container ff-stack" tabindex="-1">
+      <main class="ff-container ff-container--wide ff-stack" tabindex="-1">
         <ErrorBoundary title="Requests could not load">
-          <div class="ff-stack ff-stack--tight">
+          <div class="ff-stack ff-stack--tight filters">
             <label class="ff-sr-only" for="request-search">Search requests</label>
             <input
               id="request-search"
@@ -168,7 +168,7 @@ async function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
             </div>
           </div>
 
-          <SkeletonList v-if="state.status === 'loading' || state.status === 'idle'" :count="4" />
+          <SkeletonList v-if="state.status === 'loading' || state.status === 'idle'" :count="4" grid />
 
           <ErrorState
             v-else-if="state.status === 'error'"
@@ -205,7 +205,7 @@ async function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
               <AppButton variant="secondary" @click="clearFilters">Show all requests</AppButton>
             </EmptyState>
 
-            <ul v-else class="ff-stack">
+            <ul v-else class="ff-stack request-list">
               <li v-for="request in visible" :key="request.id">
                 <RequestCard
                   :request="request"
@@ -232,5 +232,34 @@ async function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
 
 .spinning {
   animation: ff-spin var(--spin-duration) linear infinite;
+}
+
+@media (min-width: 64rem) {
+  .filters {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .chips {
+    flex-wrap: wrap;
+    overflow: visible;
+    padding-bottom: 0;
+  }
+
+  .request-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3);
+  }
+
+  .request-list > li {
+    display: flex;
+  }
+
+  .request-list > li > * {
+    flex: 1 1 auto;
+  }
 }
 </style>

@@ -374,7 +374,7 @@ async function onFeedbackSubmit(): Promise<void> {
   flex-direction: column;
   gap: var(--space-2);
   width: 100%;
-  max-width: var(--content-max);
+  max-width: var(--content-max-wide);
   margin-inline: auto;
   padding: var(--surface-pad) var(--page-pad);
   padding-bottom: calc(var(--surface-pad) + var(--safe-bottom));
@@ -385,5 +385,19 @@ async function onFeedbackSubmit(): Promise<void> {
   grid-auto-flow: column;
   grid-auto-columns: 1fr;
   gap: var(--space-2);
+}
+
+@media (min-width: 64rem) {
+  .actions {
+    flex-direction: row-reverse;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .actions__row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
 }
 </style>

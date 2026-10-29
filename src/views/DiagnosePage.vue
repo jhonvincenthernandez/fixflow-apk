@@ -93,7 +93,7 @@ function restart(): void {
 
 <template>
   <ion-page>
-    <PageHeader title="Quick check" back-href="/" />
+    <PageHeader title="Quick check" back-href="/" width="narrow" />
     <ion-content>
       <main class="ff-container diagnose" tabindex="-1">
         <div class="ff-stack ff-stack--loose">
@@ -474,6 +474,26 @@ function restart(): void {
 @media (min-width: 30rem) {
   .options--grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 48rem) {
+  .options--grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .result__actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .result__actions .ff-btn {
+    width: auto;
+    flex: 1 1 16rem;
+  }
+
+  .result__hint {
+    flex-basis: 100%;
   }
 }
 </style>

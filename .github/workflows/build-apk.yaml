@@ -7,79 +7,129 @@ on:
 
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-apk:
-
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
-
-      # 1. Download the source code from GitHub.
       - name: Checkout project
         uses: actions/checkout@v4
 
-
-      # 2. Install Node.js for Ionic/Vue.
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "24"
           cache: "npm"
 
-
-      # 3. Install all dependencies from package-lock.json.
-      - name: Install npm dependencies
-        run: npm ci
-
-
-      # 4. Create the Firebase .env file from GitHub Secret.
-      # This allows Firebase to connect during the build.
-      - name: Create Firebase environment file
-        run: |
-          printf '%s' "${{ secrets.FIREBASE_ENV }}" > .env
-
-
-      # 5. Build the Ionic/Vue application.
-      # This creates the latest dist folder.
-      - name: Build Ionic application
-        run: npm run build
-
-
-      # 6. Install Java required for Android/Gradle.
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: "temurin"
           java-version: "21"
 
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('android/**/*.gradle*', 'android/gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
 
-      # 7. Synchronize the latest dist folder with Android.
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Create Firebase environment file
+        env:
+          FIREBASE_ENV: ${{ secrets.FIREBASE_ENV }}
+        run: |
+          if [ -z "$FIREBASE_ENV" ]; then
+            echo "::error::FIREBASE_ENV repository secret is not set."
+            exit 1
+          fi
+          printf '%s' "$FIREBASE_ENV" > .env
+
+      - name: Lint application
+        run: npm run lint
+
+      - name: Run unit tests
+        run: npx vitest run
+
+      - name: Build Ionic application
+        run: npm run build
+
       - name: Sync Capacitor Android
         run: npx cap sync android
 
-
-      # 8. Allow Gradle to run on Linux.
       - name: Make Gradle executable
         run: chmod +x android/gradlew
 
+      - name: Prepare Android signing
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          if [ -n "$ANDROID_KEYSTORE_BASE64" ]; then
+            if [ -z "$ANDROID_KEYSTORE_PASSWORD" ] || [ -z "$ANDROID_KEY_ALIAS" ] || [ -z "$ANDROID_KEY_PASSWORD" ]; then
+              echo "::error::All four Android signing secrets are required for a release build."
+              exit 1
+            fi
 
-      # 9. Build the Debug APK.
-      - name: Build Android APK
+            printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/app/fixflow-release.jks
+            printf 'storeFile=fixflow-release.jks\nstorePassword=%s\nkeyAlias=%s\nkeyPassword=%s\n' \
+              "$ANDROID_KEYSTORE_PASSWORD" "$ANDROID_KEY_ALIAS" "$ANDROID_KEY_PASSWORD" > android/key.properties
+            echo "SIGNED=true" >> "$GITHUB_ENV"
+          else
+            echo "SIGNED=false" >> "$GITHUB_ENV"
+          fi
+
+      - name: Build release APK
+        if: env.SIGNED == 'true'
+        working-directory: android
+        run: ./gradlew assembleRelease
+
+      - name: Build debug APK
+        if: env.SIGNED != 'true'
         working-directory: android
         run: ./gradlew assembleDebug
 
-
-      # 10. Rename the generated APK.
-      - name: Rename APK
+      - name: Collect APK
         run: |
-          cp android/app/build/outputs/apk/debug/app-debug.apk FixFlow.apk
+          mkdir -p artifacts
+          if [ "$SIGNED" = "true" ]; then
+            cp android/app/build/outputs/apk/release/app-release.apk artifacts/FixFlow-release.apk
+            echo "APK_NAME=FixFlow-release.apk" >> "$GITHUB_ENV"
+          else
+            cp android/app/build/outputs/apk/debug/app-debug.apk artifacts/FixFlow-debug.apk
+            echo "APK_NAME=FixFlow-debug.apk" >> "$GITHUB_ENV"
+          fi
 
-
-      # 11. Upload the APK as a GitHub Actions artifact.
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: FixFlow-APK
-          path: FixFlow.apk
+          path: artifacts/*.apk
           if-no-files-found: error
           retention-days: 30
+
+      - name: Build summary
+        run: |
+          {
+            echo "### FixFlow APK"
+            echo ""
+            echo "- File: \`$APK_NAME\`"
+            echo "- Signing: \`$SIGNED\`"
+            echo ""
+            echo "Download the APK from the workflow artifacts."
+          } >> "$GITHUB_STEP_SUMMARY"

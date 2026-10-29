@@ -33,5 +33,5 @@ window.addEventListener('unhandledrejection', (event) => {
 })
 
 // Mount right away. App.vue shows a splash while the session loads, so first launch
-// (which hashes the demo passwords) never leaves a blank screen.
+// never leaves a blank screen.
 app.mount(root)
