@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { IonContent, IonPage, onIonViewWillEnter } from '@ionic/vue'
 import { CalendarClock, LogOut } from '@lucide/vue'
-import AppearanceControl from '@/components/AppearanceControl.vue'
+import AppearancePanel from '@/components/AppearancePanel.vue'
 import AppButton from '@/components/AppButton.vue'
 import AppLink from '@/components/AppLink.vue'
 import DisclosureSection from '@/components/DisclosureSection.vue'
@@ -104,13 +104,7 @@ function onSignOut(): void {
         </div>
 
         <div class="profile-page__col">
-          <section class="ff-card ff-stack" aria-labelledby="profile-appearance">
-            <div class="ff-stack ff-stack--tight">
-              <h2 id="profile-appearance" class="ff-h3">Appearance</h2>
-              <p class="ff-meta">Follow this device or choose a fixed light or dark look.</p>
-            </div>
-            <AppearanceControl />
-          </section>
+          <AppearancePanel heading-id="profile-appearance" />
 
           <DisclosureSection title="About FixFlow">
             <p>

@@ -28,7 +28,6 @@ const { preference, setAppearance } = useAppearance()
       class="appearance__option"
       :data-appearance-opt="option.value"
       :aria-pressed="preference === option.value"
-      :title="option.label"
       @click="setAppearance(option.value)"
     >
       <component :is="option.icon" class="ff-icon ff-icon--sm" aria-hidden="true" />
@@ -50,18 +49,20 @@ const { preference, setAppearance } = useAppearance()
 
 .appearance__option {
   display: inline-flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
   gap: var(--space-1);
+  min-width: 0;
   min-height: var(--touch-min);
-  padding: var(--space-2) var(--space-1);
+  padding: 0 var(--space-1);
   background: transparent;
   border: 1px solid transparent;
   border-radius: var(--radius-sm);
   color: var(--color-text-secondary);
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
+  white-space: nowrap;
   cursor: pointer;
 }
 
@@ -76,6 +77,14 @@ const { preference, setAppearance } = useAppearance()
   .appearance__option:hover:not([aria-pressed='true']) {
     background: var(--color-overlay);
     color: var(--color-text-primary);
+  }
+}
+
+/* Below 19rem, stack the icon over the label so each target still fits. */
+@media (max-width: 19rem) {
+  .appearance__option {
+    flex-direction: column;
+    padding: var(--space-2) var(--space-1);
   }
 }
 </style>

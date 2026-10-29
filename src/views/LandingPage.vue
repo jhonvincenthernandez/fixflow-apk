@@ -11,7 +11,7 @@ import {
 } from '@lucide/vue'
 import AppLink from '@/components/AppLink.vue'
 import AppLogo from '@/components/AppLogo.vue'
-import AppearanceControl from '@/components/AppearanceControl.vue'
+import AppearancePanel from '@/components/AppearancePanel.vue'
 import DisclosureSection from '@/components/DisclosureSection.vue'
 import ServiceIcon from '@/components/ServiceIcon.vue'
 import { SERVICES } from '@/domain/services'
@@ -225,13 +225,7 @@ function scrollToSection(id: string): void {
             <p class="ff-meta">Request it. Quote it. Book it. Track it.</p>
           </div>
 
-          <section class="ff-card ff-stack landing__appearance" aria-labelledby="landing-appearance">
-            <div class="ff-stack ff-stack--tight">
-              <h2 id="landing-appearance" class="ff-h3">Appearance</h2>
-              <p class="ff-meta">Follow this device or choose a fixed light or dark look.</p>
-            </div>
-            <AppearanceControl />
-          </section>
+          <AppearancePanel heading-id="landing-appearance" class="landing__appearance" />
         </div>
       </footer>
     </ion-content>
