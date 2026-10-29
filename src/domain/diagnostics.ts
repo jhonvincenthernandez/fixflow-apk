@@ -24,6 +24,7 @@ export interface DiagnosisResult {
   readonly safety: DiagnosisSafety
   readonly safetyNote: string
   readonly nextStep: string
+  readonly prepTips: readonly string[]
   readonly requestDescription: string
 }
 
@@ -56,6 +57,33 @@ const URGENCY_SENTENCE: Record<DiagnosisUrgency, string> = {
   can_wait: 'I can wait a few days for the repair.',
   daily_use: 'This affects my daily use, so I would like the earliest available slot.',
   safety: 'I am worried about safety and would like a priority check.',
+}
+
+const PREP_TIPS: Record<ServiceId, readonly string[]> = {
+  phone: [
+    'Bring the charger and cable you normally use.',
+    'Note when the problem started and what changed.',
+  ],
+  computer: [
+    'Bring the power adapter.',
+    'Note the model and when the problem started.',
+  ],
+  appliance: [
+    'Note the model number and how old the unit is.',
+    'Clear access to the unit before the visit.',
+  ],
+  tv_audio: [
+    'Bring the remote and power cable.',
+    'Note which input or channel fails.',
+  ],
+  electrical: [
+    'Note which outlet or circuit fails.',
+    'Do not open the outlet or panel yourself.',
+  ],
+  other: [
+    'Take clear photos of the problem.',
+    'Note when the problem started.',
+  ],
 }
 
 const SYMPTOMS: Record<ServiceId, readonly DiagnosisSymptom[]> = {
@@ -319,6 +347,7 @@ export function diagnose(
     safety,
     safetyNote: safetyNoteFor(symptom, urgency, safety),
     nextStep: nextStepFor(urgency, safety),
+    prepTips: PREP_TIPS[serviceId],
     requestDescription: `${symptom.requestSummary} ${URGENCY_SENTENCE[urgency]}`,
   }
 }
@@ -340,4 +369,14 @@ export function requestHref(
 ): string {
   const params = new URLSearchParams({ service: serviceId, issue: symptomId, urgency })
   return `/request/new?${params.toString()}`
+}
+
+/** Restores a completed quick check, including the result step. */
+export function diagnosisHref(
+  serviceId: ServiceId,
+  symptomId: string,
+  urgency: DiagnosisUrgency,
+): string {
+  const params = new URLSearchParams({ service: serviceId, issue: symptomId, urgency })
+  return `/diagnose?${params.toString()}`
 }

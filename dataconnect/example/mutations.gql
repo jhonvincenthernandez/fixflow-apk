@@ -158,3 +158,26 @@ mutation UpdateAppMeta($id: UUID!, $value: String!, $updatedAt: Timestamp!) @aut
 ) {
   appMeta_update(id: $id, data: { value: $value, updatedAt: $updatedAt })
 }
+
+mutation CreateAppFeedback(
+  $id: UUID!
+  $rating: Int!
+  $topic: String!
+  $comment: String!
+  $source: String!
+  $platform: String!
+  $createdAt: Timestamp!
+) @auth(
+  level: PUBLIC
+  insecureReason: "Public: anonymous app feedback is submitted from the client; add App Check and rate limiting before public launch."
+) {
+  appFeedback_insert(data: {
+    id: $id
+    rating: $rating
+    topic: $topic
+    comment: $comment
+    source: $source
+    platform: $platform
+    createdAt: $createdAt
+  })
+}

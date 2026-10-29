@@ -30,6 +30,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/DiagnosePage.vue'),
   },
   {
+    // Public on purpose: app feedback is available after the public quick check.
+    path: '/feedback',
+    component: () => import('@/views/AppFeedbackPage.vue'),
+  },
+  {
     path: '/tabs/',
     component: () => import('@/views/TabsPage.vue'),
     meta: { requiresAuth: true },

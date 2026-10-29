@@ -12,18 +12,14 @@ This README will guide you through the process of using the generated JavaScript
   - [*GetFixflowUser*](#getfixflowuser)
   - [*GetFixflowUserForLogin*](#getfixflowuserforlogin)
   - [*ListFixflowUsersByRole*](#listfixflowusersbyrole)
-  - [*ListAllFixflowUsers*](#listallfixflowusers)
   - [*GetServiceRequest*](#getservicerequest)
   - [*ListAllServiceRequests*](#listallservicerequests)
   - [*ListServiceRequestsByCustomer*](#listservicerequestsbycustomer)
   - [*ListScheduledServiceRequests*](#listscheduledservicerequests)
   - [*ListRequestImages*](#listrequestimages)
-  - [*ListAllRequestImages*](#listallrequestimages)
   - [*GetNotification*](#getnotification)
   - [*ListNotifications*](#listnotifications)
-  - [*ListAllNotifications*](#listallnotifications)
   - [*GetAppMeta*](#getappmeta)
-  - [*ListAllAppMetas*](#listallappmetas)
 - [**Mutations**](#mutations)
   - [*CreateFixflowUser*](#createfixflowuser)
   - [*CreateServiceRequest*](#createservicerequest)
@@ -33,11 +29,7 @@ This README will guide you through the process of using the generated JavaScript
   - [*MarkNotificationRead*](#marknotificationread)
   - [*CreateAppMeta*](#createappmeta)
   - [*UpdateAppMeta*](#updateappmeta)
-  - [*DeleteFixflowUser*](#deletefixflowuser)
-  - [*DeleteServiceRequest*](#deleteservicerequest)
-  - [*DeleteRequestImage*](#deleterequestimage)
-  - [*DeleteNotification*](#deletenotification)
-  - [*DeleteAppMeta*](#deleteappmeta)
+  - [*CreateAppFeedback*](#createappfeedback)
 
 # Accessing the connector
 A connector is a collection of Queries and Mutations. One SDK is generated for each connector - this SDK is generated for the connector `example`. You can find more information about connectors in the [Data Connect documentation](https://firebase.google.com/docs/data-connect#how-does).
@@ -514,104 +506,6 @@ const ref = listFixflowUsersByRoleRef({ role: ..., });
 // You can also pass in a `DataConnect` instance to the `QueryRef` function.
 const dataConnect = getDataConnect(connectorConfig);
 const ref = listFixflowUsersByRoleRef(dataConnect, listFixflowUsersByRoleVars);
-
-// Call `executeQuery()` on the reference to execute the query.
-// You can use the `await` keyword to wait for the promise to resolve.
-const { data } = await executeQuery(ref);
-
-console.log(data.fixflowUsers);
-
-// Or, you can use the `Promise` API.
-executeQuery(ref).then((response) => {
-  const data = response.data;
-  console.log(data.fixflowUsers);
-});
-```
-
-## ListAllFixflowUsers
-You can execute the `ListAllFixflowUsers` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
-```typescript
-listAllFixflowUsers(options?: ExecuteQueryOptions): QueryPromise<ListAllFixflowUsersData, undefined>;
-
-interface ListAllFixflowUsersRef {
-  ...
-  /* Allow users to create refs without passing in DataConnect */
-  (): QueryRef<ListAllFixflowUsersData, undefined>;
-}
-export const listAllFixflowUsersRef: ListAllFixflowUsersRef;
-```
-You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
-```typescript
-listAllFixflowUsers(dc: DataConnect, options?: ExecuteQueryOptions): QueryPromise<ListAllFixflowUsersData, undefined>;
-
-interface ListAllFixflowUsersRef {
-  ...
-  (dc: DataConnect): QueryRef<ListAllFixflowUsersData, undefined>;
-}
-export const listAllFixflowUsersRef: ListAllFixflowUsersRef;
-```
-
-If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the listAllFixflowUsersRef:
-```typescript
-const name = listAllFixflowUsersRef.operationName;
-console.log(name);
-```
-
-### Variables
-The `ListAllFixflowUsers` query has no variables.
-### Return Type
-Recall that executing the `ListAllFixflowUsers` query returns a `QueryPromise` that resolves to an object with a `data` property.
-
-The `data` property is an object of type `ListAllFixflowUsersData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
-```typescript
-export interface ListAllFixflowUsersData {
-  fixflowUsers: ({
-    id: UUIDString;
-    role: string;
-    name: string;
-    email: string;
-    phone: string;
-    createdAt: TimestampString;
-  } & FixflowUser_Key)[];
-}
-```
-### Using `ListAllFixflowUsers`'s action shortcut function
-
-```typescript
-import { getDataConnect } from 'firebase/data-connect';
-import { connectorConfig, listAllFixflowUsers } from '@dataconnect/generated';
-
-
-// Call the `listAllFixflowUsers()` function to execute the query.
-// You can use the `await` keyword to wait for the promise to resolve.
-const { data } = await listAllFixflowUsers();
-
-// You can also pass in a `DataConnect` instance to the action shortcut function.
-const dataConnect = getDataConnect(connectorConfig);
-const { data } = await listAllFixflowUsers(dataConnect);
-
-console.log(data.fixflowUsers);
-
-// Or, you can use the `Promise` API.
-listAllFixflowUsers().then((response) => {
-  const data = response.data;
-  console.log(data.fixflowUsers);
-});
-```
-
-### Using `ListAllFixflowUsers`'s `QueryRef` function
-
-```typescript
-import { getDataConnect, executeQuery } from 'firebase/data-connect';
-import { connectorConfig, listAllFixflowUsersRef } from '@dataconnect/generated';
-
-
-// Call the `listAllFixflowUsersRef()` function to get a reference to the query.
-const ref = listAllFixflowUsersRef();
-
-// You can also pass in a `DataConnect` instance to the `QueryRef` function.
-const dataConnect = getDataConnect(connectorConfig);
-const ref = listAllFixflowUsersRef(dataConnect);
 
 // Call `executeQuery()` on the reference to execute the query.
 // You can use the `await` keyword to wait for the promise to resolve.
@@ -1199,99 +1093,6 @@ executeQuery(ref).then((response) => {
 });
 ```
 
-## ListAllRequestImages
-You can execute the `ListAllRequestImages` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
-```typescript
-listAllRequestImages(options?: ExecuteQueryOptions): QueryPromise<ListAllRequestImagesData, undefined>;
-
-interface ListAllRequestImagesRef {
-  ...
-  /* Allow users to create refs without passing in DataConnect */
-  (): QueryRef<ListAllRequestImagesData, undefined>;
-}
-export const listAllRequestImagesRef: ListAllRequestImagesRef;
-```
-You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
-```typescript
-listAllRequestImages(dc: DataConnect, options?: ExecuteQueryOptions): QueryPromise<ListAllRequestImagesData, undefined>;
-
-interface ListAllRequestImagesRef {
-  ...
-  (dc: DataConnect): QueryRef<ListAllRequestImagesData, undefined>;
-}
-export const listAllRequestImagesRef: ListAllRequestImagesRef;
-```
-
-If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the listAllRequestImagesRef:
-```typescript
-const name = listAllRequestImagesRef.operationName;
-console.log(name);
-```
-
-### Variables
-The `ListAllRequestImages` query has no variables.
-### Return Type
-Recall that executing the `ListAllRequestImages` query returns a `QueryPromise` that resolves to an object with a `data` property.
-
-The `data` property is an object of type `ListAllRequestImagesData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
-```typescript
-export interface ListAllRequestImagesData {
-  requestImages: ({
-    id: UUIDString;
-  } & RequestImage_Key)[];
-}
-```
-### Using `ListAllRequestImages`'s action shortcut function
-
-```typescript
-import { getDataConnect } from 'firebase/data-connect';
-import { connectorConfig, listAllRequestImages } from '@dataconnect/generated';
-
-
-// Call the `listAllRequestImages()` function to execute the query.
-// You can use the `await` keyword to wait for the promise to resolve.
-const { data } = await listAllRequestImages();
-
-// You can also pass in a `DataConnect` instance to the action shortcut function.
-const dataConnect = getDataConnect(connectorConfig);
-const { data } = await listAllRequestImages(dataConnect);
-
-console.log(data.requestImages);
-
-// Or, you can use the `Promise` API.
-listAllRequestImages().then((response) => {
-  const data = response.data;
-  console.log(data.requestImages);
-});
-```
-
-### Using `ListAllRequestImages`'s `QueryRef` function
-
-```typescript
-import { getDataConnect, executeQuery } from 'firebase/data-connect';
-import { connectorConfig, listAllRequestImagesRef } from '@dataconnect/generated';
-
-
-// Call the `listAllRequestImagesRef()` function to get a reference to the query.
-const ref = listAllRequestImagesRef();
-
-// You can also pass in a `DataConnect` instance to the `QueryRef` function.
-const dataConnect = getDataConnect(connectorConfig);
-const ref = listAllRequestImagesRef(dataConnect);
-
-// Call `executeQuery()` on the reference to execute the query.
-// You can use the `await` keyword to wait for the promise to resolve.
-const { data } = await executeQuery(ref);
-
-console.log(data.requestImages);
-
-// Or, you can use the `Promise` API.
-executeQuery(ref).then((response) => {
-  const data = response.data;
-  console.log(data.requestImages);
-});
-```
-
 ## GetNotification
 You can execute the `GetNotification` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
 ```typescript
@@ -1526,99 +1327,6 @@ executeQuery(ref).then((response) => {
 });
 ```
 
-## ListAllNotifications
-You can execute the `ListAllNotifications` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
-```typescript
-listAllNotifications(options?: ExecuteQueryOptions): QueryPromise<ListAllNotificationsData, undefined>;
-
-interface ListAllNotificationsRef {
-  ...
-  /* Allow users to create refs without passing in DataConnect */
-  (): QueryRef<ListAllNotificationsData, undefined>;
-}
-export const listAllNotificationsRef: ListAllNotificationsRef;
-```
-You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
-```typescript
-listAllNotifications(dc: DataConnect, options?: ExecuteQueryOptions): QueryPromise<ListAllNotificationsData, undefined>;
-
-interface ListAllNotificationsRef {
-  ...
-  (dc: DataConnect): QueryRef<ListAllNotificationsData, undefined>;
-}
-export const listAllNotificationsRef: ListAllNotificationsRef;
-```
-
-If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the listAllNotificationsRef:
-```typescript
-const name = listAllNotificationsRef.operationName;
-console.log(name);
-```
-
-### Variables
-The `ListAllNotifications` query has no variables.
-### Return Type
-Recall that executing the `ListAllNotifications` query returns a `QueryPromise` that resolves to an object with a `data` property.
-
-The `data` property is an object of type `ListAllNotificationsData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
-```typescript
-export interface ListAllNotificationsData {
-  notifications: ({
-    id: UUIDString;
-  } & Notification_Key)[];
-}
-```
-### Using `ListAllNotifications`'s action shortcut function
-
-```typescript
-import { getDataConnect } from 'firebase/data-connect';
-import { connectorConfig, listAllNotifications } from '@dataconnect/generated';
-
-
-// Call the `listAllNotifications()` function to execute the query.
-// You can use the `await` keyword to wait for the promise to resolve.
-const { data } = await listAllNotifications();
-
-// You can also pass in a `DataConnect` instance to the action shortcut function.
-const dataConnect = getDataConnect(connectorConfig);
-const { data } = await listAllNotifications(dataConnect);
-
-console.log(data.notifications);
-
-// Or, you can use the `Promise` API.
-listAllNotifications().then((response) => {
-  const data = response.data;
-  console.log(data.notifications);
-});
-```
-
-### Using `ListAllNotifications`'s `QueryRef` function
-
-```typescript
-import { getDataConnect, executeQuery } from 'firebase/data-connect';
-import { connectorConfig, listAllNotificationsRef } from '@dataconnect/generated';
-
-
-// Call the `listAllNotificationsRef()` function to get a reference to the query.
-const ref = listAllNotificationsRef();
-
-// You can also pass in a `DataConnect` instance to the `QueryRef` function.
-const dataConnect = getDataConnect(connectorConfig);
-const ref = listAllNotificationsRef(dataConnect);
-
-// Call `executeQuery()` on the reference to execute the query.
-// You can use the `await` keyword to wait for the promise to resolve.
-const { data } = await executeQuery(ref);
-
-console.log(data.notifications);
-
-// Or, you can use the `Promise` API.
-executeQuery(ref).then((response) => {
-  const data = response.data;
-  console.log(data.notifications);
-});
-```
-
 ## GetAppMeta
 You can execute the `GetAppMeta` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
 ```typescript
@@ -1718,99 +1426,6 @@ const ref = getAppMetaRef({ key: ..., });
 // You can also pass in a `DataConnect` instance to the `QueryRef` function.
 const dataConnect = getDataConnect(connectorConfig);
 const ref = getAppMetaRef(dataConnect, getAppMetaVars);
-
-// Call `executeQuery()` on the reference to execute the query.
-// You can use the `await` keyword to wait for the promise to resolve.
-const { data } = await executeQuery(ref);
-
-console.log(data.appMetas);
-
-// Or, you can use the `Promise` API.
-executeQuery(ref).then((response) => {
-  const data = response.data;
-  console.log(data.appMetas);
-});
-```
-
-## ListAllAppMetas
-You can execute the `ListAllAppMetas` query using the following action shortcut function, or by calling `executeQuery()` after calling the following `QueryRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
-```typescript
-listAllAppMetas(options?: ExecuteQueryOptions): QueryPromise<ListAllAppMetasData, undefined>;
-
-interface ListAllAppMetasRef {
-  ...
-  /* Allow users to create refs without passing in DataConnect */
-  (): QueryRef<ListAllAppMetasData, undefined>;
-}
-export const listAllAppMetasRef: ListAllAppMetasRef;
-```
-You can also pass in a `DataConnect` instance to the action shortcut function or `QueryRef` function.
-```typescript
-listAllAppMetas(dc: DataConnect, options?: ExecuteQueryOptions): QueryPromise<ListAllAppMetasData, undefined>;
-
-interface ListAllAppMetasRef {
-  ...
-  (dc: DataConnect): QueryRef<ListAllAppMetasData, undefined>;
-}
-export const listAllAppMetasRef: ListAllAppMetasRef;
-```
-
-If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the listAllAppMetasRef:
-```typescript
-const name = listAllAppMetasRef.operationName;
-console.log(name);
-```
-
-### Variables
-The `ListAllAppMetas` query has no variables.
-### Return Type
-Recall that executing the `ListAllAppMetas` query returns a `QueryPromise` that resolves to an object with a `data` property.
-
-The `data` property is an object of type `ListAllAppMetasData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
-```typescript
-export interface ListAllAppMetasData {
-  appMetas: ({
-    id: UUIDString;
-  } & AppMeta_Key)[];
-}
-```
-### Using `ListAllAppMetas`'s action shortcut function
-
-```typescript
-import { getDataConnect } from 'firebase/data-connect';
-import { connectorConfig, listAllAppMetas } from '@dataconnect/generated';
-
-
-// Call the `listAllAppMetas()` function to execute the query.
-// You can use the `await` keyword to wait for the promise to resolve.
-const { data } = await listAllAppMetas();
-
-// You can also pass in a `DataConnect` instance to the action shortcut function.
-const dataConnect = getDataConnect(connectorConfig);
-const { data } = await listAllAppMetas(dataConnect);
-
-console.log(data.appMetas);
-
-// Or, you can use the `Promise` API.
-listAllAppMetas().then((response) => {
-  const data = response.data;
-  console.log(data.appMetas);
-});
-```
-
-### Using `ListAllAppMetas`'s `QueryRef` function
-
-```typescript
-import { getDataConnect, executeQuery } from 'firebase/data-connect';
-import { connectorConfig, listAllAppMetasRef } from '@dataconnect/generated';
-
-
-// Call the `listAllAppMetasRef()` function to get a reference to the query.
-const ref = listAllAppMetasRef();
-
-// You can also pass in a `DataConnect` instance to the `QueryRef` function.
-const dataConnect = getDataConnect(connectorConfig);
-const ref = listAllAppMetasRef(dataConnect);
 
 // Call `executeQuery()` on the reference to execute the query.
 // You can use the `await` keyword to wait for the promise to resolve.
@@ -2850,548 +2465,130 @@ executeMutation(ref).then((response) => {
 });
 ```
 
-## DeleteFixflowUser
-You can execute the `DeleteFixflowUser` mutation using the following action shortcut function, or by calling `executeMutation()` after calling the following `MutationRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
+## CreateAppFeedback
+You can execute the `CreateAppFeedback` mutation using the following action shortcut function, or by calling `executeMutation()` after calling the following `MutationRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
 ```typescript
-deleteFixflowUser(vars: DeleteFixflowUserVariables): MutationPromise<DeleteFixflowUserData, DeleteFixflowUserVariables>;
+createAppFeedback(vars: CreateAppFeedbackVariables): MutationPromise<CreateAppFeedbackData, CreateAppFeedbackVariables>;
 
-interface DeleteFixflowUserRef {
+interface CreateAppFeedbackRef {
   ...
   /* Allow users to create refs without passing in DataConnect */
-  (vars: DeleteFixflowUserVariables): MutationRef<DeleteFixflowUserData, DeleteFixflowUserVariables>;
+  (vars: CreateAppFeedbackVariables): MutationRef<CreateAppFeedbackData, CreateAppFeedbackVariables>;
 }
-export const deleteFixflowUserRef: DeleteFixflowUserRef;
+export const createAppFeedbackRef: CreateAppFeedbackRef;
 ```
 You can also pass in a `DataConnect` instance to the action shortcut function or `MutationRef` function.
 ```typescript
-deleteFixflowUser(dc: DataConnect, vars: DeleteFixflowUserVariables): MutationPromise<DeleteFixflowUserData, DeleteFixflowUserVariables>;
+createAppFeedback(dc: DataConnect, vars: CreateAppFeedbackVariables): MutationPromise<CreateAppFeedbackData, CreateAppFeedbackVariables>;
 
-interface DeleteFixflowUserRef {
+interface CreateAppFeedbackRef {
   ...
-  (dc: DataConnect, vars: DeleteFixflowUserVariables): MutationRef<DeleteFixflowUserData, DeleteFixflowUserVariables>;
+  (dc: DataConnect, vars: CreateAppFeedbackVariables): MutationRef<CreateAppFeedbackData, CreateAppFeedbackVariables>;
 }
-export const deleteFixflowUserRef: DeleteFixflowUserRef;
+export const createAppFeedbackRef: CreateAppFeedbackRef;
 ```
 
-If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the deleteFixflowUserRef:
+If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the createAppFeedbackRef:
 ```typescript
-const name = deleteFixflowUserRef.operationName;
+const name = createAppFeedbackRef.operationName;
 console.log(name);
 ```
 
 ### Variables
-The `DeleteFixflowUser` mutation requires an argument of type `DeleteFixflowUserVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+The `CreateAppFeedback` mutation requires an argument of type `CreateAppFeedbackVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
 
 ```typescript
-export interface DeleteFixflowUserVariables {
+export interface CreateAppFeedbackVariables {
   id: UUIDString;
+  rating: number;
+  topic: string;
+  comment: string;
+  source: string;
+  platform: string;
+  createdAt: TimestampString;
 }
 ```
 ### Return Type
-Recall that executing the `DeleteFixflowUser` mutation returns a `MutationPromise` that resolves to an object with a `data` property.
+Recall that executing the `CreateAppFeedback` mutation returns a `MutationPromise` that resolves to an object with a `data` property.
 
-The `data` property is an object of type `DeleteFixflowUserData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
+The `data` property is an object of type `CreateAppFeedbackData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
 ```typescript
-export interface DeleteFixflowUserData {
-  fixflowUser_delete?: FixflowUser_Key | null;
+export interface CreateAppFeedbackData {
+  appFeedback_insert: AppFeedback_Key;
 }
 ```
-### Using `DeleteFixflowUser`'s action shortcut function
+### Using `CreateAppFeedback`'s action shortcut function
 
 ```typescript
 import { getDataConnect } from 'firebase/data-connect';
-import { connectorConfig, deleteFixflowUser, DeleteFixflowUserVariables } from '@dataconnect/generated';
+import { connectorConfig, createAppFeedback, CreateAppFeedbackVariables } from '@dataconnect/generated';
 
-// The `DeleteFixflowUser` mutation requires an argument of type `DeleteFixflowUserVariables`:
-const deleteFixflowUserVars: DeleteFixflowUserVariables = {
+// The `CreateAppFeedback` mutation requires an argument of type `CreateAppFeedbackVariables`:
+const createAppFeedbackVars: CreateAppFeedbackVariables = {
   id: ..., 
+  rating: ..., 
+  topic: ..., 
+  comment: ..., 
+  source: ..., 
+  platform: ..., 
+  createdAt: ..., 
 };
 
-// Call the `deleteFixflowUser()` function to execute the mutation.
+// Call the `createAppFeedback()` function to execute the mutation.
 // You can use the `await` keyword to wait for the promise to resolve.
-const { data } = await deleteFixflowUser(deleteFixflowUserVars);
+const { data } = await createAppFeedback(createAppFeedbackVars);
 // Variables can be defined inline as well.
-const { data } = await deleteFixflowUser({ id: ..., });
+const { data } = await createAppFeedback({ id: ..., rating: ..., topic: ..., comment: ..., source: ..., platform: ..., createdAt: ..., });
 
 // You can also pass in a `DataConnect` instance to the action shortcut function.
 const dataConnect = getDataConnect(connectorConfig);
-const { data } = await deleteFixflowUser(dataConnect, deleteFixflowUserVars);
+const { data } = await createAppFeedback(dataConnect, createAppFeedbackVars);
 
-console.log(data.fixflowUser_delete);
+console.log(data.appFeedback_insert);
 
 // Or, you can use the `Promise` API.
-deleteFixflowUser(deleteFixflowUserVars).then((response) => {
+createAppFeedback(createAppFeedbackVars).then((response) => {
   const data = response.data;
-  console.log(data.fixflowUser_delete);
+  console.log(data.appFeedback_insert);
 });
 ```
 
-### Using `DeleteFixflowUser`'s `MutationRef` function
+### Using `CreateAppFeedback`'s `MutationRef` function
 
 ```typescript
 import { getDataConnect, executeMutation } from 'firebase/data-connect';
-import { connectorConfig, deleteFixflowUserRef, DeleteFixflowUserVariables } from '@dataconnect/generated';
+import { connectorConfig, createAppFeedbackRef, CreateAppFeedbackVariables } from '@dataconnect/generated';
 
-// The `DeleteFixflowUser` mutation requires an argument of type `DeleteFixflowUserVariables`:
-const deleteFixflowUserVars: DeleteFixflowUserVariables = {
+// The `CreateAppFeedback` mutation requires an argument of type `CreateAppFeedbackVariables`:
+const createAppFeedbackVars: CreateAppFeedbackVariables = {
   id: ..., 
+  rating: ..., 
+  topic: ..., 
+  comment: ..., 
+  source: ..., 
+  platform: ..., 
+  createdAt: ..., 
 };
 
-// Call the `deleteFixflowUserRef()` function to get a reference to the mutation.
-const ref = deleteFixflowUserRef(deleteFixflowUserVars);
+// Call the `createAppFeedbackRef()` function to get a reference to the mutation.
+const ref = createAppFeedbackRef(createAppFeedbackVars);
 // Variables can be defined inline as well.
-const ref = deleteFixflowUserRef({ id: ..., });
+const ref = createAppFeedbackRef({ id: ..., rating: ..., topic: ..., comment: ..., source: ..., platform: ..., createdAt: ..., });
 
 // You can also pass in a `DataConnect` instance to the `MutationRef` function.
 const dataConnect = getDataConnect(connectorConfig);
-const ref = deleteFixflowUserRef(dataConnect, deleteFixflowUserVars);
+const ref = createAppFeedbackRef(dataConnect, createAppFeedbackVars);
 
 // Call `executeMutation()` on the reference to execute the mutation.
 // You can use the `await` keyword to wait for the promise to resolve.
 const { data } = await executeMutation(ref);
 
-console.log(data.fixflowUser_delete);
+console.log(data.appFeedback_insert);
 
 // Or, you can use the `Promise` API.
 executeMutation(ref).then((response) => {
   const data = response.data;
-  console.log(data.fixflowUser_delete);
-});
-```
-
-## DeleteServiceRequest
-You can execute the `DeleteServiceRequest` mutation using the following action shortcut function, or by calling `executeMutation()` after calling the following `MutationRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
-```typescript
-deleteServiceRequest(vars: DeleteServiceRequestVariables): MutationPromise<DeleteServiceRequestData, DeleteServiceRequestVariables>;
-
-interface DeleteServiceRequestRef {
-  ...
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: DeleteServiceRequestVariables): MutationRef<DeleteServiceRequestData, DeleteServiceRequestVariables>;
-}
-export const deleteServiceRequestRef: DeleteServiceRequestRef;
-```
-You can also pass in a `DataConnect` instance to the action shortcut function or `MutationRef` function.
-```typescript
-deleteServiceRequest(dc: DataConnect, vars: DeleteServiceRequestVariables): MutationPromise<DeleteServiceRequestData, DeleteServiceRequestVariables>;
-
-interface DeleteServiceRequestRef {
-  ...
-  (dc: DataConnect, vars: DeleteServiceRequestVariables): MutationRef<DeleteServiceRequestData, DeleteServiceRequestVariables>;
-}
-export const deleteServiceRequestRef: DeleteServiceRequestRef;
-```
-
-If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the deleteServiceRequestRef:
-```typescript
-const name = deleteServiceRequestRef.operationName;
-console.log(name);
-```
-
-### Variables
-The `DeleteServiceRequest` mutation requires an argument of type `DeleteServiceRequestVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
-
-```typescript
-export interface DeleteServiceRequestVariables {
-  id: UUIDString;
-}
-```
-### Return Type
-Recall that executing the `DeleteServiceRequest` mutation returns a `MutationPromise` that resolves to an object with a `data` property.
-
-The `data` property is an object of type `DeleteServiceRequestData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
-```typescript
-export interface DeleteServiceRequestData {
-  serviceRequest_delete?: ServiceRequest_Key | null;
-}
-```
-### Using `DeleteServiceRequest`'s action shortcut function
-
-```typescript
-import { getDataConnect } from 'firebase/data-connect';
-import { connectorConfig, deleteServiceRequest, DeleteServiceRequestVariables } from '@dataconnect/generated';
-
-// The `DeleteServiceRequest` mutation requires an argument of type `DeleteServiceRequestVariables`:
-const deleteServiceRequestVars: DeleteServiceRequestVariables = {
-  id: ..., 
-};
-
-// Call the `deleteServiceRequest()` function to execute the mutation.
-// You can use the `await` keyword to wait for the promise to resolve.
-const { data } = await deleteServiceRequest(deleteServiceRequestVars);
-// Variables can be defined inline as well.
-const { data } = await deleteServiceRequest({ id: ..., });
-
-// You can also pass in a `DataConnect` instance to the action shortcut function.
-const dataConnect = getDataConnect(connectorConfig);
-const { data } = await deleteServiceRequest(dataConnect, deleteServiceRequestVars);
-
-console.log(data.serviceRequest_delete);
-
-// Or, you can use the `Promise` API.
-deleteServiceRequest(deleteServiceRequestVars).then((response) => {
-  const data = response.data;
-  console.log(data.serviceRequest_delete);
-});
-```
-
-### Using `DeleteServiceRequest`'s `MutationRef` function
-
-```typescript
-import { getDataConnect, executeMutation } from 'firebase/data-connect';
-import { connectorConfig, deleteServiceRequestRef, DeleteServiceRequestVariables } from '@dataconnect/generated';
-
-// The `DeleteServiceRequest` mutation requires an argument of type `DeleteServiceRequestVariables`:
-const deleteServiceRequestVars: DeleteServiceRequestVariables = {
-  id: ..., 
-};
-
-// Call the `deleteServiceRequestRef()` function to get a reference to the mutation.
-const ref = deleteServiceRequestRef(deleteServiceRequestVars);
-// Variables can be defined inline as well.
-const ref = deleteServiceRequestRef({ id: ..., });
-
-// You can also pass in a `DataConnect` instance to the `MutationRef` function.
-const dataConnect = getDataConnect(connectorConfig);
-const ref = deleteServiceRequestRef(dataConnect, deleteServiceRequestVars);
-
-// Call `executeMutation()` on the reference to execute the mutation.
-// You can use the `await` keyword to wait for the promise to resolve.
-const { data } = await executeMutation(ref);
-
-console.log(data.serviceRequest_delete);
-
-// Or, you can use the `Promise` API.
-executeMutation(ref).then((response) => {
-  const data = response.data;
-  console.log(data.serviceRequest_delete);
-});
-```
-
-## DeleteRequestImage
-You can execute the `DeleteRequestImage` mutation using the following action shortcut function, or by calling `executeMutation()` after calling the following `MutationRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
-```typescript
-deleteRequestImage(vars: DeleteRequestImageVariables): MutationPromise<DeleteRequestImageData, DeleteRequestImageVariables>;
-
-interface DeleteRequestImageRef {
-  ...
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: DeleteRequestImageVariables): MutationRef<DeleteRequestImageData, DeleteRequestImageVariables>;
-}
-export const deleteRequestImageRef: DeleteRequestImageRef;
-```
-You can also pass in a `DataConnect` instance to the action shortcut function or `MutationRef` function.
-```typescript
-deleteRequestImage(dc: DataConnect, vars: DeleteRequestImageVariables): MutationPromise<DeleteRequestImageData, DeleteRequestImageVariables>;
-
-interface DeleteRequestImageRef {
-  ...
-  (dc: DataConnect, vars: DeleteRequestImageVariables): MutationRef<DeleteRequestImageData, DeleteRequestImageVariables>;
-}
-export const deleteRequestImageRef: DeleteRequestImageRef;
-```
-
-If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the deleteRequestImageRef:
-```typescript
-const name = deleteRequestImageRef.operationName;
-console.log(name);
-```
-
-### Variables
-The `DeleteRequestImage` mutation requires an argument of type `DeleteRequestImageVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
-
-```typescript
-export interface DeleteRequestImageVariables {
-  id: UUIDString;
-}
-```
-### Return Type
-Recall that executing the `DeleteRequestImage` mutation returns a `MutationPromise` that resolves to an object with a `data` property.
-
-The `data` property is an object of type `DeleteRequestImageData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
-```typescript
-export interface DeleteRequestImageData {
-  requestImage_delete?: RequestImage_Key | null;
-}
-```
-### Using `DeleteRequestImage`'s action shortcut function
-
-```typescript
-import { getDataConnect } from 'firebase/data-connect';
-import { connectorConfig, deleteRequestImage, DeleteRequestImageVariables } from '@dataconnect/generated';
-
-// The `DeleteRequestImage` mutation requires an argument of type `DeleteRequestImageVariables`:
-const deleteRequestImageVars: DeleteRequestImageVariables = {
-  id: ..., 
-};
-
-// Call the `deleteRequestImage()` function to execute the mutation.
-// You can use the `await` keyword to wait for the promise to resolve.
-const { data } = await deleteRequestImage(deleteRequestImageVars);
-// Variables can be defined inline as well.
-const { data } = await deleteRequestImage({ id: ..., });
-
-// You can also pass in a `DataConnect` instance to the action shortcut function.
-const dataConnect = getDataConnect(connectorConfig);
-const { data } = await deleteRequestImage(dataConnect, deleteRequestImageVars);
-
-console.log(data.requestImage_delete);
-
-// Or, you can use the `Promise` API.
-deleteRequestImage(deleteRequestImageVars).then((response) => {
-  const data = response.data;
-  console.log(data.requestImage_delete);
-});
-```
-
-### Using `DeleteRequestImage`'s `MutationRef` function
-
-```typescript
-import { getDataConnect, executeMutation } from 'firebase/data-connect';
-import { connectorConfig, deleteRequestImageRef, DeleteRequestImageVariables } from '@dataconnect/generated';
-
-// The `DeleteRequestImage` mutation requires an argument of type `DeleteRequestImageVariables`:
-const deleteRequestImageVars: DeleteRequestImageVariables = {
-  id: ..., 
-};
-
-// Call the `deleteRequestImageRef()` function to get a reference to the mutation.
-const ref = deleteRequestImageRef(deleteRequestImageVars);
-// Variables can be defined inline as well.
-const ref = deleteRequestImageRef({ id: ..., });
-
-// You can also pass in a `DataConnect` instance to the `MutationRef` function.
-const dataConnect = getDataConnect(connectorConfig);
-const ref = deleteRequestImageRef(dataConnect, deleteRequestImageVars);
-
-// Call `executeMutation()` on the reference to execute the mutation.
-// You can use the `await` keyword to wait for the promise to resolve.
-const { data } = await executeMutation(ref);
-
-console.log(data.requestImage_delete);
-
-// Or, you can use the `Promise` API.
-executeMutation(ref).then((response) => {
-  const data = response.data;
-  console.log(data.requestImage_delete);
-});
-```
-
-## DeleteNotification
-You can execute the `DeleteNotification` mutation using the following action shortcut function, or by calling `executeMutation()` after calling the following `MutationRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
-```typescript
-deleteNotification(vars: DeleteNotificationVariables): MutationPromise<DeleteNotificationData, DeleteNotificationVariables>;
-
-interface DeleteNotificationRef {
-  ...
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: DeleteNotificationVariables): MutationRef<DeleteNotificationData, DeleteNotificationVariables>;
-}
-export const deleteNotificationRef: DeleteNotificationRef;
-```
-You can also pass in a `DataConnect` instance to the action shortcut function or `MutationRef` function.
-```typescript
-deleteNotification(dc: DataConnect, vars: DeleteNotificationVariables): MutationPromise<DeleteNotificationData, DeleteNotificationVariables>;
-
-interface DeleteNotificationRef {
-  ...
-  (dc: DataConnect, vars: DeleteNotificationVariables): MutationRef<DeleteNotificationData, DeleteNotificationVariables>;
-}
-export const deleteNotificationRef: DeleteNotificationRef;
-```
-
-If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the deleteNotificationRef:
-```typescript
-const name = deleteNotificationRef.operationName;
-console.log(name);
-```
-
-### Variables
-The `DeleteNotification` mutation requires an argument of type `DeleteNotificationVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
-
-```typescript
-export interface DeleteNotificationVariables {
-  id: UUIDString;
-}
-```
-### Return Type
-Recall that executing the `DeleteNotification` mutation returns a `MutationPromise` that resolves to an object with a `data` property.
-
-The `data` property is an object of type `DeleteNotificationData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
-```typescript
-export interface DeleteNotificationData {
-  notification_delete?: Notification_Key | null;
-}
-```
-### Using `DeleteNotification`'s action shortcut function
-
-```typescript
-import { getDataConnect } from 'firebase/data-connect';
-import { connectorConfig, deleteNotification, DeleteNotificationVariables } from '@dataconnect/generated';
-
-// The `DeleteNotification` mutation requires an argument of type `DeleteNotificationVariables`:
-const deleteNotificationVars: DeleteNotificationVariables = {
-  id: ..., 
-};
-
-// Call the `deleteNotification()` function to execute the mutation.
-// You can use the `await` keyword to wait for the promise to resolve.
-const { data } = await deleteNotification(deleteNotificationVars);
-// Variables can be defined inline as well.
-const { data } = await deleteNotification({ id: ..., });
-
-// You can also pass in a `DataConnect` instance to the action shortcut function.
-const dataConnect = getDataConnect(connectorConfig);
-const { data } = await deleteNotification(dataConnect, deleteNotificationVars);
-
-console.log(data.notification_delete);
-
-// Or, you can use the `Promise` API.
-deleteNotification(deleteNotificationVars).then((response) => {
-  const data = response.data;
-  console.log(data.notification_delete);
-});
-```
-
-### Using `DeleteNotification`'s `MutationRef` function
-
-```typescript
-import { getDataConnect, executeMutation } from 'firebase/data-connect';
-import { connectorConfig, deleteNotificationRef, DeleteNotificationVariables } from '@dataconnect/generated';
-
-// The `DeleteNotification` mutation requires an argument of type `DeleteNotificationVariables`:
-const deleteNotificationVars: DeleteNotificationVariables = {
-  id: ..., 
-};
-
-// Call the `deleteNotificationRef()` function to get a reference to the mutation.
-const ref = deleteNotificationRef(deleteNotificationVars);
-// Variables can be defined inline as well.
-const ref = deleteNotificationRef({ id: ..., });
-
-// You can also pass in a `DataConnect` instance to the `MutationRef` function.
-const dataConnect = getDataConnect(connectorConfig);
-const ref = deleteNotificationRef(dataConnect, deleteNotificationVars);
-
-// Call `executeMutation()` on the reference to execute the mutation.
-// You can use the `await` keyword to wait for the promise to resolve.
-const { data } = await executeMutation(ref);
-
-console.log(data.notification_delete);
-
-// Or, you can use the `Promise` API.
-executeMutation(ref).then((response) => {
-  const data = response.data;
-  console.log(data.notification_delete);
-});
-```
-
-## DeleteAppMeta
-You can execute the `DeleteAppMeta` mutation using the following action shortcut function, or by calling `executeMutation()` after calling the following `MutationRef` function, both of which are defined in [dataconnect-generated/index.d.ts](./index.d.ts):
-```typescript
-deleteAppMeta(vars: DeleteAppMetaVariables): MutationPromise<DeleteAppMetaData, DeleteAppMetaVariables>;
-
-interface DeleteAppMetaRef {
-  ...
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: DeleteAppMetaVariables): MutationRef<DeleteAppMetaData, DeleteAppMetaVariables>;
-}
-export const deleteAppMetaRef: DeleteAppMetaRef;
-```
-You can also pass in a `DataConnect` instance to the action shortcut function or `MutationRef` function.
-```typescript
-deleteAppMeta(dc: DataConnect, vars: DeleteAppMetaVariables): MutationPromise<DeleteAppMetaData, DeleteAppMetaVariables>;
-
-interface DeleteAppMetaRef {
-  ...
-  (dc: DataConnect, vars: DeleteAppMetaVariables): MutationRef<DeleteAppMetaData, DeleteAppMetaVariables>;
-}
-export const deleteAppMetaRef: DeleteAppMetaRef;
-```
-
-If you need the name of the operation without creating a ref, you can retrieve the operation name by calling the `operationName` property on the deleteAppMetaRef:
-```typescript
-const name = deleteAppMetaRef.operationName;
-console.log(name);
-```
-
-### Variables
-The `DeleteAppMeta` mutation requires an argument of type `DeleteAppMetaVariables`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
-
-```typescript
-export interface DeleteAppMetaVariables {
-  id: UUIDString;
-}
-```
-### Return Type
-Recall that executing the `DeleteAppMeta` mutation returns a `MutationPromise` that resolves to an object with a `data` property.
-
-The `data` property is an object of type `DeleteAppMetaData`, which is defined in [dataconnect-generated/index.d.ts](./index.d.ts). It has the following fields:
-```typescript
-export interface DeleteAppMetaData {
-  appMeta_delete?: AppMeta_Key | null;
-}
-```
-### Using `DeleteAppMeta`'s action shortcut function
-
-```typescript
-import { getDataConnect } from 'firebase/data-connect';
-import { connectorConfig, deleteAppMeta, DeleteAppMetaVariables } from '@dataconnect/generated';
-
-// The `DeleteAppMeta` mutation requires an argument of type `DeleteAppMetaVariables`:
-const deleteAppMetaVars: DeleteAppMetaVariables = {
-  id: ..., 
-};
-
-// Call the `deleteAppMeta()` function to execute the mutation.
-// You can use the `await` keyword to wait for the promise to resolve.
-const { data } = await deleteAppMeta(deleteAppMetaVars);
-// Variables can be defined inline as well.
-const { data } = await deleteAppMeta({ id: ..., });
-
-// You can also pass in a `DataConnect` instance to the action shortcut function.
-const dataConnect = getDataConnect(connectorConfig);
-const { data } = await deleteAppMeta(dataConnect, deleteAppMetaVars);
-
-console.log(data.appMeta_delete);
-
-// Or, you can use the `Promise` API.
-deleteAppMeta(deleteAppMetaVars).then((response) => {
-  const data = response.data;
-  console.log(data.appMeta_delete);
-});
-```
-
-### Using `DeleteAppMeta`'s `MutationRef` function
-
-```typescript
-import { getDataConnect, executeMutation } from 'firebase/data-connect';
-import { connectorConfig, deleteAppMetaRef, DeleteAppMetaVariables } from '@dataconnect/generated';
-
-// The `DeleteAppMeta` mutation requires an argument of type `DeleteAppMetaVariables`:
-const deleteAppMetaVars: DeleteAppMetaVariables = {
-  id: ..., 
-};
-
-// Call the `deleteAppMetaRef()` function to get a reference to the mutation.
-const ref = deleteAppMetaRef(deleteAppMetaVars);
-// Variables can be defined inline as well.
-const ref = deleteAppMetaRef({ id: ..., });
-
-// You can also pass in a `DataConnect` instance to the `MutationRef` function.
-const dataConnect = getDataConnect(connectorConfig);
-const ref = deleteAppMetaRef(dataConnect, deleteAppMetaVars);
-
-// Call `executeMutation()` on the reference to execute the mutation.
-// You can use the `await` keyword to wait for the promise to resolve.
-const { data } = await executeMutation(ref);
-
-console.log(data.appMeta_delete);
-
-// Or, you can use the `Promise` API.
-executeMutation(ref).then((response) => {
-  const data = response.data;
-  console.log(data.appMeta_delete);
+  console.log(data.appFeedback_insert);
 });
 ```
 

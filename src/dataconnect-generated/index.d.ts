@@ -11,6 +11,11 @@ export type DateString = string;
 
 
 
+export interface AppFeedback_Key {
+  id: UUIDString;
+  __typename?: 'AppFeedback_Key';
+}
+
 export interface AppMeta_Key {
   id: UUIDString;
   __typename?: 'AppMeta_Key';
@@ -20,6 +25,20 @@ export interface CheckConnectionData {
   appMetas: ({
     key: string;
   })[];
+}
+
+export interface CreateAppFeedbackData {
+  appFeedback_insert: AppFeedback_Key;
+}
+
+export interface CreateAppFeedbackVariables {
+  id: UUIDString;
+  rating: number;
+  topic: string;
+  comment: string;
+  source: string;
+  platform: string;
+  createdAt: TimestampString;
 }
 
 export interface CreateAppMetaData {
@@ -96,46 +115,6 @@ export interface CreateServiceRequestVariables {
   imageIdsJson: string;
   createdAt: TimestampString;
   updatedAt: TimestampString;
-}
-
-export interface DeleteAppMetaData {
-  appMeta_delete?: AppMeta_Key | null;
-}
-
-export interface DeleteAppMetaVariables {
-  id: UUIDString;
-}
-
-export interface DeleteFixflowUserData {
-  fixflowUser_delete?: FixflowUser_Key | null;
-}
-
-export interface DeleteFixflowUserVariables {
-  id: UUIDString;
-}
-
-export interface DeleteNotificationData {
-  notification_delete?: Notification_Key | null;
-}
-
-export interface DeleteNotificationVariables {
-  id: UUIDString;
-}
-
-export interface DeleteRequestImageData {
-  requestImage_delete?: RequestImage_Key | null;
-}
-
-export interface DeleteRequestImageVariables {
-  id: UUIDString;
-}
-
-export interface DeleteServiceRequestData {
-  serviceRequest_delete?: ServiceRequest_Key | null;
-}
-
-export interface DeleteServiceRequestVariables {
-  id: UUIDString;
 }
 
 export interface FixflowUser_Key {
@@ -228,35 +207,6 @@ export interface GetServiceRequestData {
 
 export interface GetServiceRequestVariables {
   id: UUIDString;
-}
-
-export interface ListAllAppMetasData {
-  appMetas: ({
-    id: UUIDString;
-  } & AppMeta_Key)[];
-}
-
-export interface ListAllFixflowUsersData {
-  fixflowUsers: ({
-    id: UUIDString;
-    role: string;
-    name: string;
-    email: string;
-    phone: string;
-    createdAt: TimestampString;
-  } & FixflowUser_Key)[];
-}
-
-export interface ListAllNotificationsData {
-  notifications: ({
-    id: UUIDString;
-  } & Notification_Key)[];
-}
-
-export interface ListAllRequestImagesData {
-  requestImages: ({
-    id: UUIDString;
-  } & RequestImage_Key)[];
 }
 
 export interface ListAllServiceRequestsData {
@@ -505,65 +455,17 @@ export const updateAppMetaRef: UpdateAppMetaRef;
 export function updateAppMeta(vars: UpdateAppMetaVariables): MutationPromise<UpdateAppMetaData, UpdateAppMetaVariables>;
 export function updateAppMeta(dc: DataConnect, vars: UpdateAppMetaVariables): MutationPromise<UpdateAppMetaData, UpdateAppMetaVariables>;
 
-interface DeleteFixflowUserRef {
+interface CreateAppFeedbackRef {
   /* Allow users to create refs without passing in DataConnect */
-  (vars: DeleteFixflowUserVariables): MutationRef<DeleteFixflowUserData, DeleteFixflowUserVariables>;
+  (vars: CreateAppFeedbackVariables): MutationRef<CreateAppFeedbackData, CreateAppFeedbackVariables>;
   /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: DeleteFixflowUserVariables): MutationRef<DeleteFixflowUserData, DeleteFixflowUserVariables>;
+  (dc: DataConnect, vars: CreateAppFeedbackVariables): MutationRef<CreateAppFeedbackData, CreateAppFeedbackVariables>;
   operationName: string;
 }
-export const deleteFixflowUserRef: DeleteFixflowUserRef;
+export const createAppFeedbackRef: CreateAppFeedbackRef;
 
-export function deleteFixflowUser(vars: DeleteFixflowUserVariables): MutationPromise<DeleteFixflowUserData, DeleteFixflowUserVariables>;
-export function deleteFixflowUser(dc: DataConnect, vars: DeleteFixflowUserVariables): MutationPromise<DeleteFixflowUserData, DeleteFixflowUserVariables>;
-
-interface DeleteServiceRequestRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: DeleteServiceRequestVariables): MutationRef<DeleteServiceRequestData, DeleteServiceRequestVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: DeleteServiceRequestVariables): MutationRef<DeleteServiceRequestData, DeleteServiceRequestVariables>;
-  operationName: string;
-}
-export const deleteServiceRequestRef: DeleteServiceRequestRef;
-
-export function deleteServiceRequest(vars: DeleteServiceRequestVariables): MutationPromise<DeleteServiceRequestData, DeleteServiceRequestVariables>;
-export function deleteServiceRequest(dc: DataConnect, vars: DeleteServiceRequestVariables): MutationPromise<DeleteServiceRequestData, DeleteServiceRequestVariables>;
-
-interface DeleteRequestImageRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: DeleteRequestImageVariables): MutationRef<DeleteRequestImageData, DeleteRequestImageVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: DeleteRequestImageVariables): MutationRef<DeleteRequestImageData, DeleteRequestImageVariables>;
-  operationName: string;
-}
-export const deleteRequestImageRef: DeleteRequestImageRef;
-
-export function deleteRequestImage(vars: DeleteRequestImageVariables): MutationPromise<DeleteRequestImageData, DeleteRequestImageVariables>;
-export function deleteRequestImage(dc: DataConnect, vars: DeleteRequestImageVariables): MutationPromise<DeleteRequestImageData, DeleteRequestImageVariables>;
-
-interface DeleteNotificationRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: DeleteNotificationVariables): MutationRef<DeleteNotificationData, DeleteNotificationVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: DeleteNotificationVariables): MutationRef<DeleteNotificationData, DeleteNotificationVariables>;
-  operationName: string;
-}
-export const deleteNotificationRef: DeleteNotificationRef;
-
-export function deleteNotification(vars: DeleteNotificationVariables): MutationPromise<DeleteNotificationData, DeleteNotificationVariables>;
-export function deleteNotification(dc: DataConnect, vars: DeleteNotificationVariables): MutationPromise<DeleteNotificationData, DeleteNotificationVariables>;
-
-interface DeleteAppMetaRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (vars: DeleteAppMetaVariables): MutationRef<DeleteAppMetaData, DeleteAppMetaVariables>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect, vars: DeleteAppMetaVariables): MutationRef<DeleteAppMetaData, DeleteAppMetaVariables>;
-  operationName: string;
-}
-export const deleteAppMetaRef: DeleteAppMetaRef;
-
-export function deleteAppMeta(vars: DeleteAppMetaVariables): MutationPromise<DeleteAppMetaData, DeleteAppMetaVariables>;
-export function deleteAppMeta(dc: DataConnect, vars: DeleteAppMetaVariables): MutationPromise<DeleteAppMetaData, DeleteAppMetaVariables>;
+export function createAppFeedback(vars: CreateAppFeedbackVariables): MutationPromise<CreateAppFeedbackData, CreateAppFeedbackVariables>;
+export function createAppFeedback(dc: DataConnect, vars: CreateAppFeedbackVariables): MutationPromise<CreateAppFeedbackData, CreateAppFeedbackVariables>;
 
 interface CheckConnectionRef {
   /* Allow users to create refs without passing in DataConnect */
@@ -612,18 +514,6 @@ export const listFixflowUsersByRoleRef: ListFixflowUsersByRoleRef;
 
 export function listFixflowUsersByRole(vars: ListFixflowUsersByRoleVariables, options?: ExecuteQueryOptions): QueryPromise<ListFixflowUsersByRoleData, ListFixflowUsersByRoleVariables>;
 export function listFixflowUsersByRole(dc: DataConnect, vars: ListFixflowUsersByRoleVariables, options?: ExecuteQueryOptions): QueryPromise<ListFixflowUsersByRoleData, ListFixflowUsersByRoleVariables>;
-
-interface ListAllFixflowUsersRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (): QueryRef<ListAllFixflowUsersData, undefined>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect): QueryRef<ListAllFixflowUsersData, undefined>;
-  operationName: string;
-}
-export const listAllFixflowUsersRef: ListAllFixflowUsersRef;
-
-export function listAllFixflowUsers(options?: ExecuteQueryOptions): QueryPromise<ListAllFixflowUsersData, undefined>;
-export function listAllFixflowUsers(dc: DataConnect, options?: ExecuteQueryOptions): QueryPromise<ListAllFixflowUsersData, undefined>;
 
 interface GetServiceRequestRef {
   /* Allow users to create refs without passing in DataConnect */
@@ -685,18 +575,6 @@ export const listRequestImagesRef: ListRequestImagesRef;
 export function listRequestImages(vars: ListRequestImagesVariables, options?: ExecuteQueryOptions): QueryPromise<ListRequestImagesData, ListRequestImagesVariables>;
 export function listRequestImages(dc: DataConnect, vars: ListRequestImagesVariables, options?: ExecuteQueryOptions): QueryPromise<ListRequestImagesData, ListRequestImagesVariables>;
 
-interface ListAllRequestImagesRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (): QueryRef<ListAllRequestImagesData, undefined>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect): QueryRef<ListAllRequestImagesData, undefined>;
-  operationName: string;
-}
-export const listAllRequestImagesRef: ListAllRequestImagesRef;
-
-export function listAllRequestImages(options?: ExecuteQueryOptions): QueryPromise<ListAllRequestImagesData, undefined>;
-export function listAllRequestImages(dc: DataConnect, options?: ExecuteQueryOptions): QueryPromise<ListAllRequestImagesData, undefined>;
-
 interface GetNotificationRef {
   /* Allow users to create refs without passing in DataConnect */
   (vars: GetNotificationVariables): QueryRef<GetNotificationData, GetNotificationVariables>;
@@ -721,18 +599,6 @@ export const listNotificationsRef: ListNotificationsRef;
 export function listNotifications(vars: ListNotificationsVariables, options?: ExecuteQueryOptions): QueryPromise<ListNotificationsData, ListNotificationsVariables>;
 export function listNotifications(dc: DataConnect, vars: ListNotificationsVariables, options?: ExecuteQueryOptions): QueryPromise<ListNotificationsData, ListNotificationsVariables>;
 
-interface ListAllNotificationsRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (): QueryRef<ListAllNotificationsData, undefined>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect): QueryRef<ListAllNotificationsData, undefined>;
-  operationName: string;
-}
-export const listAllNotificationsRef: ListAllNotificationsRef;
-
-export function listAllNotifications(options?: ExecuteQueryOptions): QueryPromise<ListAllNotificationsData, undefined>;
-export function listAllNotifications(dc: DataConnect, options?: ExecuteQueryOptions): QueryPromise<ListAllNotificationsData, undefined>;
-
 interface GetAppMetaRef {
   /* Allow users to create refs without passing in DataConnect */
   (vars: GetAppMetaVariables): QueryRef<GetAppMetaData, GetAppMetaVariables>;
@@ -744,16 +610,4 @@ export const getAppMetaRef: GetAppMetaRef;
 
 export function getAppMeta(vars: GetAppMetaVariables, options?: ExecuteQueryOptions): QueryPromise<GetAppMetaData, GetAppMetaVariables>;
 export function getAppMeta(dc: DataConnect, vars: GetAppMetaVariables, options?: ExecuteQueryOptions): QueryPromise<GetAppMetaData, GetAppMetaVariables>;
-
-interface ListAllAppMetasRef {
-  /* Allow users to create refs without passing in DataConnect */
-  (): QueryRef<ListAllAppMetasData, undefined>;
-  /* Allow users to pass in custom DataConnect instances */
-  (dc: DataConnect): QueryRef<ListAllAppMetasData, undefined>;
-  operationName: string;
-}
-export const listAllAppMetasRef: ListAllAppMetasRef;
-
-export function listAllAppMetas(options?: ExecuteQueryOptions): QueryPromise<ListAllAppMetasData, undefined>;
-export function listAllAppMetas(dc: DataConnect, options?: ExecuteQueryOptions): QueryPromise<ListAllAppMetasData, undefined>;
 

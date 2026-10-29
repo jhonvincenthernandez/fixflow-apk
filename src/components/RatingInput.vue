@@ -2,7 +2,9 @@
 import { useId } from 'vue'
 import { Star } from '@lucide/vue'
 
-defineProps<{ error?: string | undefined }>()
+withDefaults(defineProps<{ error?: string | undefined; legend?: string }>(), {
+  legend: 'How was the service?',
+})
 
 /** 0 means "not chosen yet". */
 const model = defineModel<number>({ required: true })
@@ -12,7 +14,7 @@ const STAR_COUNT = 5
 
 <template>
   <fieldset class="rating">
-    <legend class="ff-label">How was the service?</legend>
+    <legend class="ff-label">{{ legend }}</legend>
     <div class="rating__row">
       <label v-for="n in STAR_COUNT" :key="n" class="rating__star" :class="{ 'is-on': n <= model }">
         <input v-model="model" type="radio" class="ff-sr-only" :name="name" :value="n" />

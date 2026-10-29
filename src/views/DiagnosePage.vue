@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { IonContent, IonPage } from '@ionic/vue'
-import { ArrowLeft, ArrowRight, Check, ShieldAlert, Stethoscope } from '@lucide/vue'
+import { ArrowLeft, ArrowRight, Check, ShieldAlert, Star, Stethoscope } from '@lucide/vue'
 import { useRoute } from 'vue-router'
 import AppLink from '@/components/AppLink.vue'
 import PageHeader from '@/components/PageHeader.vue'
@@ -10,7 +10,9 @@ import { useSession } from '@/composables/useSession'
 import {
   URGENCY_OPTIONS,
   diagnose,
+  findSymptom,
   getSymptoms,
+  parseUrgency,
   requestHref,
 } from '@/domain/diagnostics'
 import type { DiagnosisUrgency } from '@/domain/diagnostics'
@@ -47,13 +49,39 @@ const requestLink = computed(() => {
   return requestHref(result.value.serviceId, result.value.symptom.id, result.value.urgency)
 })
 
+const appFeedbackLink = computed(() => {
+  if (result.value === null) return '/feedback?source=quick_check'
+  const params = new URLSearchParams({
+    source: 'quick_check',
+    service: result.value.serviceId,
+    issue: result.value.symptom.id,
+    urgency: result.value.urgency,
+  })
+  return `/feedback?${params.toString()}`
+})
+
 onMounted(() => {
   // The landing page can deep-link a service, for example /diagnose?service=electrical.
   const parsed = ServiceIdSchema.safeParse(route.query['service'])
-  if (parsed.success) {
-    serviceId.value = parsed.data
-    step.value = 'symptom'
+  if (!parsed.success) return
+  serviceId.value = parsed.data
+
+  // App feedback can return here with the full diagnosis so the result is not lost.
+  const issue = typeof route.query['issue'] === 'string' ? route.query['issue'] : null
+  const restoredUrgency = parseUrgency(route.query['urgency'])
+  const symptom = findSymptom(parsed.data, issue)
+  if (symptom !== null && restoredUrgency !== null) {
+    symptomId.value = symptom.id
+    urgency.value = restoredUrgency
+    step.value = 'result'
+    return
   }
+  if (symptom !== null) {
+    symptomId.value = symptom.id
+    step.value = 'urgency'
+    return
+  }
+  step.value = 'symptom'
 })
 
 watch(step, async () => {
@@ -119,6 +147,10 @@ function restart(): void {
               <p class="ff-overline">Step 1 of 3</p>
               <h2 id="service-step-title" ref="heading" class="ff-h2" tabindex="-1">What needs fixing?</h2>
               <p class="ff-meta">Choose the closest category. You can change it on the next step.</p>
+              <p class="ff-meta diagnose__note">
+                <Stethoscope class="ff-icon ff-icon--sm" aria-hidden="true" />
+                This check is general guidance. It does not replace an inspection by the shop.
+              </p>
             </div>
             <div class="options">
               <button
@@ -138,10 +170,6 @@ function restart(): void {
                 <ArrowRight class="ff-icon ff-icon--sm option__arrow" aria-hidden="true" />
               </button>
             </div>
-            <p class="ff-meta diagnose__note">
-              <Stethoscope class="ff-icon ff-icon--sm" aria-hidden="true" />
-              This check is general guidance. It does not replace an inspection by the shop.
-            </p>
           </section>
 
           <section v-else-if="step === 'symptom'" class="ff-stack step" aria-labelledby="symptom-step-title">
@@ -155,6 +183,10 @@ function restart(): void {
                 {{ selectedService?.name ?? 'Choose a symptom' }}
               </h2>
               <p class="ff-meta">Which of these is closest to what you see?</p>
+              <p class="ff-meta diagnose__note">
+                <Stethoscope class="ff-icon ff-icon--sm" aria-hidden="true" />
+                This check is general guidance. It does not replace an inspection by the shop.
+              </p>
             </div>
             <div class="options">
               <button
@@ -173,10 +205,6 @@ function restart(): void {
                 <ArrowRight class="ff-icon ff-icon--sm option__arrow" aria-hidden="true" />
               </button>
             </div>
-            <p class="ff-meta diagnose__note">
-              <Stethoscope class="ff-icon ff-icon--sm" aria-hidden="true" />
-              This check is general guidance. It does not replace an inspection by the shop.
-            </p>
           </section>
 
           <section v-else-if="step === 'urgency'" class="ff-stack step" aria-labelledby="urgency-step-title">
@@ -191,6 +219,10 @@ function restart(): void {
               </h2>
               <p class="ff-meta">
                 This helps the shop prioritize the request. It does not confirm urgency.
+              </p>
+              <p class="ff-meta diagnose__note">
+                <Stethoscope class="ff-icon ff-icon--sm" aria-hidden="true" />
+                This check is general guidance. It does not replace an inspection by the shop.
               </p>
             </div>
             <div class="options">
@@ -210,13 +242,14 @@ function restart(): void {
                 <ArrowRight class="ff-icon ff-icon--sm option__arrow" aria-hidden="true" />
               </button>
             </div>
-            <p class="ff-meta diagnose__note">
-              <Stethoscope class="ff-icon ff-icon--sm" aria-hidden="true" />
-              This check is general guidance. It does not replace an inspection by the shop.
-            </p>
           </section>
 
-          <section v-else-if="result !== null" class="ff-stack result" aria-labelledby="result-title">
+          <section
+            v-else-if="result !== null"
+            class="ff-stack result"
+            :class="{ 'result--has-safety': result.safetyNote.length > 0 }"
+            aria-labelledby="result-title"
+          >
             <div class="ff-stack ff-stack--tight result__intro">
               <p
                 class="ff-badge"
@@ -245,6 +278,17 @@ function restart(): void {
               </div>
             </aside>
 
+            <div class="ff-inset ff-stack ff-stack--tight result__prep">
+              <h3 class="ff-h3">Before you book</h3>
+              <p class="ff-meta">A few details help the shop quote faster.</p>
+              <ul class="prep">
+                <li v-for="tip in result.prepTips" :key="tip">
+                  <Check class="ff-icon ff-icon--sm" aria-hidden="true" />
+                  <span>{{ tip }}</span>
+                </li>
+              </ul>
+            </div>
+
             <div class="ff-inset ff-stack ff-stack--tight result__inset result__inset--do">
               <h3 class="ff-h3">What you can do now</h3>
               <p class="ff-meta">{{ result.symptom.safeStep }}</p>
@@ -269,8 +313,27 @@ function restart(): void {
               <button type="button" class="ff-btn ff-btn--secondary ff-btn--block" @click="restart">
                 Check another problem
               </button>
-              <p class="ff-meta result__hint">You can review and edit the request before sending it.</p>
+              <p class="ff-meta result__hint">
+                Add photos on the next screen to help the shop quote faster.
+              </p>
             </div>
+
+            <section class="result__app-feedback" aria-labelledby="result-app-feedback-title">
+              <div class="ff-stack ff-stack--tight">
+                <p class="ff-overline">App feedback</p>
+                <h3 id="result-app-feedback-title" class="ff-h3">Did this quick check help?</h3>
+                <p class="ff-meta">
+                  Send a note to the FixFlow app team. This is separate from shop feedback.
+                </p>
+              </div>
+              <AppLink
+                :to="appFeedbackLink"
+                class="ff-btn ff-btn--secondary result__app-feedback-btn"
+              >
+                <Star class="ff-icon ff-icon--sm" aria-hidden="true" />
+                Rate this app
+              </AppLink>
+            </section>
           </section>
         </div>
       </main>
@@ -280,15 +343,26 @@ function restart(): void {
 
 <style scoped>
 .diagnose {
-  padding-block: var(--space-4) var(--space-10);
+  padding-block: var(--space-5) var(--space-12);
+}
+
+.diagnose > .ff-stack {
+  gap: var(--space-6);
+  margin-inline: auto;
+  max-width: 760px;
 }
 
 .progress {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  justify-content: space-between;
+  gap: var(--space-3);
   margin: 0;
-  padding: 0;
+  padding: var(--space-2);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-xs);
   list-style: none;
 }
 
@@ -297,9 +371,22 @@ function restart(): void {
   align-items: center;
   gap: var(--space-2);
   min-width: 0;
+  flex: 1 1 0;
   color: var(--color-text-muted);
   font-size: var(--text-xs);
   font-weight: var(--weight-semibold);
+}
+
+.progress__item:not(:last-child)::after {
+  content: '';
+  flex: 1 1 auto;
+  height: 1px;
+  margin-inline: var(--space-1);
+  background: var(--color-border);
+}
+
+.progress__item.is-done:not(:last-child)::after {
+  background: var(--color-brand-border);
 }
 
 .progress__dot {
@@ -338,7 +425,7 @@ function restart(): void {
 .options {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--space-3);
 }
 
 .option {
@@ -346,19 +433,21 @@ function restart(): void {
   width: 100%;
   align-items: flex-start;
   gap: var(--space-3);
-  min-height: var(--touch-min);
-  padding: var(--space-3);
+  min-height: 72px;
+  padding: var(--space-4);
   appearance: none;
   background: var(--color-surface);
   border: 1px solid var(--color-control-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   color: inherit;
   font: inherit;
   text-align: left;
   cursor: pointer;
   transition:
     background-color var(--transition-base),
-    border-color var(--transition-base);
+    border-color var(--transition-base),
+    box-shadow var(--transition-base),
+    transform var(--transition-base);
 }
 
 .option:focus-visible {
@@ -369,6 +458,7 @@ function restart(): void {
 .option.is-selected {
   background: var(--color-brand-light);
   border-color: var(--color-brand);
+  box-shadow: 0 0 0 3px var(--color-brand-light);
 }
 
 .option--row {
@@ -414,14 +504,30 @@ function restart(): void {
   cursor: pointer;
 }
 
+.step {
+  padding: var(--space-6);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+}
+
+.step > .ff-stack--tight {
+  gap: var(--space-2);
+}
+
+.step .options {
+  margin-top: var(--space-2);
+}
+
 .result__safety {
   display: flex;
   align-items: flex-start;
   gap: var(--space-3);
-  padding: var(--space-3);
+  padding: var(--space-4);
   background: var(--color-overlay);
   border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-lg);
   color: var(--color-text-secondary);
 }
 
@@ -437,6 +543,67 @@ function restart(): void {
 
 .result__safety.is-urgent .ff-meta {
   color: var(--color-danger);
+}
+
+.prep {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+}
+
+.prep li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+
+.prep .ff-icon {
+  margin-top: 2px;
+  color: var(--color-brand);
+}
+
+.result__app-feedback {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--color-brand-light);
+  border: 1px solid var(--color-brand-border);
+  border-radius: var(--radius-md);
+}
+
+.result {
+  gap: var(--space-4);
+}
+
+.result__intro {
+  padding: var(--space-6);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+}
+
+.result__intro .ff-h2 {
+  max-width: 28rem;
+}
+
+.result__prep,
+.result__inset {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.result__app-feedback .ff-overline {
+  color: var(--color-brand-dark);
+}
+
+.result__app-feedback-btn {
+  width: 100%;
 }
 
 .result__disclaimer {
@@ -470,10 +637,46 @@ function restart(): void {
   .option:hover:not(.is-selected) {
     background: var(--color-overlay);
     border-color: var(--color-text-secondary);
+    box-shadow: var(--shadow-sm);
+    transform: translateY(-1px);
+  }
+}
+
+@media (max-width: 30rem) {
+  .diagnose {
+    padding-block: var(--space-3) var(--space-8);
+  }
+
+  .progress {
+    gap: var(--space-1);
+    padding: var(--space-1);
+  }
+
+  .progress__item {
+    gap: var(--space-1);
+  }
+
+  .progress__item:not(:last-child)::after {
+    margin-inline: 0;
+  }
+
+  .progress__label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .step,
+  .result__intro {
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
   }
 }
 
 @media (min-width: 48rem) {
+  .diagnose > .ff-stack {
+    gap: var(--space-8);
+  }
+
   .result__actions {
     flex-direction: row;
     flex-wrap: wrap;
@@ -487,14 +690,35 @@ function restart(): void {
   .result__hint {
     flex-basis: 100%;
   }
+
+  .result__app-feedback {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-6);
+  }
+
+  .result__app-feedback-btn {
+    width: auto;
+    flex: none;
+  }
 }
 
 @media (min-width: 64rem) {
+  .diagnose > .ff-stack {
+    max-width: 960px;
+  }
+
   .step {
     display: grid;
     grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
     gap: var(--space-4) var(--space-12);
     align-items: start;
+  }
+
+  .step > .ff-stack--tight {
+    position: sticky;
+    top: var(--space-4);
   }
 
   .result {
@@ -524,9 +748,21 @@ function restart(): void {
     grid-row: 2;
   }
 
+  .result__prep {
+    grid-column: 1;
+  }
+
   .result__actions {
+    grid-column: 1 / -1;
+  }
+
+  .result--has-safety .result__actions {
     grid-column: 2;
     grid-row: 3;
+  }
+
+  .result__app-feedback {
+    grid-column: 1 / -1;
   }
 }
 </style>

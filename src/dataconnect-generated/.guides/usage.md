@@ -14,7 +14,7 @@ If a user is not using a supported framework, they can use the generated SDK dir
 Here's an example of how to use it with the first 5 operations:
 
 ```js
-import { createFixflowUser, createServiceRequest, updateServiceRequest, createRequestImage, createNotification, markNotificationRead, createAppMeta, updateAppMeta, deleteFixflowUser, deleteServiceRequest } from '@dataconnect/generated';
+import { createFixflowUser, createServiceRequest, updateServiceRequest, createRequestImage, createNotification, markNotificationRead, createAppMeta, updateAppMeta, createAppFeedback, checkConnection } from '@dataconnect/generated';
 
 
 // Operation CreateFixflowUser:  For variables, look at type CreateFixflowUserVars in ../index.d.ts
@@ -41,11 +41,11 @@ const { data } = await CreateAppMeta(dataConnect, createAppMetaVars);
 // Operation UpdateAppMeta:  For variables, look at type UpdateAppMetaVars in ../index.d.ts
 const { data } = await UpdateAppMeta(dataConnect, updateAppMetaVars);
 
-// Operation DeleteFixflowUser:  For variables, look at type DeleteFixflowUserVars in ../index.d.ts
-const { data } = await DeleteFixflowUser(dataConnect, deleteFixflowUserVars);
+// Operation CreateAppFeedback:  For variables, look at type CreateAppFeedbackVars in ../index.d.ts
+const { data } = await CreateAppFeedback(dataConnect, createAppFeedbackVars);
 
-// Operation DeleteServiceRequest:  For variables, look at type DeleteServiceRequestVars in ../index.d.ts
-const { data } = await DeleteServiceRequest(dataConnect, deleteServiceRequestVars);
+// Operation CheckConnection: 
+const { data } = await CheckConnection(dataConnect);
 
 
 ```

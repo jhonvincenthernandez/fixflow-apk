@@ -224,6 +224,26 @@ export const FeedbackInputSchema = z.object({
 })
 export type FeedbackInput = z.infer<typeof FeedbackInputSchema>
 
+export const APP_FEEDBACK_TOPICS = ['quick_check', 'app_problem', 'idea', 'other'] as const
+export const AppFeedbackTopicSchema = z.enum(APP_FEEDBACK_TOPICS)
+export type AppFeedbackTopic = z.infer<typeof AppFeedbackTopicSchema>
+
+export const APP_FEEDBACK_SOURCES = ['quick_check', 'direct'] as const
+export type AppFeedbackSource = (typeof APP_FEEDBACK_SOURCES)[number]
+
+export const APP_FEEDBACK_COMMENT_LIMIT = 1000
+
+/** Feedback about the app itself, kept separate from feedback about a repair. */
+export const AppFeedbackInputSchema = z.object({
+  rating: z.number().int().min(1, 'Choose a star rating').max(5, 'Choose a star rating'),
+  topic: AppFeedbackTopicSchema,
+  comment: z
+    .string()
+    .trim()
+    .max(APP_FEEDBACK_COMMENT_LIMIT, `Keep your feedback under ${APP_FEEDBACK_COMMENT_LIMIT} characters`),
+})
+export type AppFeedbackInput = z.infer<typeof AppFeedbackInputSchema>
+
 export const ReasonSchema = z.string().trim().max(200, 'Keep the reason under 200 characters')
 
 /* ------------------------------------------------------------

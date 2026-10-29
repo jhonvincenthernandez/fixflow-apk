@@ -1,6 +1,6 @@
 # FixFlow application schema.
-# The app stores users, service requests, photos, notifications, and shop
-# settings in PostgreSQL through Firebase Data Connect.
+# The app stores users, service requests, photos, notifications, shop settings,
+# and app feedback in PostgreSQL through Firebase Data Connect.
 
 type FixflowUser @table {
   id: UUID! @default(expr: "uuidV4()")
@@ -58,4 +58,14 @@ type AppMeta @table {
   key: String! @unique
   value: String!
   updatedAt: Timestamp!
+}
+
+type AppFeedback @table {
+  id: UUID! @default(expr: "uuidV4()")
+  rating: Int!
+  topic: String!
+  comment: String!
+  source: String!
+  platform: String!
+  createdAt: Timestamp!
 }

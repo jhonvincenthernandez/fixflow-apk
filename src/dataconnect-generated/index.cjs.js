@@ -125,73 +125,17 @@ exports.updateAppMeta = function updateAppMeta(dcOrVars, vars) {
 }
 ;
 
-const deleteFixflowUserRef = (dcOrVars, vars) => {
+const createAppFeedbackRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
   dcInstance._useGeneratedSdk();
-  return mutationRef(dcInstance, 'DeleteFixflowUser', inputVars);
+  return mutationRef(dcInstance, 'CreateAppFeedback', inputVars);
 }
-deleteFixflowUserRef.operationName = 'DeleteFixflowUser';
-exports.deleteFixflowUserRef = deleteFixflowUserRef;
+createAppFeedbackRef.operationName = 'CreateAppFeedback';
+exports.createAppFeedbackRef = createAppFeedbackRef;
 
-exports.deleteFixflowUser = function deleteFixflowUser(dcOrVars, vars) {
+exports.createAppFeedback = function createAppFeedback(dcOrVars, vars) {
   const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
-  return executeMutation(deleteFixflowUserRef(dcInstance, inputVars));
-}
-;
-
-const deleteServiceRequestRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return mutationRef(dcInstance, 'DeleteServiceRequest', inputVars);
-}
-deleteServiceRequestRef.operationName = 'DeleteServiceRequest';
-exports.deleteServiceRequestRef = deleteServiceRequestRef;
-
-exports.deleteServiceRequest = function deleteServiceRequest(dcOrVars, vars) {
-  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
-  return executeMutation(deleteServiceRequestRef(dcInstance, inputVars));
-}
-;
-
-const deleteRequestImageRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return mutationRef(dcInstance, 'DeleteRequestImage', inputVars);
-}
-deleteRequestImageRef.operationName = 'DeleteRequestImage';
-exports.deleteRequestImageRef = deleteRequestImageRef;
-
-exports.deleteRequestImage = function deleteRequestImage(dcOrVars, vars) {
-  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
-  return executeMutation(deleteRequestImageRef(dcInstance, inputVars));
-}
-;
-
-const deleteNotificationRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return mutationRef(dcInstance, 'DeleteNotification', inputVars);
-}
-deleteNotificationRef.operationName = 'DeleteNotification';
-exports.deleteNotificationRef = deleteNotificationRef;
-
-exports.deleteNotification = function deleteNotification(dcOrVars, vars) {
-  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
-  return executeMutation(deleteNotificationRef(dcInstance, inputVars));
-}
-;
-
-const deleteAppMetaRef = (dcOrVars, vars) => {
-  const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
-  dcInstance._useGeneratedSdk();
-  return mutationRef(dcInstance, 'DeleteAppMeta', inputVars);
-}
-deleteAppMetaRef.operationName = 'DeleteAppMeta';
-exports.deleteAppMetaRef = deleteAppMetaRef;
-
-exports.deleteAppMeta = function deleteAppMeta(dcOrVars, vars) {
-  const { dc: dcInstance, vars: inputVars } = validateArgs(connectorConfig, dcOrVars, vars, true);
-  return executeMutation(deleteAppMetaRef(dcInstance, inputVars));
+  return executeMutation(createAppFeedbackRef(dcInstance, inputVars));
 }
 ;
 
@@ -252,21 +196,6 @@ exports.listFixflowUsersByRole = function listFixflowUsersByRole(dcOrVars, varsO
   
   const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
   return executeQuery(listFixflowUsersByRoleRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
-}
-;
-
-const listAllFixflowUsersRef = (dc) => {
-  const { dc: dcInstance} = validateArgs(connectorConfig, dc, undefined);
-  dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'ListAllFixflowUsers');
-}
-listAllFixflowUsersRef.operationName = 'ListAllFixflowUsers';
-exports.listAllFixflowUsersRef = listAllFixflowUsersRef;
-
-exports.listAllFixflowUsers = function listAllFixflowUsers(dcOrOptions, options) {
-  
-  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrOptions, options, undefined,false, false);
-  return executeQuery(listAllFixflowUsersRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
 }
 ;
 
@@ -345,21 +274,6 @@ exports.listRequestImages = function listRequestImages(dcOrVars, varsOrOptions, 
 }
 ;
 
-const listAllRequestImagesRef = (dc) => {
-  const { dc: dcInstance} = validateArgs(connectorConfig, dc, undefined);
-  dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'ListAllRequestImages');
-}
-listAllRequestImagesRef.operationName = 'ListAllRequestImages';
-exports.listAllRequestImagesRef = listAllRequestImagesRef;
-
-exports.listAllRequestImages = function listAllRequestImages(dcOrOptions, options) {
-  
-  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrOptions, options, undefined,false, false);
-  return executeQuery(listAllRequestImagesRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
-}
-;
-
 const getNotificationRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
   dcInstance._useGeneratedSdk();
@@ -390,21 +304,6 @@ exports.listNotifications = function listNotifications(dcOrVars, varsOrOptions, 
 }
 ;
 
-const listAllNotificationsRef = (dc) => {
-  const { dc: dcInstance} = validateArgs(connectorConfig, dc, undefined);
-  dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'ListAllNotifications');
-}
-listAllNotificationsRef.operationName = 'ListAllNotifications';
-exports.listAllNotificationsRef = listAllNotificationsRef;
-
-exports.listAllNotifications = function listAllNotifications(dcOrOptions, options) {
-  
-  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrOptions, options, undefined,false, false);
-  return executeQuery(listAllNotificationsRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
-}
-;
-
 const getAppMetaRef = (dcOrVars, vars) => {
   const { dc: dcInstance, vars: inputVars} = validateArgs(connectorConfig, dcOrVars, vars, true);
   dcInstance._useGeneratedSdk();
@@ -417,20 +316,5 @@ exports.getAppMeta = function getAppMeta(dcOrVars, varsOrOptions, options) {
   
   const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrVars, varsOrOptions, options, true, true);
   return executeQuery(getAppMetaRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
-}
-;
-
-const listAllAppMetasRef = (dc) => {
-  const { dc: dcInstance} = validateArgs(connectorConfig, dc, undefined);
-  dcInstance._useGeneratedSdk();
-  return queryRef(dcInstance, 'ListAllAppMetas');
-}
-listAllAppMetasRef.operationName = 'ListAllAppMetas';
-exports.listAllAppMetasRef = listAllAppMetasRef;
-
-exports.listAllAppMetas = function listAllAppMetas(dcOrOptions, options) {
-  
-  const { dc: dcInstance, vars: inputVars, options: inputOpts } = validateArgsWithOptions(connectorConfig, dcOrOptions, options, undefined,false, false);
-  return executeQuery(listAllAppMetasRef(dcInstance, inputVars), inputOpts && { fetchPolicy: inputOpts.fetchPolicy });
 }
 ;

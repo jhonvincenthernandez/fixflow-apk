@@ -1,4 +1,6 @@
+import { Capacitor } from '@capacitor/core'
 import {
+  createAppFeedback,
   createAppMeta,
   createFixflowUser,
   createNotification as createNotificationRow,
@@ -34,6 +36,7 @@ import { logger } from '@/domain/logger'
 import { toBooking } from '@/domain/schedule'
 import type { Booking } from '@/domain/schedule'
 import {
+  AppFeedbackInputSchema,
   LoginInputSchema,
   MAX_IMAGES,
   NewRequestInputSchema,
@@ -41,7 +44,13 @@ import {
   RegisterInputSchema,
   parseOrThrow,
 } from '@/domain/types'
-import type { AppNotification, PublicUser, ServiceRequest, User } from '@/domain/types'
+import type {
+  AppFeedbackSource,
+  AppNotification,
+  PublicUser,
+  ServiceRequest,
+  User,
+} from '@/domain/types'
 import { applyAction, notificationsFor } from '@/domain/workflow'
 import type { ActionInput, Actor, NotificationDraft } from '@/domain/workflow'
 import { dataConnect, decodeJson, decodeNullableJson, freshRead, isUniqueViolation, toStorageError, toTimestamp } from './client'
@@ -240,6 +249,32 @@ export async function listCustomers(actor: Actor): Promise<PublicUser[]> {
   } catch (error) {
     throw toStorageError(error, 'load customers')
   }
+}
+
+/* ------------------------------------------------------------
+   App feedback
+   ------------------------------------------------------------ */
+export async function submitAppFeedback(
+  input: unknown,
+  source: AppFeedbackSource,
+  now: number = Date.now(),
+): Promise<string> {
+  const parsed = parseOrThrow(AppFeedbackInputSchema, input)
+  const id = newId()
+  try {
+    await createAppFeedback(dataConnect, {
+      id,
+      rating: parsed.rating,
+      topic: parsed.topic,
+      comment: parsed.comment,
+      source,
+      platform: Capacitor.getPlatform(),
+      createdAt: toTimestamp(now),
+    })
+  } catch (error) {
+    throw toStorageError(error, 'send your feedback')
+  }
+  return id
 }
 
 /* ------------------------------------------------------------
