@@ -93,9 +93,9 @@ function restart(): void {
 
 <template>
   <ion-page>
-    <PageHeader title="Quick check" back-href="/" width="narrow" />
+    <PageHeader title="Quick check" back-href="/" width="wide" />
     <ion-content>
-      <main class="ff-container diagnose" tabindex="-1">
+      <main class="ff-container ff-container--wide diagnose" tabindex="-1">
         <div class="ff-stack ff-stack--loose">
           <ol v-if="step !== 'result'" class="progress" aria-label="Quick check progress">
             <li
@@ -114,18 +114,18 @@ function restart(): void {
           </ol>
           <p v-else class="ff-badge ff-badge--success">Check complete</p>
 
-          <section v-if="step === 'service'" class="ff-stack" aria-labelledby="service-step-title">
+          <section v-if="step === 'service'" class="ff-stack step" aria-labelledby="service-step-title">
             <div class="ff-stack ff-stack--tight">
               <p class="ff-overline">Step 1 of 3</p>
               <h2 id="service-step-title" ref="heading" class="ff-h2" tabindex="-1">What needs fixing?</h2>
               <p class="ff-meta">Choose the closest category. You can change it on the next step.</p>
             </div>
-            <div class="options options--grid">
+            <div class="options">
               <button
                 v-for="service in SERVICES"
                 :key="service.id"
                 type="button"
-                class="option option--tile"
+                class="option option--row"
                 :class="{ 'is-selected': serviceId === service.id }"
                 :aria-pressed="serviceId === service.id"
                 @click="selectService(service.id)"
@@ -135,11 +135,16 @@ function restart(): void {
                   <span class="option__label">{{ service.name }}</span>
                   <span class="option__hint">{{ service.blurb }}</span>
                 </span>
+                <ArrowRight class="ff-icon ff-icon--sm option__arrow" aria-hidden="true" />
               </button>
             </div>
+            <p class="ff-meta diagnose__note">
+              <Stethoscope class="ff-icon ff-icon--sm" aria-hidden="true" />
+              This check is general guidance. It does not replace an inspection by the shop.
+            </p>
           </section>
 
-          <section v-else-if="step === 'symptom'" class="ff-stack" aria-labelledby="symptom-step-title">
+          <section v-else-if="step === 'symptom'" class="ff-stack step" aria-labelledby="symptom-step-title">
             <div class="ff-stack ff-stack--tight">
               <button type="button" class="back" @click="step = 'service'">
                 <ArrowLeft class="ff-icon ff-icon--sm" aria-hidden="true" />
@@ -168,9 +173,13 @@ function restart(): void {
                 <ArrowRight class="ff-icon ff-icon--sm option__arrow" aria-hidden="true" />
               </button>
             </div>
+            <p class="ff-meta diagnose__note">
+              <Stethoscope class="ff-icon ff-icon--sm" aria-hidden="true" />
+              This check is general guidance. It does not replace an inspection by the shop.
+            </p>
           </section>
 
-          <section v-else-if="step === 'urgency'" class="ff-stack" aria-labelledby="urgency-step-title">
+          <section v-else-if="step === 'urgency'" class="ff-stack step" aria-labelledby="urgency-step-title">
             <div class="ff-stack ff-stack--tight">
               <button type="button" class="back" @click="step = 'symptom'">
                 <ArrowLeft class="ff-icon ff-icon--sm" aria-hidden="true" />
@@ -201,10 +210,14 @@ function restart(): void {
                 <ArrowRight class="ff-icon ff-icon--sm option__arrow" aria-hidden="true" />
               </button>
             </div>
+            <p class="ff-meta diagnose__note">
+              <Stethoscope class="ff-icon ff-icon--sm" aria-hidden="true" />
+              This check is general guidance. It does not replace an inspection by the shop.
+            </p>
           </section>
 
-          <section v-else-if="result !== null" class="ff-stack" aria-labelledby="result-title">
-            <div class="ff-stack ff-stack--tight">
+          <section v-else-if="result !== null" class="ff-stack result" aria-labelledby="result-title">
+            <div class="ff-stack ff-stack--tight result__intro">
               <p
                 class="ff-badge"
                 :class="result.safety === 'urgent' ? 'ff-badge--danger' : 'ff-badge--brand'"
@@ -232,12 +245,12 @@ function restart(): void {
               </div>
             </aside>
 
-            <div class="ff-inset ff-stack ff-stack--tight">
+            <div class="ff-inset ff-stack ff-stack--tight result__inset result__inset--do">
               <h3 class="ff-h3">What you can do now</h3>
               <p class="ff-meta">{{ result.symptom.safeStep }}</p>
             </div>
 
-            <div class="ff-inset ff-stack ff-stack--tight">
+            <div class="ff-inset ff-stack ff-stack--tight result__inset result__inset--next">
               <h3 class="ff-h3">What happens next</h3>
               <p class="ff-meta">
                 {{ result.nextStep }} You will review an itemized quotation before any work starts.
@@ -259,11 +272,6 @@ function restart(): void {
               <p class="ff-meta result__hint">You can review and edit the request before sending it.</p>
             </div>
           </section>
-
-          <p v-if="step !== 'result'" class="ff-meta diagnose__note">
-            <Stethoscope class="ff-icon ff-icon--sm" aria-hidden="true" />
-            This check is general guidance. It does not replace an inspection by the shop.
-          </p>
         </div>
       </main>
     </ion-content>
@@ -333,12 +341,6 @@ function restart(): void {
   gap: var(--space-2);
 }
 
-.options--grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-2);
-}
-
 .option {
   display: flex;
   width: 100%;
@@ -367,11 +369,6 @@ function restart(): void {
 .option.is-selected {
   background: var(--color-brand-light);
   border-color: var(--color-brand);
-}
-
-.option--tile {
-  flex-direction: column;
-  align-items: flex-start;
 }
 
 .option--row {
@@ -458,10 +455,15 @@ function restart(): void {
   text-align: center;
 }
 
+.diagnose .ff-badge {
+  align-self: flex-start;
+}
+
 .diagnose__note {
   display: flex;
   align-items: flex-start;
   gap: var(--space-2);
+  margin-top: var(--space-2);
 }
 
 @media (hover: hover) {
@@ -471,17 +473,7 @@ function restart(): void {
   }
 }
 
-@media (min-width: 30rem) {
-  .options--grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
 @media (min-width: 48rem) {
-  .options--grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
   .result__actions {
     flex-direction: row;
     flex-wrap: wrap;
@@ -494,6 +486,47 @@ function restart(): void {
 
   .result__hint {
     flex-basis: 100%;
+  }
+}
+
+@media (min-width: 64rem) {
+  .step {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    gap: var(--space-4) var(--space-12);
+    align-items: start;
+  }
+
+  .result {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: var(--space-6) var(--space-12);
+    align-items: start;
+  }
+
+  .result__intro {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .result__safety {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .result__inset--do {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .result__inset--next {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .result__actions {
+    grid-column: 2;
+    grid-row: 3;
   }
 }
 </style>

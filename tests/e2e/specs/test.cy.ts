@@ -82,4 +82,23 @@ describe('FixFlow public experience', () => {
       expect(Math.abs(box.left + box.width / 2 - view.innerWidth / 2)).to.be.lessThan(3)
     })
   })
+
+  it('keeps the quick check readable on large screens and phones', () => {
+    cy.viewport(1280, 900)
+    cy.visit('/diagnose')
+    cy.get('#service-step-title').should('be.visible')
+    cy.get('.step').should(($step) => {
+      const intro = $step.children().first()[0].getBoundingClientRect()
+      const options = $step.find('.options')[0].getBoundingClientRect()
+      expect(options.left).to.be.greaterThan(intro.right)
+    })
+
+    cy.viewport(390, 844)
+    cy.get('.step').should(($step) => {
+      const intro = $step.children().first()[0].getBoundingClientRect()
+      const options = $step.find('.options')[0].getBoundingClientRect()
+      expect(options.top).to.be.greaterThan(intro.bottom)
+    })
+    cy.get('.option').first().should('contain', 'Phone and tablet')
+  })
 })
