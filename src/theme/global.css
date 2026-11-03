@@ -188,6 +188,8 @@
    ------------------------------------------------------------ */
 html,
 body {
+  min-width: 320px;
+  min-height: 100%;
   background: var(--color-canvas);
   color: var(--color-text-primary);
   font-family: var(--font-sans);
@@ -195,6 +197,11 @@ body {
   line-height: var(--leading-base);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+}
+
+ion-app {
+  min-height: 100%;
+  background: var(--color-canvas);
 }
 
 h1, h2, h3, h4, p {
@@ -358,6 +365,12 @@ a,
 
   .ff-container--wide {
     padding-inline: var(--page-pad);
+  }
+}
+
+@media (min-width: 96rem) {
+  .ff-container--wide {
+    max-width: 1360px;
   }
 }
 
