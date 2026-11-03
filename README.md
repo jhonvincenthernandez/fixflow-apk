@@ -74,7 +74,7 @@ Add this repository secret before the first build:
   `VITE_FIREBASE_APP_ID`. See `.env.example` for the shape.
 
 Without signing secrets, the workflow produces an installable debug APK named
-`FixFlow-debug.apk`.
+`FixFlow.apk`.
 
 For a signed release APK, add these repository secrets:
 

@@ -132,8 +132,8 @@ jobs:
             cp android/app/build/outputs/apk/release/app-release.apk artifacts/FixFlow-release.apk
             echo "APK_NAME=FixFlow-release.apk" >> "$GITHUB_ENV"
           else
-            cp android/app/build/outputs/apk/debug/app-debug.apk artifacts/FixFlow-debug.apk
-            echo "APK_NAME=FixFlow-debug.apk" >> "$GITHUB_ENV"
+            cp android/app/build/outputs/apk/debug/app-debug.apk artifacts/FixFlow.apk
+            echo "APK_NAME=FixFlow.apk" >> "$GITHUB_ENV"
           fi
 
       - name: Upload APK
