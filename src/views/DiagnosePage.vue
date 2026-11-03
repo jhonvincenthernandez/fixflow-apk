@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
-import { IonContent, IonPage } from '@ionic/vue'
+import { IonContent, IonPage, IonRefresher, IonRefresherContent } from '@ionic/vue'
+import type { RefresherCustomEvent } from '@ionic/vue'
 import { ArrowLeft, ArrowRight, Check, ShieldAlert, Star, Stethoscope } from '@lucide/vue'
 import { useRoute } from 'vue-router'
 import AppLink from '@/components/AppLink.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import ServiceIcon from '@/components/ServiceIcon.vue'
 import { useSession } from '@/composables/useSession'
+import { refreshPage } from '@/composables/usePageRefresh'
 import {
   URGENCY_OPTIONS,
   diagnose,
@@ -117,12 +119,19 @@ function restart(): void {
   urgency.value = null
   step.value = 'service'
 }
+
+function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
+  return refreshPage(event)
+}
 </script>
 
 <template>
   <ion-page>
     <PageHeader title="Quick check" back-href="/" width="wide" />
     <ion-content>
+      <ion-refresher slot="fixed" @ionRefresh="onPullRefresh">
+        <ion-refresher-content />
+      </ion-refresher>
       <main class="ff-container ff-container--wide diagnose" tabindex="-1">
         <div class="ff-stack ff-stack--loose">
           <ol v-if="step !== 'result'" class="progress" aria-label="Quick check progress">

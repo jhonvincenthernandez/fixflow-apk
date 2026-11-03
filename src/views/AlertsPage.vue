@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { IonContent, IonPage, onIonViewWillEnter } from '@ionic/vue'
+import { IonContent, IonPage, IonRefresher, IonRefresherContent, onIonViewWillEnter } from '@ionic/vue'
+import type { RefresherCustomEvent } from '@ionic/vue'
 import { BellOff, CheckCheck } from '@lucide/vue'
 import AppButton from '@/components/AppButton.vue'
 import AppLink from '@/components/AppLink.vue'
@@ -10,6 +11,7 @@ import ErrorState from '@/components/ErrorState.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import SkeletonList from '@/components/SkeletonList.vue'
 import { loadNotifications, markAllRead, markRead, useNotifications } from '@/composables/useNotifications'
+import { refreshPage } from '@/composables/usePageRefresh'
 import { useAsyncAction } from '@/composables/useAsyncAction'
 import { showToast } from '@/composables/useToast'
 import { toAppError, userMessage } from '@/domain/errors'
@@ -23,6 +25,10 @@ onIonViewWillEnter(() => {
   now.value = Date.now()
   void loadNotifications({ silent: true })
 })
+
+function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
+  return refreshPage(event)
+}
 
 const markAll = useAsyncAction(async () => {
   await markAllRead()
@@ -45,6 +51,9 @@ async function onOpen(id: string, alreadyRead: boolean): Promise<void> {
   <ion-page>
     <PageHeader title="Alerts" />
     <ion-content>
+      <ion-refresher slot="fixed" @ionRefresh="onPullRefresh">
+        <ion-refresher-content />
+      </ion-refresher>
       <main class="ff-container ff-container--wide ff-stack" tabindex="-1">
         <ErrorBoundary title="Alerts could not load">
           <SkeletonList v-if="state.status === 'loading' || state.status === 'idle'" :count="4" grid />

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { IonContent, IonPage } from '@ionic/vue'
+import { IonContent, IonPage, IonRefresher, IonRefresherContent } from '@ionic/vue'
+import type { RefresherCustomEvent } from '@ionic/vue'
 import { Eye, EyeOff, LogIn, UserPlus } from '@lucide/vue'
 import { useRoute } from 'vue-router'
 import AppButton from '@/components/AppButton.vue'
@@ -10,6 +11,7 @@ import SegmentedControl from '@/components/SegmentedControl.vue'
 import TypewriterHeading from '@/components/TypewriterHeading.vue'
 import { useAsyncAction } from '@/composables/useAsyncAction'
 import { useNavigate } from '@/composables/useNavigate'
+import { refreshPage } from '@/composables/usePageRefresh'
 import { register, signIn } from '@/composables/useSession'
 import { HERO_TITLE } from '@/content'
 import { ValidationError, userMessage } from '@/domain/errors'
@@ -60,11 +62,18 @@ function fieldError(field: string): string | undefined {
 function switchMode(): void {
   submit.reset()
 }
+
+function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
+  return refreshPage(event)
+}
 </script>
 
 <template>
   <ion-page>
     <ion-content class="auth-content">
+      <ion-refresher slot="fixed" @ionRefresh="onPullRefresh">
+        <ion-refresher-content />
+      </ion-refresher>
       <main class="ff-container auth" tabindex="-1">
         <header class="auth__intro ff-stack">
           <AppLogo />

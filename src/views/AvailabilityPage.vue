@@ -1,6 +1,14 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, useTemplateRef, watch } from 'vue'
-import { IonContent, IonFooter, IonPage, onIonViewWillEnter } from '@ionic/vue'
+import {
+  IonContent,
+  IonFooter,
+  IonPage,
+  IonRefresher,
+  IonRefresherContent,
+  onIonViewWillEnter,
+} from '@ionic/vue'
+import type { RefresherCustomEvent } from '@ionic/vue'
 import { ChevronRight, TriangleAlert, Undo2 } from '@lucide/vue'
 import AppButton from '@/components/AppButton.vue'
 import AppLink from '@/components/AppLink.vue'
@@ -17,6 +25,7 @@ import ToggleField from '@/components/ToggleField.vue'
 import { useAsyncAction } from '@/composables/useAsyncAction'
 import { loadAvailability, persistAvailability, useAvailability } from '@/composables/useAvailability'
 import { loadRequests, useRequests } from '@/composables/useRequests'
+import { refreshPage } from '@/composables/usePageRefresh'
 import { showToast } from '@/composables/useToast'
 import {
   AvailabilityInputSchema,
@@ -147,6 +156,10 @@ function onDiscard(): void {
   if (availability.value !== null) resetDraft(availability.value)
   save.reset()
 }
+
+function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
+  return refreshPage(event)
+}
 </script>
 
 <template>
@@ -154,6 +167,9 @@ function onDiscard(): void {
     <PageHeader title="Shop schedule" back-href="/tabs/profile" />
 
     <ion-content>
+      <ion-refresher slot="fixed" @ionRefresh="onPullRefresh">
+        <ion-refresher-content />
+      </ion-refresher>
       <main ref="main" class="ff-container ff-container--wide ff-stack" tabindex="-1">
         <ErrorBoundary title="The schedule could not be shown">
           <SkeletonList v-if="state.status === 'idle' || (state.status === 'loading' && draft === null)" :count="3" />

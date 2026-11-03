@@ -23,11 +23,12 @@ export function dismissToast(id: number): void {
   toasts.value = toasts.value.filter((toast) => toast.id !== id)
 }
 
-export function showToast(kind: ToastKind, message: string, durationMs: number = DEFAULT_DURATION_MS): void {
+export function showToast(kind: ToastKind, message: string, durationMs: number = DEFAULT_DURATION_MS): number {
   const id = nextId
   nextId += 1
   toasts.value = [...toasts.value, { id, kind, message }]
   timers.set(id, setTimeout(() => dismissToast(id), durationMs))
+  return id
 }
 
 export function useToasts() {

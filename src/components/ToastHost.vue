@@ -23,7 +23,9 @@ const ICONS: Record<ToastKind, Component> = {
         :class="`toast--${toast.kind}`"
       >
         <component :is="ICONS[toast.kind]" class="ff-icon" aria-hidden="true" />
-        <p class="toast__message" :role="toast.kind === 'error' ? 'alert' : 'status'">{{ toast.message }}</p>
+        <p class="toast__message" :role="toast.kind === 'error' ? 'alert' : 'status'" aria-live="polite">
+          {{ toast.message }}
+        </p>
         <button type="button" class="ff-icon-btn toast__close" aria-label="Dismiss notification" @click="dismissToast(toast.id)">
           <X class="ff-icon" aria-hidden="true" />
         </button>

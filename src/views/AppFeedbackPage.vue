@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, ref } from 'vue'
-import { IonContent, IonPage } from '@ionic/vue'
+import { IonContent, IonPage, IonRefresher, IonRefresherContent } from '@ionic/vue'
+import type { RefresherCustomEvent } from '@ionic/vue'
 import { Check, Send } from '@lucide/vue'
 import { useRoute } from 'vue-router'
 import AppButton from '@/components/AppButton.vue'
@@ -8,6 +9,7 @@ import AppLink from '@/components/AppLink.vue'
 import FormField from '@/components/FormField.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import RatingInput from '@/components/RatingInput.vue'
+import { refreshPage } from '@/composables/usePageRefresh'
 import { useAsyncAction } from '@/composables/useAsyncAction'
 import { submitAppFeedback } from '@/data/repo'
 import { diagnosisHref, findSymptom, parseUrgency } from '@/domain/diagnostics'
@@ -69,12 +71,19 @@ async function onSubmit(): Promise<void> {
   await nextTick()
   successHeading.value?.focus()
 }
+
+function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
+  return refreshPage(event)
+}
 </script>
 
 <template>
   <ion-page>
     <PageHeader title="App feedback" :back-href="backHref" width="wide" />
     <ion-content>
+      <ion-refresher slot="fixed" @ionRefresh="onPullRefresh">
+        <ion-refresher-content />
+      </ion-refresher>
       <main class="ff-container ff-container--wide feedback" tabindex="-1">
         <div class="feedback__layout">
           <section class="feedback__intro ff-stack" aria-labelledby="feedback-title">

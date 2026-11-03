@@ -4,6 +4,10 @@ import { toAppError } from '@/domain/errors'
 import type { AppError, FieldErrors } from '@/domain/errors'
 import { ValidationError } from '@/domain/errors'
 import { logger } from '@/domain/logger'
+import { dismissToast, showToast } from './useToast'
+
+const SLOW_OPERATION_DELAY_MS = 700
+const SLOW_OPERATION_MESSAGE = 'Still working. This may take a little longer on a slow connection.'
 
 /**
  * Wraps one user-triggered async operation with the four required states:
@@ -16,6 +20,10 @@ export function useAsyncAction<Args extends unknown[], Result>(operation: (...ar
   async function run(...args: Args): Promise<Result | undefined> {
     if (state.value.status === 'loading') return undefined
     state.value = { status: 'loading' }
+    let slowStatusToast: number | null = null
+    const slowStatusTimer = setTimeout(() => {
+      slowStatusToast = showToast('info', SLOW_OPERATION_MESSAGE, 12000)
+    }, SLOW_OPERATION_DELAY_MS)
     try {
       const data = await operation(...args)
       state.value = { status: 'success', data }
@@ -28,6 +36,9 @@ export function useAsyncAction<Args extends unknown[], Result>(operation: (...ar
       }
       state.value = { status: 'error', error: appError }
       return undefined
+    } finally {
+      clearTimeout(slowStatusTimer)
+      if (slowStatusToast !== null) dismissToast(slowStatusToast)
     }
   }
 

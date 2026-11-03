@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, type Component } from 'vue'
-import { IonContent, IonPage, IonPopover } from '@ionic/vue'
+import { IonContent, IonPage, IonPopover, IonRefresher, IonRefresherContent } from '@ionic/vue'
+import type { RefresherCustomEvent } from '@ionic/vue'
 import {
   ArrowRight,
   CalendarCheck,
@@ -18,6 +19,7 @@ import ServiceIcon from '@/components/ServiceIcon.vue'
 import TypewriterHeading from '@/components/TypewriterHeading.vue'
 import { HERO_TITLE } from '@/content'
 import { SERVICES } from '@/domain/services'
+import { refreshPage } from '@/composables/usePageRefresh'
 
 interface Step {
   readonly title: string
@@ -57,11 +59,18 @@ function scrollToSection(id: string): void {
     .getElementById(id)
     ?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' })
 }
+
+function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
+  return refreshPage(event)
+}
 </script>
 
 <template>
   <ion-page>
     <ion-content>
+      <ion-refresher slot="fixed" @ionRefresh="onPullRefresh">
+        <ion-refresher-content />
+      </ion-refresher>
       <header class="landing__bar">
         <div class="landing__shell landing__bar-inner">
           <AppLogo />

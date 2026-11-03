@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, shallowRef } from 'vue'
-import { IonContent, IonPage, onIonViewWillEnter } from '@ionic/vue'
+import { IonContent, IonPage, IonRefresher, IonRefresherContent, onIonViewWillEnter } from '@ionic/vue'
+import type { RefresherCustomEvent } from '@ionic/vue'
 import { Send } from '@lucide/vue'
 import { useRoute } from 'vue-router'
 import AppButton from '@/components/AppButton.vue'
@@ -11,6 +12,7 @@ import SegmentedControl from '@/components/SegmentedControl.vue'
 import ServiceIcon from '@/components/ServiceIcon.vue'
 import { useAsyncAction } from '@/composables/useAsyncAction'
 import { useNavigate } from '@/composables/useNavigate'
+import { refreshPage } from '@/composables/usePageRefresh'
 import { submitRequest } from '@/composables/useRequests'
 import { showToast } from '@/composables/useToast'
 import type { ImageUpload } from '@/data/repo'
@@ -80,6 +82,10 @@ function fieldError(field: string): string | undefined {
   return submit.fieldErrors.value[field]?.[0]
 }
 
+function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
+  return refreshPage(event)
+}
+
 const formError = computed(() => {
   const error = submit.error.value
   return error === null || error instanceof ValidationError ? null : userMessage(error)
@@ -90,6 +96,9 @@ const formError = computed(() => {
   <ion-page>
     <PageHeader title="New request" back-href="/tabs/home" width="narrow" />
     <ion-content>
+      <ion-refresher slot="fixed" @ionRefresh="onPullRefresh">
+        <ion-refresher-content />
+      </ion-refresher>
       <main class="ff-container" tabindex="-1">
         <form class="ff-stack ff-stack--loose" novalidate @submit.prevent="submit.run()">
           <fieldset class="picker">

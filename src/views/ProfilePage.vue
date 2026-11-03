@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { IonContent, IonPage, onIonViewWillEnter } from '@ionic/vue'
+import { IonContent, IonPage, IonRefresher, IonRefresherContent, onIonViewWillEnter } from '@ionic/vue'
+import type { RefresherCustomEvent } from '@ionic/vue'
 import { CalendarClock, LogOut } from '@lucide/vue'
 import AppearancePanel from '@/components/AppearancePanel.vue'
 import AppButton from '@/components/AppButton.vue'
@@ -9,6 +10,7 @@ import DisclosureSection from '@/components/DisclosureSection.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import SheetModal from '@/components/SheetModal.vue'
 import { loadAvailability, useAvailability } from '@/composables/useAvailability'
+import { refreshPage } from '@/composables/usePageRefresh'
 import { useNavigate } from '@/composables/useNavigate'
 import { signOut, useSession } from '@/composables/useSession'
 import { BUSINESS } from '@/domain/business'
@@ -40,12 +42,19 @@ function onSignOut(): void {
   signOut()
   replace('/auth')
 }
+
+function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
+  return refreshPage(event)
+}
 </script>
 
 <template>
   <ion-page>
     <PageHeader title="Profile" />
     <ion-content>
+      <ion-refresher slot="fixed" @ionRefresh="onPullRefresh">
+        <ion-refresher-content />
+      </ion-refresher>
       <main class="ff-container ff-container--wide profile-page" tabindex="-1">
         <div class="profile-page__col">
           <section v-if="user" class="ff-card profile" aria-labelledby="profile-name">

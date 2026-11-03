@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, shallowRef } from 'vue'
-import { IonContent, IonFooter, IonPage, onIonViewWillEnter } from '@ionic/vue'
+import { IonContent, IonFooter, IonPage, IonRefresher, IonRefresherContent, onIonViewWillEnter } from '@ionic/vue'
+import type { RefresherCustomEvent } from '@ionic/vue'
 import { SearchX } from '@lucide/vue'
 import AppButton from '@/components/AppButton.vue'
 import AppLink from '@/components/AppLink.vue'
@@ -16,6 +17,7 @@ import SkeletonList from '@/components/SkeletonList.vue'
 import StatusBadge from '@/components/StatusBadge.vue'
 import StatusStepper from '@/components/StatusStepper.vue'
 import RequestActions from '@/components/request/RequestActions.vue'
+import { refreshPage } from '@/composables/usePageRefresh'
 import { loadRequests, upsertRequest, useRequests } from '@/composables/useRequests'
 import { requireActor, useSession } from '@/composables/useSession'
 import { showToast } from '@/composables/useToast'
@@ -89,6 +91,10 @@ function onUpdated(next: ServiceRequest): void {
   detail.value = { status: 'success', data: next }
   now.value = Date.now()
 }
+
+function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
+  return refreshPage(event)
+}
 </script>
 
 <template>
@@ -96,6 +102,9 @@ function onUpdated(next: ServiceRequest): void {
     <PageHeader :title="request?.ref ?? 'Request'" back-href="/tabs/requests" />
 
     <ion-content>
+      <ion-refresher slot="fixed" @ionRefresh="onPullRefresh">
+        <ion-refresher-content />
+      </ion-refresher>
       <main class="ff-container ff-container--wide ff-stack" tabindex="-1">
         <ErrorBoundary title="This request could not be shown">
           <SkeletonList v-if="detail.status === 'loading' || detail.status === 'idle'" :count="2" />
