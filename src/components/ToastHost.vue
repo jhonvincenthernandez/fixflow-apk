@@ -59,7 +59,7 @@ const ICONS: Record<ToastKind, Component> = {
   gap: var(--space-3);
   padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
   border: 1px solid var(--color-brand-border);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   background: var(--color-brand-light);
   box-shadow: var(--shadow-md);
   color: var(--color-brand-dark);
@@ -80,8 +80,11 @@ const ICONS: Record<ToastKind, Component> = {
 
 .toast__message {
   flex: 1;
+  min-width: 0;
+  margin: 0;
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
+  line-height: var(--leading-base);
 }
 
 .toast__close {

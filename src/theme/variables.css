@@ -83,9 +83,13 @@ ion-toolbar {
   --border-width: 0 0 1px 0;
   --border-color: var(--color-border);
   --min-height: var(--control-height);
+  --background: var(--color-surface);
 }
 
 ion-tab-bar {
+  --background: var(--color-surface);
+  --padding-top: var(--space-1);
+  --padding-bottom: calc(var(--space-1) + var(--safe-bottom));
   border-top: 1px solid var(--color-border);
   box-shadow: var(--shadow-sm);
 }
@@ -98,6 +102,11 @@ ion-tab-button {
   transition:
     color var(--transition-base),
     background-color var(--transition-base);
+}
+
+ion-tab-button::part(native) {
+  border-radius: var(--radius-md);
+  margin: var(--space-1);
 }
 
 ion-modal {
@@ -130,26 +139,30 @@ ion-footer {
 
   ion-toolbar {
     --background: var(--color-surface);
-    --min-height: 56px;
-    box-shadow: var(--shadow-xs);
+    --min-height: 64px;
+    box-shadow: var(--shadow-sm);
   }
 
   ion-tab-bar {
     --border: 0;
     align-self: center;
-    width: min(calc(100% - var(--space-12)), 34rem);
-    margin-block-end: calc(var(--space-4) + var(--safe-bottom));
+    width: min(calc(100% - var(--space-12)), 42rem);
+    margin-block-end: calc(var(--space-6) + var(--safe-bottom));
     padding: var(--space-1);
     border: 1px solid var(--color-border);
-    border-radius: var(--radius-full);
-    box-shadow: var(--shadow-lg);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-md);
     overflow: hidden;
   }
 
   ion-tab-button {
-    min-height: 56px;
-    border-radius: var(--radius-full);
+    min-height: 60px;
+    border-radius: var(--radius-lg);
     font-size: var(--text-sm);
+  }
+
+  ion-content::part(scroll) {
+    padding-bottom: var(--space-6);
   }
 
   @media (hover: hover) {

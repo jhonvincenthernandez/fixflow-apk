@@ -85,7 +85,7 @@
   --radius-sm:   6px;
   --radius-md:   10px;
   --radius-lg:   14px;
-  --radius-xl:   18px;
+  --radius-xl:  20px;
   --radius-full: 9999px;
 
   /* Transitions */
@@ -137,7 +137,7 @@
   --avatar-size: 48px;
   --thumb-size:  72px;
   --content-max: 640px;       /* Reading column: forms, quick check, sheets */
-  --content-max-wide: 1120px; /* Data pages, dashboards, landing */
+  --content-max-wide: 1280px; /* Data pages, dashboards, landing */
   --sheet-max-height: 90vh;
   --stepper-marker: 24px;
   --switch-width: 44px;
@@ -178,7 +178,7 @@
 
 @media (min-width: 64rem) {
   :root {
-    --page-pad: var(--space-8);
+    --page-pad: clamp(var(--space-8), 3vw, 56px);
     --surface-pad: var(--space-4);
   }
 }
@@ -351,6 +351,16 @@ a,
   --container-max: var(--content-max-wide);
 }
 
+@media (min-width: 64rem) {
+  .ff-container {
+    padding-block: var(--space-10);
+  }
+
+  .ff-container--wide {
+    padding-inline: var(--page-pad);
+  }
+}
+
 .ff-stack {
   display: flex;
   flex-direction: column;
@@ -398,12 +408,18 @@ a,
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-xs);
   padding: var(--surface-pad);
   transition:
     transform    var(--transition-base),
     box-shadow   var(--transition-base),
     border-color var(--transition-base);
+}
+
+@media (min-width: 64rem) {
+  .ff-card {
+    padding: var(--space-5);
+  }
 }
 
 /* Interactive card: lift and upgrade the shadow on hover (policy 8, 10). */
@@ -448,7 +464,7 @@ a,
   min-height: var(--control-height);
   padding: 0 var(--space-5);
   border: 1px solid transparent;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   font-size: var(--text-base);
   font-weight: var(--weight-semibold);
   line-height: 1;
@@ -539,7 +555,7 @@ a,
   padding: 0;
   background: transparent;
   border: 1px solid transparent;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   color: var(--color-text-primary);
   cursor: pointer;
 }

@@ -15,7 +15,7 @@ withDefaults(
   <button
     :type="type"
     class="ff-btn"
-    :class="[`ff-btn--${variant}`, { 'ff-btn--block': block }]"
+    :class="[`ff-btn--${variant}`, { 'ff-btn--block': block, 'ff-btn--loading': loading }]"
     :disabled="disabled || loading"
     :aria-busy="loading ? 'true' : undefined"
   >

@@ -29,6 +29,7 @@ withDefaults(
 
 <style scoped>
 .page-toolbar {
+  --background: var(--color-surface);
   --padding-start: max(var(--page-pad), calc((100% - var(--content-max-wide)) / 2 + var(--page-pad)));
   --padding-end: max(var(--page-pad), calc((100% - var(--content-max-wide)) / 2 + var(--page-pad)));
 }
@@ -41,8 +42,19 @@ withDefaults(
 .page-title {
   flex: 1 1 auto;
   min-width: 0;
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: var(--text-md);
+  font-weight: var(--weight-extrabold);
+  letter-spacing: -0.015em;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+@media (min-width: 48rem) {
+  .page-title {
+    font-size: var(--text-lg);
+  }
 }
 </style>
