@@ -4,13 +4,16 @@ import { Copy } from '@lucide/vue'
 import AppButton from '@/components/AppButton.vue'
 import TimeSelect from '@/components/TimeSelect.vue'
 import ToggleField from '@/components/ToggleField.vue'
-import { DISPLAY_ORDER, WEEKDAY_NAMES } from '@/domain/availability'
-import type { DayHours } from '@/domain/availability'
+import { DISPLAY_ORDER, WEEKDAY_NAMES, parseDateKey } from '@/domain/availability'
+import type { DayHours, DayOff } from '@/domain/availability'
 import type { FieldErrors } from '@/domain/errors'
+import { formatLongDay } from '@/domain/format'
 
 const props = defineProps<{
   /** Field errors from validation, keyed by path such as "week.1.to". */
   errors: FieldErrors
+  /** Specific upcoming dates when the shop is closed despite regular weekly hours. */
+  daysOff: readonly DayOff[]
 }>()
 
 /** Seven entries indexed like Date#getDay (0 is Sunday). */
@@ -40,6 +43,24 @@ function copyToOpenDays(): void {
   if (first === undefined) return
   week.value = week.value.map((day) => (day.open ? { ...day, from: first.from, to: first.to } : day))
 }
+
+function dayOffNotice(weekday: number): string | undefined {
+  const entries = props.daysOff
+    .map((entry) => {
+      const timestamp = parseDateKey(entry.date)
+      return timestamp === null ? null : { entry, timestamp }
+    })
+    .filter((item): item is { entry: DayOff; timestamp: number } => item !== null)
+    .filter((item) => new Date(item.timestamp).getDay() === weekday)
+
+  if (entries.length === 0) return undefined
+  const dates = entries.slice(0, 3).map(({ entry, timestamp }) => {
+    const label = entry.label === '' ? '' : `, ${entry.label}`
+    return `${formatLongDay(timestamp)}${label}`
+  })
+  const remaining = entries.length - dates.length
+  return `Closed on: ${dates.join('; ')}${remaining > 0 ? `; and ${remaining} more` : ''}`
+}
 </script>
 
 <template>
@@ -52,6 +73,9 @@ function copyToOpenDays(): void {
             :label="WEEKDAY_NAMES[weekday] ?? ''"
             @update:model-value="patch(weekday, { open: $event })"
           />
+          <p v-if="dayOffNotice(weekday)" class="ff-meta week__day-off" role="status">
+            {{ dayOffNotice(weekday) }}
+          </p>
           <div v-if="week[weekday].open" class="week__times">
             <TimeSelect
               :model-value="week[weekday].from"
@@ -106,6 +130,11 @@ function copyToOpenDays(): void {
   display: flex;
   align-items: center;
   gap: var(--space-2);
+}
+
+.week__day-off {
+  margin: 0;
+  color: var(--color-brand-dark);
 }
 
 .week__to {

@@ -231,7 +231,7 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
                     <h2 id="av-week" class="ff-h3">Weekly hours</h2>
                     <p class="ff-meta">Switch a day to closed to keep the shop shut that day every week.</p>
                   </div>
-                  <WeeklyHoursEditor v-model="draft.week" :errors="errors" />
+                  <WeeklyHoursEditor v-model="draft.week" :errors="errors" :days-off="draft.daysOff" />
                 </section>
 
                 <section class="ff-card ff-stack" aria-labelledby="av-off">
