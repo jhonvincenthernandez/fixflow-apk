@@ -35,12 +35,14 @@ import {
   WINDOW_OPTIONS,
   dateKey,
   durationText,
+  defaultAvailability,
   hoursLines,
   lunchText,
+  upcomingDaysOff,
 } from '@/domain/availability'
 import type { Availability, AvailabilityInput } from '@/domain/availability'
 import { userMessage } from '@/domain/errors'
-import { formatDateTime } from '@/domain/format'
+import { formatDateTime, formatLongDay } from '@/domain/format'
 import { fitsAvailability } from '@/domain/schedule'
 import { validationFields } from '@/domain/types'
 
@@ -124,7 +126,15 @@ const affected = computed(() => {
     .sort((a, b) => a.startAt - b.startAt)
 })
 
-const preview = computed(() => (checked.value === null ? null : { lines: hoursLines(checked.value), lunch: lunchText(checked.value) }))
+const preview = computed(() => {
+  const schedule = checked.value
+  if (schedule === null) return null
+  return {
+    lines: hoursLines(schedule),
+    lunch: lunchText(schedule),
+    daysOff: upcomingDaysOff(schedule, now.value, schedule.windowDays),
+  }
+})
 
 const save = useAsyncAction(async () => {
   const saved = await persistAvailability(draft.value)
@@ -154,6 +164,12 @@ async function onSave(): Promise<void> {
 
 function onDiscard(): void {
   if (availability.value !== null) resetDraft(availability.value)
+  save.reset()
+}
+
+function useDefaultSettings(): void {
+  draft.value = toDraft(defaultAvailability())
+  attempted.value = false
   save.reset()
 }
 
@@ -295,6 +311,14 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
                     </div>
                   </dl>
                   <p v-if="preview.lunch" class="ff-meta">{{ preview.lunch }}.</p>
+                  <div v-if="preview.daysOff.length > 0" class="preview__days-off">
+                    <p class="ff-meta">Upcoming days off</p>
+                    <ul class="ff-meta">
+                      <li v-for="dayOff in preview.daysOff" :key="dayOff.date">
+                        {{ formatLongDay(dayOff.timestamp) }}<span v-if="dayOff.label">: {{ dayOff.label }}</span>
+                      </li>
+                    </ul>
+                  </div>
                 </section>
               </div>
             </div>
@@ -308,6 +332,7 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
         <p v-if="formError" class="ff-error-text" role="alert">{{ formError }}</p>
         <p v-else-if="dirty" class="ff-meta" role="status">You have unsaved changes.</p>
         <div class="savebar__buttons">
+          <AppButton variant="secondary" @click="useDefaultSettings">Use default settings</AppButton>
           <AppButton v-if="dirty" variant="secondary" @click="onDiscard">
             <Undo2 class="ff-icon ff-icon--sm" aria-hidden="true" />
             Discard
