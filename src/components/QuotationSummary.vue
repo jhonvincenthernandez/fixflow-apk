@@ -14,6 +14,9 @@ const expired = computed(() => props.quotation.response === null && props.now > 
     <div class="quote__badges">
       <span v-if="quotation.response === 'accepted'" class="ff-badge ff-badge--success">Accepted</span>
       <span v-else-if="quotation.response === 'declined'" class="ff-badge ff-badge--danger">Declined</span>
+      <span v-else-if="quotation.response === 'revision_requested'" class="ff-badge ff-badge--brand">
+        Being revised
+      </span>
       <span v-else-if="expired" class="ff-badge">Expired</span>
       <span v-else class="ff-badge ff-badge--brand">Awaiting response</span>
     </div>

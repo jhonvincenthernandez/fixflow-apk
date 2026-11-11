@@ -4,7 +4,7 @@ import { ChevronRight } from '@lucide/vue'
 import { formatRelative } from '@/domain/format'
 import { getService } from '@/domain/services'
 import type { Role, ServiceRequest } from '@/domain/types'
-import { STAGES, actionOwner, nextStepText, stageIndex } from '@/domain/workflow'
+import { STAGES, actionOwner, nextStepText, stagePosition } from '@/domain/workflow'
 import AppLink from './AppLink.vue'
 import ServiceIcon from './ServiceIcon.vue'
 import StatusBadge from './StatusBadge.vue'
@@ -20,7 +20,7 @@ const props = defineProps<{
 
 const service = computed(() => getService(props.request.serviceId))
 /** 1 to 8 inside the main flow, 0 for declined and cancelled. */
-const step = computed(() => stageIndex(props.request.status) + 1)
+const step = computed(() => stagePosition(props.request))
 const yourTurn = computed(() => actionOwner(props.request.status) === props.role)
 </script>
 
@@ -41,7 +41,7 @@ const yourTurn = computed(() => actionOwner(props.request.status) === props.role
     </div>
 
     <div class="card__status">
-      <StatusBadge :status="request.status" />
+      <StatusBadge :request="request" />
       <span v-if="step > 0" class="ff-meta">Step {{ step }} of {{ STAGES.length }}</span>
     </div>
 
@@ -51,7 +51,7 @@ const yourTurn = computed(() => actionOwner(props.request.status) === props.role
 
     <p class="ff-meta card__hint" :class="{ 'is-turn': yourTurn }">
       <span v-if="yourTurn" class="ff-badge ff-badge--brand card__turn">Your turn</span>
-      {{ nextStepText(request.status, role) }}
+      {{ nextStepText(request, role) }}
     </p>
     <p class="ff-meta ff-muted card__updated">Updated {{ formatRelative(request.updatedAt, now) }}</p>
   </AppLink>

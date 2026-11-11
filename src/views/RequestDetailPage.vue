@@ -25,11 +25,11 @@ import { getRequest, getRequestImages } from '@/data/repo'
 import type { StoredImage } from '@/data/repo'
 import type { AsyncState } from '@/domain/async'
 import { toAppError, userMessage } from '@/domain/errors'
-import { formatDate, formatLongDay, formatRelative, formatTime } from '@/domain/format'
+import { formatDate, formatDateTime, formatLongDay, formatRelative, formatTime } from '@/domain/format'
 import { logger } from '@/domain/logger'
 import { getService } from '@/domain/services'
 import type { ServiceRequest } from '@/domain/types'
-import { actionOwner, availableActions, nextStepText } from '@/domain/workflow'
+import { actionOwner, availableActions, nextStepText, pendingRevision } from '@/domain/workflow'
 
 // Props instead of useRoute(): see the route definition.
 const props = defineProps<{ id: string }>()
@@ -48,6 +48,8 @@ const hasActions = computed(
   () => request.value !== null && role.value !== null && availableActions(request.value.status, role.value).length > 0,
 )
 const yourTurn = computed(() => request.value !== null && actionOwner(request.value.status) === role.value)
+/** The revision request the shop still owes a revised quotation for. */
+const revision = computed(() => (request.value === null ? null : pendingRevision(request.value)))
 
 /** Shows the cached copy at once, then refreshes it. A failed refresh keeps what is on screen. */
 async function loadRequest(): Promise<void> {
@@ -129,14 +131,14 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
             <header class="masthead" aria-labelledby="detail-title">
               <div class="masthead__identity">
                 <div class="masthead__status">
-                  <StatusBadge :status="request.status" />
+                  <StatusBadge :request="request" />
                   <span class="ff-meta">Updated {{ formatRelative(request.updatedAt, now) }}</span>
                 </div>
                 <h1 id="detail-title" class="ff-h1 masthead__title">{{ request.itemName }}</h1>
                 <p class="ff-meta">{{ service.name }}, submitted {{ formatDate(request.createdAt) }}</p>
               </div>
               <p class="ff-inset next" :class="{ 'is-turn': yourTurn }">
-                <strong v-if="yourTurn" class="next__turn">Your turn: </strong>{{ nextStepText(request.status, role) }}
+                <strong v-if="yourTurn" class="next__turn">Your turn: </strong>{{ nextStepText(request, role) }}
               </p>
             </header>
 
@@ -185,6 +187,14 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
                   </dl>
                 </section>
 
+                <section v-if="revision" class="ff-card ff-stack ff-stack--tight" aria-labelledby="detail-revision">
+                  <h2 id="detail-revision" class="ff-h3">Revision requested</h2>
+                  <p class="revision__reason">{{ revision.note }}</p>
+                  <p class="ff-meta">
+                    {{ role === 'owner' ? 'By the customer' : 'Requested by you' }}, {{ formatDateTime(revision.at) }}
+                  </p>
+                </section>
+
                 <section v-if="request.quotation" class="ff-card ff-stack" aria-labelledby="detail-quote">
                   <h2 id="detail-quote" class="ff-h3">Quotation</h2>
                   <QuotationSummary :quotation="request.quotation" :now="now" />
@@ -200,7 +210,7 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
 
               <div class="detail__aside">
                 <DisclosureSection title="Progress" default-open>
-                  <StatusStepper :request="request" />
+                  <StatusStepper :request="request" :role="role" />
                 </DisclosureSection>
 
                 <section v-if="request.appointment" class="ff-card ff-stack ff-stack--tight" aria-labelledby="detail-appointment">
@@ -300,6 +310,14 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
 
 .feedback__comment {
   max-width: 68ch;
+  overflow-wrap: anywhere;
+}
+
+.revision__reason {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
 

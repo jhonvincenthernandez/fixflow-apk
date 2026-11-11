@@ -73,7 +73,7 @@ export const QuotationSchema = z.object({
   /** Frozen at send time so history never changes if pricing rules change later. */
   totalCentavos: z.number().int().nonnegative(),
   sentAt: Millis,
-  response: z.enum(['accepted', 'declined']).nullable(),
+  response: z.enum(['accepted', 'declined', 'revision_requested']).nullable(),
   respondedAt: Millis.nullable(),
 })
 export type Quotation = z.infer<typeof QuotationSchema>
@@ -245,6 +245,13 @@ export const AppFeedbackInputSchema = z.object({
 export type AppFeedbackInput = z.infer<typeof AppFeedbackInputSchema>
 
 export const ReasonSchema = z.string().trim().max(200, 'Keep the reason under 200 characters')
+
+/** A revision request needs a reason so the shop knows what to change. */
+export const RevisionReasonSchema = z
+  .string()
+  .trim()
+  .min(5, 'Tell the shop what you want changed')
+  .max(200, 'Keep the reason under 200 characters')
 
 /* ------------------------------------------------------------
    Parsing helper

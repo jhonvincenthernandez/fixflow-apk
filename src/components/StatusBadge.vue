@@ -1,11 +1,23 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { Component } from 'vue'
-import { Ban, BadgeCheck, CalendarCheck, CircleCheck, CircleX, ClipboardList, Receipt, Search, Star, Wrench } from '@lucide/vue'
-import type { RequestStatus } from '@/domain/types'
-import { STATUS_LABEL } from '@/domain/workflow'
+import {
+  Ban,
+  BadgeCheck,
+  CalendarCheck,
+  CircleCheck,
+  CircleX,
+  ClipboardList,
+  PencilLine,
+  Receipt,
+  Search,
+  Star,
+  Wrench,
+} from '@lucide/vue'
+import type { RequestStatus, ServiceRequest } from '@/domain/types'
+import { STATUS_LABEL, pendingRevision } from '@/domain/workflow'
 
-const props = defineProps<{ status: RequestStatus }>()
+const props = defineProps<{ request: ServiceRequest }>()
 
 type Tone = '' | 'brand' | 'solid' | 'success' | 'danger'
 
@@ -27,12 +39,19 @@ const META: Record<RequestStatus, { icon: Component; tone: Tone }> = {
   cancelled: { icon: Ban, tone: 'danger' },
 }
 
-const meta = computed(() => META[props.status])
+/** A revision round is the state the request is really in, so it takes over the badge. */
+const revision = computed(() => pendingRevision(props.request) !== null)
+
+const meta = computed(() =>
+  revision.value ? { icon: PencilLine, tone: 'brand' as Tone } : META[props.request.status],
+)
+
+const label = computed(() => (revision.value ? 'Revision requested' : STATUS_LABEL[props.request.status]))
 </script>
 
 <template>
   <span class="ff-badge" :class="meta.tone === '' ? undefined : `ff-badge--${meta.tone}`">
     <component :is="meta.icon" class="ff-icon ff-icon--sm" aria-hidden="true" />
-    {{ STATUS_LABEL[status] }}
+    {{ label }}
   </span>
 </template>

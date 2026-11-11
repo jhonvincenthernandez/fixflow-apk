@@ -4,7 +4,7 @@ import { buildQuotation } from './quotation'
 import type { Availability } from './availability'
 import { validateSlot } from './schedule'
 import type { Booking } from './schedule'
-import { FeedbackInputSchema, ReasonSchema, parseOrThrow } from './types'
+import { FeedbackInputSchema, ReasonSchema, RevisionReasonSchema, parseOrThrow } from './types'
 import type { FeedbackInput, HistoryEntry, Quotation, QuotationDraft, RequestStatus, Role, ServiceRequest } from './types'
 
 /* ------------------------------------------------------------
@@ -43,6 +43,15 @@ export const STATUS_LABEL: Record<RequestStatus, string> = {
 /** Position in the eight-stage flow, or -1 for the declined and cancelled off-ramps. */
 export function stageIndex(status: RequestStatus): number {
   return STAGES.findIndex((stage) => stage.status === status)
+}
+
+/**
+ * The step number used by the progress bar. A revision round does not add a
+ * stage, so the request stays at the quotation stage it is negotiating on.
+ */
+export function stagePosition(request: ServiceRequest): number {
+  const status = pendingRevision(request) !== null ? 'quotation_sent' : request.status
+  return stageIndex(status) + 1
 }
 
 export const TERMINAL_STATUSES: readonly RequestStatus[] = ['feedback', 'declined', 'cancelled']
@@ -106,8 +115,11 @@ const NEXT_STEP: Record<Role, Record<RequestStatus, string>> = {
   },
 }
 
-export function nextStepText(status: RequestStatus, role: Role): string {
-  return NEXT_STEP[role][status]
+export function nextStepText(request: ServiceRequest, role: Role): string {
+  if (pendingRevision(request) !== null) {
+    return role === 'owner' ? 'Prepare a revised quotation' : 'The shop is preparing a revised quotation'
+  }
+  return NEXT_STEP[role][request.status]
 }
 
 /* ------------------------------------------------------------
@@ -118,6 +130,7 @@ export const ACTION_IDS = [
   'send_quotation',
   'revise_quotation',
   'accept_quotation',
+  'request_revision',
   'decline_quotation',
   'schedule',
   'start_service',
@@ -146,6 +159,7 @@ export const ACTION_RULES: Record<ActionId, ActionRule> = {
   send_quotation: { from: ['under_review'], to: 'quotation_sent', roles: ['owner'] },
   revise_quotation: { from: ['quotation_sent'], to: 'under_review', roles: ['owner'] },
   accept_quotation: { from: ['quotation_sent'], to: 'quotation_accepted', roles: ['customer'] },
+  request_revision: { from: ['quotation_sent'], to: 'under_review', roles: ['customer'] },
   decline_quotation: { from: ['quotation_sent'], to: 'declined', roles: ['customer'] },
   schedule: { from: ['quotation_accepted', 'scheduled'], to: 'scheduled', roles: ['customer', 'owner'] },
   start_service: { from: ['scheduled'], to: 'in_progress', roles: ['owner'] },
@@ -161,6 +175,31 @@ export function availableActions(status: RequestStatus, role: Role): ActionId[] 
   })
 }
 
+/**
+ * True once the customer has used the one revision round on this request.
+ * Only a customer can move a request back to under review, so a customer entry
+ * there marks a spent revision.
+ */
+export function hasRevisionRequest(request: ServiceRequest): boolean {
+  return lastRevisionEntry(request) !== null
+}
+
+/**
+ * The revision request that is still waiting on the shop.
+ * Present while the shop owes a revised quotation, gone once it sends one.
+ */
+export function pendingRevision(request: ServiceRequest): HistoryEntry | null {
+  if (request.status !== 'under_review') return null
+  return lastRevisionEntry(request)
+}
+
+function lastRevisionEntry(request: ServiceRequest): HistoryEntry | null {
+  const entry = [...request.history]
+    .reverse()
+    .find((item) => item.status === 'under_review' && item.by === 'customer')
+  return entry ?? null
+}
+
 export function actionLabel(action: ActionId, status: RequestStatus): string {
   switch (action) {
     case 'start_review':
@@ -171,6 +210,8 @@ export function actionLabel(action: ActionId, status: RequestStatus): string {
       return 'Revise quotation'
     case 'accept_quotation':
       return 'Accept quotation'
+    case 'request_revision':
+      return 'Request a revision'
     case 'decline_quotation':
       return 'Decline quotation'
     case 'schedule':
@@ -196,6 +237,7 @@ export type ActionInput =
   | { readonly action: 'send_quotation'; readonly draft: QuotationDraft }
   | { readonly action: 'revise_quotation' }
   | { readonly action: 'accept_quotation' }
+  | { readonly action: 'request_revision'; readonly reason: string }
   | { readonly action: 'decline_quotation'; readonly reason: string }
   | { readonly action: 'schedule'; readonly startAt: number }
   | { readonly action: 'start_service' }
@@ -236,13 +278,24 @@ function computePatch(request: ServiceRequest, input: ActionInput, actor: Actor,
     case 'send_quotation':
       return { patch: { quotation: buildQuotation(input.draft, now) }, note: '' }
     case 'revise_quotation':
-      return { patch: { quotation: null }, note: 'Quotation withdrawn for revision' }
+      return { patch: { quotation: null }, note: 'The shop took back the quotation to send a new one' }
     case 'accept_quotation': {
       const quotation = requireQuotation(request)
       if (now > quotation.validUntil) {
         throw new ConflictError('This quotation has expired. Ask the shop for a new one.')
       }
       return { patch: { quotation: { ...quotation, response: 'accepted', respondedAt: now } }, note: '' }
+    }
+    case 'request_revision': {
+      const quotation = requireQuotation(request)
+      if (hasRevisionRequest(request)) {
+        throw new ConflictError('A revised quotation was already requested. Accept it or decline it.')
+      }
+      const reason = parseOrThrow(RevisionReasonSchema, input.reason)
+      return {
+        patch: { quotation: { ...quotation, response: 'revision_requested', respondedAt: now } },
+        note: reason,
+      }
     }
     case 'decline_quotation': {
       const quotation = requireQuotation(request)
@@ -349,6 +402,11 @@ function messageFor(request: ServiceRequest, input: ActionInput, actor: Actor): 
       return { title: 'Quotation being revised', body: `${ref}: the shop is updating the quotation for your ${item}.` }
     case 'accept_quotation':
       return { title: 'Quotation accepted', body: `${ref}: the customer accepted the quotation for ${item}.` }
+    case 'request_revision':
+      return {
+        title: 'Quotation revision requested',
+        body: withReason(`${ref}: the customer asked for a revised quotation for ${item}.`, input.reason.trim()),
+      }
     case 'decline_quotation':
       return {
         title: 'Quotation declined',

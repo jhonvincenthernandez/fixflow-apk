@@ -31,7 +31,7 @@ import type { AsyncState } from '@/domain/async'
 import { toAppError, userMessage } from '@/domain/errors'
 import { logger } from '@/domain/logger'
 import type { QuotationDraft, Role, ServiceRequest } from '@/domain/types'
-import { actionLabel, availableActions } from '@/domain/workflow'
+import { actionLabel, availableActions, hasRevisionRequest } from '@/domain/workflow'
 import type { ActionId, ActionInput } from '@/domain/workflow'
 
 const props = defineProps<{ request: ServiceRequest; role: Role }>()
@@ -44,13 +44,14 @@ const emit = defineEmits<{
 }>()
 
 type SheetKind = 'quotation' | 'schedule' | 'reason' | 'feedback'
-type ReasonAction = Extract<ActionId, 'cancel' | 'decline_quotation'>
+type ReasonAction = Extract<ActionId, 'cancel' | 'decline_quotation' | 'request_revision'>
 
 const ICONS: Record<ActionId, Component> = {
   start_review: Search,
   send_quotation: Receipt,
   revise_quotation: PencilLine,
   accept_quotation: BadgeCheck,
+  request_revision: PencilLine,
   decline_quotation: CircleX,
   schedule: CalendarCheck,
   start_service: Play,
@@ -62,14 +63,56 @@ const ICONS: Record<ActionId, Component> = {
 const SUCCESS_TEXT: Record<ActionId, string> = {
   start_review: 'Review started. The customer was notified.',
   send_quotation: 'Quotation sent to the customer.',
-  revise_quotation: 'Quotation withdrawn. You can prepare a new one.',
+  revise_quotation: 'Quotation taken back. You can prepare a new one.',
   accept_quotation: 'Quotation accepted. Next, choose an appointment time.',
+  request_revision: 'Revision requested. The shop was notified.',
   decline_quotation: 'Quotation declined.',
   schedule: 'Appointment saved.',
   start_service: 'Service started.',
   complete_service: 'Marked as completed. The customer can now leave feedback.',
   submit_feedback: 'Thanks for your feedback.',
   cancel: 'Request cancelled.',
+}
+
+/** Copy for the shared reason sheet. Each reason action has its own wording. */
+interface ReasonSheetCopy {
+  readonly title: string
+  readonly body: string
+  readonly label: string
+  readonly secondaryLabel: string
+  readonly placeholder: string
+  readonly optional: boolean
+  readonly danger: boolean
+}
+
+const REASON_SHEET: Record<ReasonAction, ReasonSheetCopy> = {
+  cancel: {
+    title: 'Cancel this request?',
+    body: 'The request will close and the other side will be notified. This cannot be undone.',
+    label: 'Cancel request',
+    secondaryLabel: 'Keep request',
+    placeholder: 'Tell them why',
+    optional: true,
+    danger: true,
+  },
+  decline_quotation: {
+    title: 'Decline this quotation?',
+    body: 'The request will close and the shop will be notified. You can send a new request any time. If the price is the problem, ask for a revised quotation instead.',
+    label: 'Decline quotation',
+    secondaryLabel: 'Review again',
+    placeholder: 'Tell them why',
+    optional: true,
+    danger: true,
+  },
+  request_revision: {
+    title: 'Request a revised quotation?',
+    body: 'The shop is asked to send a new quotation. You can accept or decline it once it arrives.',
+    label: 'Request revision',
+    secondaryLabel: 'Not now',
+    placeholder: 'Tell the shop what to change',
+    optional: false,
+    danger: false,
+  },
 }
 
 const quotationFormId = useId()
@@ -91,12 +134,16 @@ const runner = useAsyncAction((input: ActionInput) => runAction(props.request.id
 const actions = computed(() => {
   const all = availableActions(props.request.status, props.role)
   // Declining a quotation already closes the request, so a second "cancel" would be redundant.
-  return all.includes('decline_quotation') ? all.filter((action) => action !== 'cancel') : all
+  const withoutCancel = all.includes('decline_quotation') ? all.filter((action) => action !== 'cancel') : all
+  // One revision round per request, so the customer cannot ask for a second one.
+  return withoutCancel.filter((action) => action !== 'request_revision' || !hasRevisionRequest(props.request))
 })
+
+const reasonCopy = computed(() => REASON_SHEET[reasonAction.value])
 
 function variantOf(action: ActionId): 'primary' | 'secondary' | 'danger' {
   if (action === 'cancel' || action === 'decline_quotation') return 'danger'
-  if (action === 'revise_quotation') return 'secondary'
+  if (action === 'revise_quotation' || action === 'request_revision') return 'secondary'
   if (action === 'schedule' && props.request.status === 'scheduled') return 'secondary'
   return 'primary'
 }
@@ -124,6 +171,7 @@ function immediateInput(action: ActionId): ActionInput | null {
     case 'complete_service':
       return { action }
     case 'send_quotation':
+    case 'request_revision':
     case 'decline_quotation':
     case 'schedule':
     case 'submit_feedback':
@@ -186,6 +234,7 @@ async function onAction(action: ActionId): Promise<void> {
       sheet.value = 'schedule'
       await loadSchedule()
       return
+    case 'request_revision':
     case 'decline_quotation':
     case 'cancel':
       reasonAction.value = action
@@ -221,11 +270,23 @@ async function onScheduleConfirm(): Promise<void> {
   }
 }
 
+function buildReasonInput(action: ReasonAction, value: string): ActionInput {
+  switch (action) {
+    case 'cancel':
+      return { action: 'cancel', reason: value }
+    case 'decline_quotation':
+      return { action: 'decline_quotation', reason: value }
+    case 'request_revision':
+      return { action: 'request_revision', reason: value }
+    default: {
+      const unreachable: never = action
+      return unreachable
+    }
+  }
+}
+
 async function onReasonConfirm(): Promise<void> {
-  const input: ActionInput =
-    reasonAction.value === 'cancel'
-      ? { action: 'cancel', reason: reason.value }
-      : { action: 'decline_quotation', reason: reason.value }
+  const input = buildReasonInput(reasonAction.value, reason.value)
   if (await perform(input)) closeSheet()
 }
 
@@ -306,26 +367,21 @@ async function onFeedbackSubmit(): Promise<void> {
     </template>
   </SheetModal>
 
-  <SheetModal
-    :open="sheet === 'reason'"
-    :title="reasonAction === 'cancel' ? 'Cancel this request?' : 'Decline this quotation?'"
-    @close="closeSheet"
-  >
+  <SheetModal :open="sheet === 'reason'" :title="reasonCopy.title" @close="closeSheet">
     <div class="ff-stack">
-      <p>
-        {{
-          reasonAction === 'cancel'
-            ? 'The request will close and the other side will be notified. This cannot be undone.'
-            : 'The request will close and the shop will be notified. You can send a new request any time.'
-        }}
-      </p>
-      <FormField v-slot="field" label="Reason" optional :error="runner.fieldErrors.value['_form']?.[0]">
+      <p>{{ reasonCopy.body }}</p>
+      <FormField
+        v-slot="field"
+        label="Reason"
+        :optional="reasonCopy.optional"
+        :error="runner.fieldErrors.value['_form']?.[0]"
+      >
         <textarea
           :id="field.id"
           v-model="reason"
           class="ff-textarea"
           maxlength="200"
-          placeholder="Tell them why"
+          :placeholder="reasonCopy.placeholder"
           :aria-invalid="field.invalid"
           :aria-describedby="field.describedBy"
         />
@@ -335,11 +391,16 @@ async function onFeedbackSubmit(): Promise<void> {
       </p>
     </div>
     <template #footer>
-      <AppButton variant="danger" block :loading="runner.loading.value" @click="onReasonConfirm">
-        {{ reasonAction === 'cancel' ? 'Cancel request' : 'Decline quotation' }}
+      <AppButton
+        :variant="reasonCopy.danger ? 'danger' : 'primary'"
+        block
+        :loading="runner.loading.value"
+        @click="onReasonConfirm"
+      >
+        {{ reasonCopy.label }}
       </AppButton>
       <AppButton variant="secondary" block @click="closeSheet">
-        {{ reasonAction === 'cancel' ? 'Keep request' : 'Review again' }}
+        {{ reasonCopy.secondaryLabel }}
       </AppButton>
     </template>
   </SheetModal>

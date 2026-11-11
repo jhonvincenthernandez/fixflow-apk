@@ -2,10 +2,10 @@
 import { computed } from 'vue'
 import { Ban, Check, CircleX } from '@lucide/vue'
 import { formatDateTime } from '@/domain/format'
-import type { ServiceRequest } from '@/domain/types'
-import { STAGES, STATUS_LABEL, isClosedEarly, stageIndex } from '@/domain/workflow'
+import type { Role, ServiceRequest } from '@/domain/types'
+import { STAGES, STATUS_LABEL, isClosedEarly } from '@/domain/workflow'
 
-const props = defineProps<{ request: ServiceRequest }>()
+const props = defineProps<{ request: ServiceRequest; role: Role }>()
 
 type StepState = 'done' | 'current' | 'upcoming' | 'closed'
 
@@ -25,48 +25,114 @@ const STATE_PREFIX: Record<StepState, string> = {
   closed: 'Closed: ',
 }
 
+/** One moment in the request, taken from the history. */
+interface Moment {
+  readonly key: string
+  readonly label: string
+  readonly description: string
+  readonly at: number
+  readonly note: string
+  /** The stage this moment belongs to, or a synthetic one for a revision round. */
+  readonly stage: string
+}
+
+/**
+ * The moments of the request in the order they happened.
+ * A revision round is a real step, so it gets its own label instead of
+ * pretending to be a second review.
+ */
+function buildMoments(request: ServiceRequest, role: Role): Moment[] {
+  const moments: Moment[] = []
+  for (const [index, entry] of request.history.entries()) {
+    const revision = entry.status === 'under_review' && entry.by === 'customer'
+    const stage = STAGES.find((item) => item.status === entry.status)
+    moments.push({
+      key: `${entry.status}-${entry.at}-${index}`,
+      label: revision ? 'Revision requested' : (stage?.label ?? STATUS_LABEL[entry.status]),
+      description: revision
+        ? role === 'owner'
+          ? 'The customer asked for a revised quotation.'
+          : 'You asked for a revised quotation.'
+        : (stage?.description ?? ''),
+      at: entry.at,
+      note: entry.note,
+      stage: revision ? 'revision_requested' : entry.status,
+    })
+  }
+  return moments
+}
+
+/** Two moments on the same stage back to back are one stage, shown at the later time. */
+function collapse(moments: Moment[]): Moment[] {
+  const result: Moment[] = []
+  for (const moment of moments) {
+    const previous = result[result.length - 1]
+    if (previous !== undefined && previous.stage === moment.stage) {
+      result[result.length - 1] = moment
+      continue
+    }
+    result.push(moment)
+  }
+  return result
+}
+
+/** The stages that still lie ahead, judged by the furthest stage already reached. */
+function upcomingStages(moments: Moment[]): Step[] {
+  const reached = moments
+    .map((moment) => STAGES.findIndex((stage) => stage.status === moment.stage))
+    .filter((index) => index >= 0)
+  const furthest = reached.length > 0 ? Math.max(...reached) : -1
+  return STAGES.slice(furthest + 1).map((stage) => ({
+    key: stage.status,
+    label: stage.label,
+    description: stage.description,
+    state: 'upcoming' as StepState,
+    at: null,
+    note: '',
+  }))
+}
+
 const steps = computed<Step[]>(() => {
   const { request } = props
-  // Later history entries win, so a rescheduled appointment shows its latest time.
-  const reached = new Map(request.history.map((entry) => [entry.status, entry]))
   const closedEarly = isClosedEarly(request.status)
-  const current = stageIndex(request.status)
+  const moments = collapse(buildMoments(request, props.role))
 
-  const stages: Step[] = STAGES.map((stage, index) => {
-    const entry = reached.get(stage.status)
-    let state: StepState = 'upcoming'
-    if (closedEarly) {
-      state = entry === undefined ? 'upcoming' : 'done'
-    } else if (request.status === 'feedback' || index < current) {
-      state = 'done'
-    } else if (index === current) {
-      state = 'current'
-    }
-    return {
-      key: stage.status,
-      label: stage.label,
-      description: stage.description,
-      state,
-      at: entry?.at ?? null,
-      note: entry?.note ?? '',
-    }
-  })
+  if (closedEarly) {
+    // A closed request shows the steps it reached, then how it ended.
+    const closure = moments[moments.length - 1]
+    const past: Step[] = moments.slice(0, -1).map((moment) => ({
+      key: moment.key,
+      label: moment.label,
+      description: moment.description,
+      state: 'done',
+      at: moment.at,
+      note: moment.note,
+    }))
+    return [
+      ...past,
+      {
+        key: request.status,
+        label: STATUS_LABEL[request.status],
+        description: request.closure === null ? '' : `By the ${request.closure.by === 'owner' ? 'shop' : 'customer'}`,
+        state: 'closed',
+        at: closure?.at ?? null,
+        note: request.closure?.reason ?? '',
+      },
+    ]
+  }
 
-  if (!closedEarly) return stages
+  // The last moment is where the request stands now. Everything before it is done.
+  const allDone = request.status === 'feedback'
+  const timeline: Step[] = moments.map((moment, index) => ({
+    key: moment.key,
+    label: moment.label,
+    description: moment.description,
+    state: allDone ? 'done' : index === moments.length - 1 ? 'current' : 'done',
+    at: moment.at,
+    note: moment.note,
+  }))
 
-  // A closed request shows the steps it reached, then how it ended.
-  const closure = reached.get(request.status)
-  return [
-    ...stages.filter((step) => step.state === 'done'),
-    {
-      key: request.status,
-      label: STATUS_LABEL[request.status],
-      description: request.closure === null ? '' : `By the ${request.closure.by === 'owner' ? 'shop' : 'customer'}`,
-      state: 'closed',
-      at: closure?.at ?? null,
-      note: request.closure?.reason ?? '',
-    },
-  ]
+  return [...timeline, ...upcomingStages(moments)]
 })
 </script>
 
