@@ -126,21 +126,23 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
           />
 
           <template v-else-if="request && service && role">
-            <section class="ff-stack ff-stack--tight" aria-labelledby="detail-title">
-              <div class="ff-row ff-row--between ff-row--wrap">
-                <StatusBadge :status="request.status" />
-                <span class="ff-meta">Updated {{ formatRelative(request.updatedAt, now) }}</span>
+            <header class="masthead" aria-labelledby="detail-title">
+              <div class="masthead__identity">
+                <div class="masthead__status">
+                  <StatusBadge :status="request.status" />
+                  <span class="ff-meta">Updated {{ formatRelative(request.updatedAt, now) }}</span>
+                </div>
+                <h2 id="detail-title" class="ff-h1 masthead__title">{{ request.itemName }}</h2>
+                <p class="ff-meta">{{ service.name }}, submitted {{ formatDate(request.createdAt) }}</p>
               </div>
-              <h2 id="detail-title" class="ff-h1">{{ request.itemName }}</h2>
-              <p class="ff-meta">{{ service.name }}, submitted {{ formatDate(request.createdAt) }}</p>
               <p class="ff-inset next" :class="{ 'is-turn': yourTurn }">
                 <strong v-if="yourTurn" class="next__turn">Your turn: </strong>{{ nextStepText(request.status, role) }}
               </p>
-            </section>
+            </header>
 
             <div class="detail__layout">
-              <div class="detail__column ff-stack">
-                <section class="ff-card ff-stack" aria-labelledby="detail-problem">
+              <div class="detail__main">
+                <section class="ff-card ff-stack problem-card" aria-labelledby="detail-problem">
                   <h2 id="detail-problem" class="ff-h3">The problem</h2>
                   <p class="problem">{{ request.description }}</p>
                   <dl class="facts">
@@ -165,7 +167,7 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
                   </template>
                 </section>
 
-                <section v-if="role === 'owner'" class="ff-card ff-stack" aria-labelledby="detail-customer">
+                <section v-if="role === 'owner'" class="ff-card ff-stack customer-card" aria-labelledby="detail-customer">
                   <h2 id="detail-customer" class="ff-h3">Customer</h2>
                   <dl class="facts">
                     <div>
@@ -182,17 +184,24 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
                     </div>
                   </dl>
                 </section>
-              </div>
-
-              <aside class="detail__aside ff-stack" aria-label="Progress and documents">
-                <DisclosureSection title="Progress" default-open>
-                  <StatusStepper :request="request" />
-                </DisclosureSection>
 
                 <section v-if="request.quotation" class="ff-card ff-stack" aria-labelledby="detail-quote">
                   <h2 id="detail-quote" class="ff-h3">Quotation</h2>
                   <QuotationSummary :quotation="request.quotation" :now="now" />
                 </section>
+
+                <section v-if="request.feedback" class="ff-card ff-stack ff-stack--tight" aria-labelledby="detail-feedback">
+                  <h2 id="detail-feedback" class="ff-h3">Feedback</h2>
+                  <RatingStars :rating="request.feedback.rating" />
+                  <p v-if="request.feedback.comment.length > 0" class="feedback__comment">{{ request.feedback.comment }}</p>
+                  <p class="ff-meta">{{ formatDate(request.feedback.createdAt) }}</p>
+                </section>
+              </div>
+
+              <div class="detail__aside">
+                <DisclosureSection title="Progress" default-open>
+                  <StatusStepper :request="request" />
+                </DisclosureSection>
 
                 <section v-if="request.appointment" class="ff-card ff-stack ff-stack--tight" aria-labelledby="detail-appointment">
                   <h2 id="detail-appointment" class="ff-h3">Appointment</h2>
@@ -202,14 +211,7 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
                     {{ request.mode === 'home_visit' ? 'the technician will visit the address above' : 'bring the item to the shop' }}.
                   </p>
                 </section>
-
-                <section v-if="request.feedback" class="ff-card ff-stack ff-stack--tight" aria-labelledby="detail-feedback">
-                  <h2 id="detail-feedback" class="ff-h3">Feedback</h2>
-                  <RatingStars :rating="request.feedback.rating" />
-                  <p v-if="request.feedback.comment.length > 0">{{ request.feedback.comment }}</p>
-                  <p class="ff-meta">{{ formatDate(request.feedback.createdAt) }}</p>
-                </section>
-              </aside>
+              </div>
             </div>
           </template>
         </ErrorBoundary>
@@ -223,6 +225,26 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
 </template>
 
 <style scoped>
+.masthead {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.masthead__identity {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.masthead__status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
 .next {
   margin: 0;
   font-size: var(--text-sm);
@@ -240,6 +262,7 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
 }
 
 .problem {
+  max-width: 68ch;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
@@ -262,13 +285,18 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
   font-weight: var(--weight-extrabold);
 }
 
+.feedback__comment {
+  max-width: 68ch;
+  overflow-wrap: anywhere;
+}
+
 .detail__layout {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
 }
 
-.detail__column,
+.detail__main,
 .detail__aside {
   display: flex;
   flex-direction: column;
@@ -277,11 +305,42 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
 }
 
 @media (min-width: 64rem) {
+  .masthead {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(18rem, 24rem);
+    align-items: end;
+    gap: var(--space-6);
+    padding-bottom: var(--space-6);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .masthead__title {
+    overflow-wrap: anywhere;
+  }
+
+  .next {
+    padding: var(--space-4);
+  }
+
   .detail__layout {
     display: grid;
-    grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.85fr);
-    gap: var(--space-6);
+    grid-template-columns: minmax(0, 1.6fr) minmax(20rem, 1fr);
     align-items: start;
+    gap: var(--space-6);
+  }
+
+  .problem-card .facts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-4);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .customer-card .facts {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-4);
   }
 }
 </style>

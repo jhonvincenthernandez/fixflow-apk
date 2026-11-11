@@ -94,13 +94,13 @@ const formError = computed(() => {
 
 <template>
   <ion-page>
-    <PageHeader title="New request" back-href="/tabs/home" width="narrow" />
+    <PageHeader title="New request" back-href="/tabs/home" width="wide" />
     <ion-content>
       <ion-refresher slot="fixed" @ionRefresh="onPullRefresh">
         <ion-refresher-content />
       </ion-refresher>
-      <main class="ff-container" tabindex="-1">
-        <form class="ff-stack ff-stack--loose" novalidate @submit.prevent="submit.run()">
+      <main class="ff-container request-page" tabindex="-1">
+        <form class="request" novalidate @submit.prevent="submit.run()">
           <fieldset class="picker">
             <legend class="ff-label">What needs fixing?</legend>
             <div class="picker__grid">
@@ -118,68 +118,70 @@ const formError = computed(() => {
             <p class="ff-hint" aria-live="polite">For example: {{ examples }}</p>
           </fieldset>
 
-          <FormField v-slot="field" label="What is the item?" :error="fieldError('itemName')">
-            <input
-              :id="field.id"
-              v-model="itemName"
-              class="ff-input"
-              type="text"
-              maxlength="60"
-              autocomplete="off"
-              placeholder="iPhone 12, Samsung aircon, Dell Inspiron"
-              :aria-invalid="field.invalid"
-              :aria-describedby="field.describedBy"
-            />
-          </FormField>
+          <div class="request__fields ff-stack ff-stack--loose">
+            <FormField v-slot="field" label="What is the item?" :error="fieldError('itemName')">
+              <input
+                :id="field.id"
+                v-model="itemName"
+                class="ff-input"
+                type="text"
+                maxlength="60"
+                autocomplete="off"
+                placeholder="iPhone 12, Samsung aircon, Dell Inspiron"
+                :aria-invalid="field.invalid"
+                :aria-describedby="field.describedBy"
+              />
+            </FormField>
 
-          <FormField
-            v-slot="field"
-            label="What is wrong with it?"
-            :hint="`${description.length} of ${DESCRIPTION_LIMIT} characters`"
-            :error="fieldError('description')"
-          >
-            <textarea
-              :id="field.id"
-              v-model="description"
-              class="ff-textarea"
-              :maxlength="DESCRIPTION_LIMIT"
-              placeholder="When did it start? What happens? Anything you already tried?"
-              :aria-invalid="field.invalid"
-              :aria-describedby="field.describedBy"
-            />
-          </FormField>
+            <FormField
+              v-slot="field"
+              label="What is wrong with it?"
+              :hint="`${description.length} of ${DESCRIPTION_LIMIT} characters`"
+              :error="fieldError('description')"
+            >
+              <textarea
+                :id="field.id"
+                v-model="description"
+                class="ff-textarea"
+                :maxlength="DESCRIPTION_LIMIT"
+                placeholder="When did it start? What happens? Anything you already tried?"
+                :aria-invalid="field.invalid"
+                :aria-describedby="field.describedBy"
+              />
+            </FormField>
 
-          <ImagePicker v-model="uploads" :error="fieldError('images')" />
+            <ImagePicker v-model="uploads" :error="fieldError('images')" />
 
-          <div class="ff-stack ff-stack--tight">
-            <p class="ff-label" id="mode-label">How would you like it done?</p>
-            <SegmentedControl v-model="mode" :options="MODE_OPTIONS" legend="Drop off or home visit" />
-          </div>
+            <div class="mode ff-stack ff-stack--tight">
+              <p class="ff-label" id="mode-label">How would you like it done?</p>
+              <SegmentedControl v-model="mode" :options="MODE_OPTIONS" legend="Drop off or home visit" />
+            </div>
 
-          <FormField
-            v-if="mode === 'home_visit'"
-            v-slot="field"
-            label="Address for the visit"
-            :error="fieldError('address')"
-          >
-            <textarea
-              :id="field.id"
-              v-model="address"
-              class="ff-textarea"
-              maxlength="200"
-              autocomplete="street-address"
-              placeholder="House number, street, barangay"
-              :aria-invalid="field.invalid"
-              :aria-describedby="field.describedBy"
-            />
-          </FormField>
+            <FormField
+              v-if="mode === 'home_visit'"
+              v-slot="field"
+              label="Address for the visit"
+              :error="fieldError('address')"
+            >
+              <textarea
+                :id="field.id"
+                v-model="address"
+                class="ff-textarea"
+                maxlength="200"
+                autocomplete="street-address"
+                placeholder="House number, street, barangay"
+                :aria-invalid="field.invalid"
+                :aria-describedby="field.describedBy"
+              />
+            </FormField>
 
-          <div class="ff-stack ff-stack--tight">
-            <p v-if="formError" class="ff-error-text" role="alert">{{ formError }} Try again.</p>
-            <AppButton type="submit" block :loading="submit.loading.value">
-              <Send class="ff-icon ff-icon--sm" aria-hidden="true" />
-              Submit request
-            </AppButton>
+            <div class="ff-stack ff-stack--tight">
+              <p v-if="formError" class="ff-error-text" role="alert">{{ formError }} Try again.</p>
+              <AppButton type="submit" class="submit" :loading="submit.loading.value">
+                <Send class="ff-icon ff-icon--sm" aria-hidden="true" />
+                Submit request
+              </AppButton>
+            </div>
           </div>
         </form>
       </main>
@@ -188,11 +190,33 @@ const formError = computed(() => {
 </template>
 
 <style scoped>
+.request-page {
+  max-width: var(--content-max-wide);
+}
+
+.request {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.request__fields {
+  min-width: 0;
+}
+
+.submit {
+  width: 100%;
+}
+
 .picker {
   min-width: 0;
   margin: 0;
   padding: 0;
   border: 0;
+}
+
+.picker > legend {
+  padding: 0;
 }
 
 .picker__grid {
@@ -246,6 +270,38 @@ const formError = computed(() => {
 @media (min-width: 48rem) {
   .picker__grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .mode {
+    max-width: 32rem;
+  }
+
+  .submit {
+    width: auto;
+    min-width: 14rem;
+    align-self: flex-start;
+  }
+}
+
+@media (min-width: 64rem) {
+  .request {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr);
+    gap: var(--space-12);
+    align-items: start;
+  }
+
+  .request > .picker {
+    position: sticky;
+    top: var(--space-6);
+  }
+
+  .picker__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tile__name {
+    font-size: var(--text-base);
   }
 }
 </style>

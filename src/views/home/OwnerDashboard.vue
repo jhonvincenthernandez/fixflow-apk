@@ -2,21 +2,18 @@
 import { computed } from 'vue'
 import { CalendarCheck, CalendarClock, ChevronRight, CircleCheck } from '@lucide/vue'
 import AppLink from '@/components/AppLink.vue'
-import EmptyState from '@/components/EmptyState.vue'
 import ErrorState from '@/components/ErrorState.vue'
 import RatingStars from '@/components/RatingStars.vue'
 import RequestCard from '@/components/RequestCard.vue'
 import SkeletonList from '@/components/SkeletonList.vue'
-import { loadAvailability, useAvailability } from '@/composables/useAvailability'
 import { loadRequests, useRequests } from '@/composables/useRequests'
-import { BUSINESS } from '@/domain/business'
 import { formatDateTime, formatRelative } from '@/domain/format'
-import { hoursSentence, lunchText } from '@/domain/availability'
 import type { RequestStatus, ServiceRequest } from '@/domain/types'
 import { actionOwner } from '@/domain/workflow'
 
-const props = defineProps<{ now: number }>()
+const props = defineProps<{ name: string; now: number }>()
 
+const WHITESPACE = /\s+/
 const MAX_ACTION = 4
 const MAX_UPCOMING = 4
 const MAX_FEEDBACK = 3
@@ -35,8 +32,8 @@ function isTileStatus(status: RequestStatus): status is TileStatus {
 }
 
 const { state, list, customerName } = useRequests()
-const { availability } = useAvailability()
-void loadAvailability({ silent: true })
+
+const firstName = computed(() => props.name.trim().split(WHITESPACE)[0] ?? props.name)
 
 /** One pass over the list for all four counters. */
 const counts = computed<Record<TileStatus, number>>(() => {
@@ -77,22 +74,17 @@ const averageRating = computed(() => {
 
 <template>
   <div class="ff-stack ff-stack--loose dash">
-    <section class="ff-stack ff-stack--tight dash__hero" aria-labelledby="dash-title">
-      <p class="ff-overline">{{ BUSINESS.name }}</p>
-      <h1 id="dash-title" class="ff-h1">Shop dashboard</h1>
+    <section class="dash__hero" aria-labelledby="dash-greeting">
+      <div class="ff-stack ff-stack--tight">
+        <p class="ff-overline">Business portal</p>
+        <h1 id="dash-greeting" class="ff-h1">Hello, {{ firstName }}</h1>
+        <p class="ff-lead">What needs your attention today?</p>
+      </div>
+      <AppLink to="/availability" class="ff-btn ff-btn--primary dash__cta">
+        <CalendarClock class="ff-icon ff-icon--sm" aria-hidden="true" />
+        Shop schedule
+      </AppLink>
     </section>
-
-    <AppLink to="/availability" class="ff-card ff-card--interactive schedule">
-      <CalendarClock class="ff-icon ff-icon--lg schedule__icon" aria-hidden="true" />
-      <span class="ff-grow">
-        <span class="schedule__title">Shop schedule</span>
-        <span v-if="availability" class="ff-meta schedule__meta">
-          {{ hoursSentence(availability) }}<template v-if="lunchText(availability)">. {{ lunchText(availability) }}</template>
-        </span>
-        <span v-else class="ff-meta schedule__meta">Set your hours, slots and days off</span>
-      </span>
-      <ChevronRight class="ff-icon" aria-hidden="true" />
-    </AppLink>
 
     <SkeletonList v-if="state.status === 'loading' || state.status === 'idle'" :count="3" />
     <ErrorState
@@ -123,7 +115,7 @@ const averageRating = computed(() => {
               <RequestCard :request="request" role="owner" :customer-name="customerName(request.customerId)" :now="now" />
             </li>
           </ul>
-          <p v-else class="caught-up ff-meta">
+          <p v-else class="dash-empty dash-empty--clear">
             <CircleCheck class="ff-icon ff-icon--sm" aria-hidden="true" />
             Nothing is waiting on you right now.
           </p>
@@ -131,12 +123,10 @@ const averageRating = computed(() => {
 
         <section class="ff-stack" aria-labelledby="dash-upcoming">
           <h2 id="dash-upcoming" class="ff-h2">Upcoming appointments</h2>
-          <EmptyState
-            v-if="upcoming.length === 0"
-            :icon="CalendarCheck"
-            title="No appointments booked"
-            body="Booked visits appear here once customers pick a time."
-          />
+          <p v-if="upcoming.length === 0" class="dash-empty">
+            <CalendarCheck class="ff-icon ff-icon--sm" aria-hidden="true" />
+            No appointments booked yet. Booked visits appear here once customers pick a time.
+          </p>
           <div v-else class="ff-card">
             <ul>
               <li v-for="request in upcoming" :key="request.id" class="row-item">
@@ -184,30 +174,30 @@ const averageRating = computed(() => {
 </template>
 
 <style scoped>
-.schedule {
+.dash__hero {
   display: flex;
-  align-items: center;
-  gap: var(--space-3);
+  flex-direction: column;
+  gap: var(--space-4);
 }
 
-.schedule__icon {
-  flex: none;
-  color: var(--color-brand);
+.dash__cta {
+  width: 100%;
 }
 
-.schedule__title {
-  display: block;
-  font-weight: var(--weight-bold);
-}
-
-.schedule__meta {
-  display: block;
-}
-
-.caught-up {
+.dash-empty {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.dash-empty > .ff-icon {
+  flex: none;
+  margin-top: 0.125rem;
+}
+
+.dash-empty--clear {
   color: var(--color-success);
   font-weight: var(--weight-semibold);
 }
@@ -235,9 +225,25 @@ const averageRating = computed(() => {
     gap: var(--space-8);
   }
 
+  .dash__hero {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-6);
+    padding: var(--space-6);
+    background: var(--color-brand-light);
+    border: 1px solid var(--color-brand-border);
+    border-radius: var(--radius-xl);
+  }
+
+  .dash__cta {
+    width: auto;
+    flex: none;
+  }
+
   .dash__split {
     display: grid;
-    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
     gap: var(--space-6);
     align-items: start;
   }

@@ -36,7 +36,7 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
       <main class="ff-container ff-container--wide" tabindex="-1">
         <ErrorBoundary title="Home could not load">
           <CustomerHome v-if="user?.role === 'customer'" :name="user.name" :now="now" />
-          <OwnerDashboard v-else-if="user?.role === 'owner'" :now="now" />
+          <OwnerDashboard v-else-if="user?.role === 'owner'" :name="user.name" :now="now" />
         </ErrorBoundary>
       </main>
     </ion-content>

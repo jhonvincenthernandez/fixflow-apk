@@ -56,42 +56,41 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
         <ion-refresher-content />
       </ion-refresher>
       <main class="ff-container ff-container--wide profile-page" tabindex="-1">
-        <div class="profile-page__col">
-          <section v-if="user" class="ff-card profile" aria-labelledby="profile-name">
-            <span class="profile__avatar" aria-hidden="true">{{ initials(user.name) }}</span>
-            <div class="ff-grow">
+        <header v-if="user" class="ff-card profile-head" aria-labelledby="profile-name">
+          <span class="profile-head__avatar" aria-hidden="true">{{ initials(user.name) }}</span>
+          <div class="profile-head__body">
+            <div class="profile-head__identity">
               <h2 id="profile-name" class="ff-h2">{{ user.name }}</h2>
               <span class="ff-badge ff-badge--brand">{{ user.role === 'owner' ? 'Business owner' : 'Customer' }}</span>
             </div>
-          </section>
-
-          <section v-if="user" class="ff-card" aria-labelledby="profile-contact">
-            <h2 id="profile-contact" class="ff-h3">Contact</h2>
-            <dl class="facts">
+            <dl class="profile-head__contact">
               <div>
                 <dt class="ff-meta">Email</dt>
-                <dd>{{ user.email }}</dd>
+                <dd><a :href="`mailto:${user.email}`">{{ user.email }}</a></dd>
               </div>
               <div>
                 <dt class="ff-meta">Mobile</dt>
-                <dd>{{ user.phone }}</dd>
+                <dd><a :href="`tel:${user.phone}`">{{ user.phone }}</a></dd>
               </div>
             </dl>
-          </section>
+          </div>
+        </header>
 
-          <section v-if="user?.role === 'owner'" class="ff-card" aria-labelledby="profile-shop">
-            <h2 id="profile-shop" class="ff-h3">Shop</h2>
-            <dl class="facts">
+        <div class="profile-grid">
+          <section v-if="user" class="ff-card ff-stack shop-card" aria-labelledby="profile-shop">
+            <h2 id="profile-shop" class="ff-h3">{{ user.role === 'owner' ? 'Shop' : 'Shop hours' }}</h2>
+
+            <dl v-if="user.role === 'owner'" class="facts">
               <div>
                 <dt class="ff-meta">Name</dt>
                 <dd>{{ BUSINESS.name }}</dd>
               </div>
             </dl>
-          </section>
 
-          <section v-if="user" class="ff-card ff-stack" aria-labelledby="profile-hours">
-            <h2 id="profile-hours" class="ff-h3">{{ user.role === 'owner' ? 'Opening hours' : 'Shop hours' }}</h2>
+            <hr v-if="user.role === 'owner'" class="ff-divider" />
+
             <template v-if="availability">
+              <h3 v-if="user.role === 'owner'" class="ff-label">Opening hours</h3>
               <dl class="hours">
                 <div v-for="line in hoursLines(availability)" :key="line.days" class="hours__row">
                   <dt>{{ line.days }}</dt>
@@ -108,28 +107,30 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
               <AppButton variant="secondary" @click="loadAvailability()">Try again</AppButton>
             </template>
             <p v-else class="ff-meta" role="status">Loading the hours</p>
-            <AppLink v-if="user.role === 'owner'" to="/availability" class="ff-btn ff-btn--secondary ff-btn--block">
+
+            <AppLink v-if="user.role === 'owner'" to="/availability" class="ff-btn ff-btn--secondary shop-card__manage">
               <CalendarClock class="ff-icon ff-icon--sm" aria-hidden="true" />
               Manage schedule
             </AppLink>
           </section>
-        </div>
 
-        <div class="profile-page__col">
-          <AppearancePanel heading-id="profile-appearance" />
+          <div class="profile-grid__side">
+            <AppearancePanel heading-id="profile-appearance" />
 
-          <DisclosureSection title="About FixFlow">
-            <p>
-              FixFlow keeps accounts, requests, photos and shop hours in a PostgreSQL database through
-              Firebase Data Connect, so customers and the shop stay in sync across devices.
-            </p>
-          </DisclosureSection>
+            <DisclosureSection title="About FixFlow">
+              <p>
+                FixFlow keeps accounts, requests, photos and shop hours in a PostgreSQL database through
+                Firebase Data Connect, so customers and the shop stay in sync across devices.
+              </p>
+            </DisclosureSection>
 
-          <div class="ff-stack ff-stack--tight">
-            <AppButton variant="secondary" block aria-haspopup="dialog" @click="signOutOpen = true">
-              <LogOut class="ff-icon ff-icon--sm" aria-hidden="true" />
-              Sign out
-            </AppButton>
+            <section class="ff-card ff-stack" aria-labelledby="profile-session">
+              <h2 id="profile-session" class="ff-h3">Session</h2>
+              <AppButton variant="secondary" block aria-haspopup="dialog" @click="signOutOpen = true">
+                <LogOut class="ff-icon ff-icon--sm" aria-hidden="true" />
+                Sign out
+              </AppButton>
+            </section>
           </div>
         </div>
       </main>
@@ -155,29 +156,13 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
   gap: var(--space-4);
 }
 
-.profile-page__col {
+.profile-head {
   display: flex;
-  flex-direction: column;
+  align-items: flex-start;
   gap: var(--space-4);
-  min-width: 0;
 }
 
-@media (min-width: 64rem) {
-  .profile-page {
-    display: grid;
-    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
-    gap: var(--space-6);
-    align-items: start;
-  }
-}
-
-.profile {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-}
-
-.profile__avatar {
+.profile-head__avatar {
   display: inline-flex;
   flex: none;
   align-items: center;
@@ -187,20 +172,70 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
   background: var(--color-brand);
   border-radius: var(--radius-full);
   color: var(--color-text-on-brand);
+  font-size: var(--text-md);
   font-weight: var(--weight-extrabold);
+}
+
+.profile-head__body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.profile-head__identity {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+}
+
+.profile-head__identity h2 {
+  overflow-wrap: anywhere;
+}
+
+.profile-head__contact {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.profile-head__contact dd {
+  margin: 0;
+  font-weight: var(--weight-semibold);
+  overflow-wrap: anywhere;
+}
+
+.profile-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.profile-grid__side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
 }
 
 .facts {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  margin: var(--space-3) 0 0;
+  margin: 0;
 }
 
 .facts dd {
   margin: 0;
   font-weight: var(--weight-semibold);
   overflow-wrap: anywhere;
+}
+
+.shop-card__manage {
+  align-self: stretch;
 }
 
 .hours {
@@ -223,5 +258,41 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
 .hours dd {
   margin: 0;
   text-align: right;
+}
+
+@media (min-width: 48rem) {
+  .profile-head__contact {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-4);
+  }
+}
+
+@media (min-width: 64rem) {
+  .profile-page {
+    gap: var(--space-6);
+  }
+
+  .profile-head {
+    align-items: center;
+    padding: var(--space-6);
+  }
+
+  .profile-head__body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(18rem, 24rem);
+    align-items: center;
+    gap: var(--space-6);
+  }
+
+  .profile-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(20rem, 0.9fr);
+    align-items: start;
+    gap: var(--space-6);
+  }
+
+  .shop-card__manage {
+    align-self: flex-start;
+  }
 }
 </style>
