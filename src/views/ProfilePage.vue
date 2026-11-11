@@ -60,7 +60,7 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
           <span class="profile-head__avatar" aria-hidden="true">{{ initials(user.name) }}</span>
           <div class="profile-head__body">
             <div class="profile-head__identity">
-              <h2 id="profile-name" class="ff-h2">{{ user.name }}</h2>
+              <h2 id="profile-name" class="ff-h1">{{ user.name }}</h2>
               <span class="ff-badge ff-badge--brand">{{ user.role === 'owner' ? 'Business owner' : 'Customer' }}</span>
             </div>
             <dl class="profile-head__contact">
@@ -78,16 +78,10 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
 
         <div class="profile-grid">
           <section v-if="user" class="ff-card ff-stack shop-card" aria-labelledby="profile-shop">
-            <h2 id="profile-shop" class="ff-h3">{{ user.role === 'owner' ? 'Shop' : 'Shop hours' }}</h2>
-
-            <dl v-if="user.role === 'owner'" class="facts">
-              <div>
-                <dt class="ff-meta">Name</dt>
-                <dd>{{ BUSINESS.name }}</dd>
-              </div>
-            </dl>
-
-            <hr v-if="user.role === 'owner'" class="ff-divider" />
+            <div class="ff-stack ff-stack--tight">
+              <h2 id="profile-shop" class="ff-h3">{{ user.role === 'owner' ? 'Shop' : 'Shop hours' }}</h2>
+              <p class="ff-meta">{{ BUSINESS.name }}</p>
+            </div>
 
             <template v-if="availability">
               <h3 v-if="user.role === 'owner'" class="ff-label">Opening hours</h3>
@@ -117,13 +111,6 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
           <div class="profile-grid__side">
             <AppearancePanel heading-id="profile-appearance" />
 
-            <DisclosureSection title="About FixFlow">
-              <p>
-                FixFlow keeps accounts, requests, photos and shop hours in a PostgreSQL database through
-                Firebase Data Connect, so customers and the shop stay in sync across devices.
-              </p>
-            </DisclosureSection>
-
             <section class="ff-card ff-stack" aria-labelledby="profile-session">
               <h2 id="profile-session" class="ff-h3">Session</h2>
               <AppButton variant="secondary" block aria-haspopup="dialog" @click="signOutOpen = true">
@@ -133,6 +120,13 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
             </section>
           </div>
         </div>
+
+        <DisclosureSection title="About FixFlow">
+          <p class="about-copy">
+            FixFlow keeps accounts, requests, photos and shop hours in a PostgreSQL database through
+            Firebase Data Connect, so customers and the shop stay in sync across devices.
+          </p>
+        </DisclosureSection>
       </main>
     </ion-content>
 
@@ -203,9 +197,21 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
 }
 
 .profile-head__contact dd {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  min-height: var(--touch-min);
   margin: 0;
   font-weight: var(--weight-semibold);
   overflow-wrap: anywhere;
+}
+
+.profile-head__contact dd a {
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+  min-width: 0;
+  color: var(--color-brand-dark);
 }
 
 .profile-grid {
@@ -221,17 +227,8 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
   min-width: 0;
 }
 
-.facts {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  margin: 0;
-}
-
-.facts dd {
-  margin: 0;
-  font-weight: var(--weight-semibold);
-  overflow-wrap: anywhere;
+.about-copy {
+  max-width: 68ch;
 }
 
 .shop-card__manage {
@@ -275,6 +272,14 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
   .profile-head {
     align-items: center;
     padding: var(--space-6);
+    background: var(--color-brand-light);
+    border-color: var(--color-brand-border);
+  }
+
+  .profile-head__avatar {
+    width: calc(var(--avatar-size) + var(--space-4));
+    height: calc(var(--avatar-size) + var(--space-4));
+    font-size: var(--text-lg);
   }
 
   .profile-head__body {
@@ -282,6 +287,11 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
     grid-template-columns: minmax(0, 1fr) minmax(18rem, 24rem);
     align-items: center;
     gap: var(--space-6);
+  }
+
+  .profile-head__contact {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-3);
   }
 
   .profile-grid {
