@@ -99,7 +99,7 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
 
 <template>
   <ion-page>
-    <PageHeader :title="request?.ref ?? 'Request'" back-href="/tabs/requests" />
+    <PageHeader :title="request?.ref ?? 'Request'" back-href="/tabs/requests" :heading="false" />
 
     <ion-content>
       <ion-refresher slot="fixed" @ionRefresh="onPullRefresh">
@@ -132,7 +132,7 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
                   <StatusBadge :status="request.status" />
                   <span class="ff-meta">Updated {{ formatRelative(request.updatedAt, now) }}</span>
                 </div>
-                <h2 id="detail-title" class="ff-h1 masthead__title">{{ request.itemName }}</h2>
+                <h1 id="detail-title" class="ff-h1 masthead__title">{{ request.itemName }}</h1>
                 <p class="ff-meta">{{ service.name }}, submitted {{ formatDate(request.createdAt) }}</p>
               </div>
               <p class="ff-inset next" :class="{ 'is-turn': yourTurn }">
@@ -157,7 +157,7 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
                   </dl>
 
                   <template v-if="request.imageIds.length > 0">
-                    <h3 class="ff-label">Photos</h3>
+                    <h3 class="ff-h3">Photos</h3>
                     <SkeletonList v-if="images.status === 'loading' || images.status === 'idle'" :count="1" />
                     <template v-else-if="images.status === 'error'">
                       <p class="ff-error-text" role="alert">{{ userMessage(images.error) }}</p>
@@ -205,7 +205,7 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
 
                 <section v-if="request.appointment" class="ff-card ff-stack ff-stack--tight" aria-labelledby="detail-appointment">
                   <h2 id="detail-appointment" class="ff-h3">Appointment</h2>
-                  <p class="appointment">{{ formatLongDay(request.appointment.startAt) }}</p>
+                  <p class="ff-h2">{{ formatLongDay(request.appointment.startAt) }}</p>
                   <p class="ff-meta">
                     {{ formatTime(request.appointment.startAt) }},
                     {{ request.mode === 'home_visit' ? 'the technician will visit the address above' : 'bring the item to the shop' }}.
@@ -280,9 +280,22 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
   overflow-wrap: anywhere;
 }
 
-.appointment {
-  font-size: var(--text-lg);
-  font-weight: var(--weight-extrabold);
+/* Contact links get the same 44px row treatment as the profile screen. */
+.facts dd a {
+  display: flex;
+  align-items: center;
+  min-height: var(--touch-min);
+  margin-inline: calc(var(--space-2) * -1);
+  padding-inline: var(--space-2);
+  border-radius: var(--radius-sm);
+  color: var(--color-brand-dark);
+  text-decoration: none;
+}
+
+@media (hover: hover) {
+  .facts dd a:hover {
+    background: var(--color-overlay);
+  }
 }
 
 .feedback__comment {
@@ -310,22 +323,21 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
     grid-template-columns: minmax(0, 1fr) minmax(18rem, 24rem);
     align-items: end;
     gap: var(--space-6);
-    padding-bottom: var(--space-6);
-    border-bottom: 1px solid var(--color-border);
   }
 
   .masthead__title {
     overflow-wrap: anywhere;
   }
 
-  .next {
-    padding: var(--space-4);
-  }
-
   .detail__layout {
     display: grid;
     grid-template-columns: minmax(0, 1.6fr) minmax(20rem, 1fr);
     align-items: start;
+    gap: var(--space-6);
+  }
+
+  .detail__main,
+  .detail__aside {
     gap: var(--space-6);
   }
 

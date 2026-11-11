@@ -158,7 +158,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
   padding: var(--space-2);
   background: var(--color-track);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   isolation: isolate;
 }
 
@@ -256,8 +256,8 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
 
 .viewer__thumb img {
   display: block;
-  width: 56px;
-  height: 56px;
+  width: var(--thumb-size-sm);
+  height: var(--thumb-size-sm);
   object-fit: cover;
   border: 1px solid var(--color-border);
   border-radius: calc(var(--radius-sm) - 2px);

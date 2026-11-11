@@ -32,7 +32,7 @@ const invalid = computed(() => props.error !== undefined && props.error.length >
     </label>
     <slot :id="controlId" :described-by="describedBy" :invalid="invalid" />
     <p v-if="hint" :id="hintId" class="ff-hint">{{ hint }}</p>
-    <p v-if="invalid" :id="errorId" class="ff-error-text" role="alert">
+    <p v-if="invalid" :id="errorId" class="ff-error-text">
       <TriangleAlert class="ff-icon ff-icon--sm" aria-hidden="true" />
       <span>{{ error }}</span>
     </p>

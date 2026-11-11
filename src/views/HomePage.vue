@@ -28,7 +28,7 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
 
 <template>
   <ion-page>
-    <PageHeader :title="user?.role === 'owner' ? 'Dashboard' : 'Home'" />
+    <PageHeader :title="user?.role === 'owner' ? 'Dashboard' : 'Home'" :heading="false" />
     <ion-content>
       <ion-refresher slot="fixed" @ionRefresh="onPullRefresh">
         <ion-refresher-content />

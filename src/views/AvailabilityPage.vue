@@ -329,8 +329,16 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
 
     <ion-footer v-if="draft">
       <div class="savebar">
-        <p v-if="formError" class="ff-error-text" role="alert">{{ formError }}</p>
-        <p v-else-if="dirty" class="ff-meta" role="status">You have unsaved changes.</p>
+        <div v-if="formError || dirty" class="savebar__status">
+          <p v-if="formError" class="ff-error-text savebar__error" role="alert">
+            <TriangleAlert class="ff-icon ff-icon--sm" aria-hidden="true" />
+            <span>{{ formError }}</span>
+          </p>
+          <p v-else class="ff-meta savebar__dirty" role="status">
+            <span class="savebar__dot" aria-hidden="true" />
+            You have unsaved changes.
+          </p>
+        </div>
         <div class="savebar__buttons">
           <AppButton variant="secondary" @click="useDefaultSettings">Use default settings</AppButton>
           <AppButton v-if="dirty" variant="secondary" @click="onDiscard">
@@ -426,7 +434,6 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
 .preview {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
   margin: 0;
 }
 
@@ -434,6 +441,19 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
   display: flex;
   justify-content: space-between;
   gap: var(--space-3);
+  padding-block: var(--space-2);
+}
+
+.preview__row + .preview__row {
+  border-top: 1px solid var(--color-border);
+}
+
+.preview__row:first-child {
+  padding-top: 0;
+}
+
+.preview__row:last-child {
+  padding-bottom: 0;
 }
 
 .preview dt {
@@ -455,6 +475,29 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
   padding: var(--surface-pad) var(--page-pad);
   padding-bottom: calc(var(--surface-pad) + var(--safe-bottom));
   background: var(--color-surface);
+}
+
+.savebar__status {
+  display: flex;
+  align-items: center;
+}
+
+.savebar__error {
+  gap: var(--space-2);
+}
+
+.savebar__dirty {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.savebar__dot {
+  flex: none;
+  width: var(--space-2);
+  height: var(--space-2);
+  background: var(--color-brand);
+  border-radius: var(--radius-full);
 }
 
 .savebar__buttons {
@@ -481,7 +524,9 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
   }
 
   .savebar__buttons > :last-child {
-    flex: 1 1 auto;
+    flex: 0 0 auto;
+    width: auto;
+    min-width: calc(var(--control-height) * 4);
   }
 }
 
@@ -490,6 +535,7 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
+    gap: var(--space-4);
   }
 
   .savebar__buttons {

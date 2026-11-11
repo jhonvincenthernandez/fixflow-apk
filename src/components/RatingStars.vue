@@ -27,6 +27,9 @@ const STAR_COUNT = 5
 .stars__icon {
   color: var(--color-text-muted);
   fill: none;
+  transition:
+    color var(--transition-base),
+    fill var(--transition-base);
 }
 
 .stars__icon.is-on {

@@ -97,13 +97,13 @@ const expired = computed(() => props.quotation.response === null && props.now > 
 .quote__table tfoot td {
   border-bottom: 0;
   padding-top: var(--space-3);
-  font-size: var(--text-md);
+  font-size: var(--text-lg);
   font-weight: var(--weight-extrabold);
 }
 
 .quote__facts {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-3);
   margin: 0;
 }

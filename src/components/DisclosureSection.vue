@@ -67,6 +67,16 @@ const regionId = `${uid}-region`
   transition: transform var(--transition-base);
 }
 
+@media (hover: hover) {
+  .disclosure__trigger:hover {
+    color: var(--color-brand-dark);
+  }
+
+  .disclosure__trigger:hover .disclosure__chevron {
+    color: var(--color-brand-dark);
+  }
+}
+
 .disclosure__chevron.is-open {
   transform: rotate(180deg);
 }
@@ -95,6 +105,6 @@ const regionId = `${uid}-region`
 }
 
 .disclosure__content {
-  padding-top: var(--space-3);
+  padding-top: var(--surface-pad);
 }
 </style>

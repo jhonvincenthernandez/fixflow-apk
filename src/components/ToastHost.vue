@@ -23,7 +23,7 @@ const ICONS: Record<ToastKind, Component> = {
         :class="`toast--${toast.kind}`"
       >
         <component :is="ICONS[toast.kind]" class="ff-icon" aria-hidden="true" />
-        <p class="toast__message" :role="toast.kind === 'error' ? 'alert' : 'status'" aria-live="polite">
+        <p class="toast__message">
           {{ toast.message }}
         </p>
         <button type="button" class="ff-icon-btn toast__close" aria-label="Dismiss notification" @click="dismissToast(toast.id)">
@@ -38,8 +38,8 @@ const ICONS: Record<ToastKind, Component> = {
 .toast-host {
   position: fixed;
   top: calc(var(--safe-top) + var(--space-3));
-  right: var(--space-3);
-  left: var(--space-3);
+  right: var(--page-pad);
+  left: var(--page-pad);
   z-index: var(--z-toast);
   pointer-events: none;
 }
@@ -52,12 +52,12 @@ const ICONS: Record<ToastKind, Component> = {
   margin-inline: auto;
 }
 
-/* radius-lg (14) = icon button radius-sm (6) + 8px gap. */
+/* radius-xl leaves room for the radius-md close button and the space-3 gap. */
 .toast {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
+  padding: var(--surface-pad);
   border: 1px solid var(--color-brand-border);
   border-radius: var(--radius-xl);
   background: var(--color-brand-light);

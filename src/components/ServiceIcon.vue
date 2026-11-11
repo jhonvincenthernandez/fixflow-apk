@@ -19,8 +19,8 @@ const icon = computed(() => ICONS[props.serviceId])
 </script>
 
 <template>
-  <span class="service-icon">
-    <component :is="icon" class="ff-icon" aria-hidden="true" />
+  <span class="service-icon" aria-hidden="true">
+    <component :is="icon" class="ff-icon" />
   </span>
 </template>
 

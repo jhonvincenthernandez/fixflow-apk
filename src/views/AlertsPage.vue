@@ -122,14 +122,25 @@ async function onOpen(id: string, alreadyRead: boolean): Promise<void> {
 <style scoped>
 .toolbar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-3);
+  gap: var(--space-2) var(--space-3);
 }
 
 .alert {
   display: flex;
   align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.alert > .ff-grow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.alert-list {
   gap: var(--space-3);
 }
 

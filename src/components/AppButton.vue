@@ -20,7 +20,29 @@ withDefaults(
     :aria-busy="loading ? 'true' : undefined"
   >
     <span v-if="loading" class="ff-spinner" aria-hidden="true" />
-    <slot />
+    <span class="ff-btn__label"><slot /></span>
     <span v-if="loading" class="ff-sr-only">Loading</span>
   </button>
 </template>
+
+<style scoped>
+/* While loading, the label keeps its space and a spinner takes its place. */
+.ff-btn--loading {
+  position: relative;
+}
+
+.ff-btn--loading .ff-btn__label {
+  visibility: hidden;
+}
+
+.ff-btn--loading .ff-spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: calc(var(--icon-md) / -2) 0 0 calc(var(--icon-md) / -2);
+}
+
+.ff-btn--loading.ff-btn:disabled {
+  opacity: 1;
+}
+</style>

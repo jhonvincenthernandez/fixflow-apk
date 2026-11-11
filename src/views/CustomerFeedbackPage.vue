@@ -176,7 +176,7 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
 
 .dist__row {
   display: grid;
-  grid-template-columns: 4.5rem minmax(0, 1fr);
+  grid-template-columns: var(--space-12) minmax(0, 1fr);
   align-items: center;
   gap: var(--space-3);
 }
@@ -210,7 +210,7 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
 
 .dist__count {
   flex: none;
-  min-width: 2rem;
+  min-width: var(--space-8);
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
   text-align: right;

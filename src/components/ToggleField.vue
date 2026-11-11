@@ -62,7 +62,7 @@ function onChange(event: Event): void {
   width: var(--switch-width);
   height: var(--switch-height);
   box-sizing: border-box;
-  background: var(--color-overlay);
+  background: var(--color-track);
   border: 1px solid var(--color-control-border);
   border-radius: var(--radius-full);
   outline: var(--focus-ring-width) solid transparent;
@@ -71,6 +71,12 @@ function onChange(event: Event): void {
     background-color var(--transition-base),
     border-color var(--transition-base),
     outline-color var(--transition-base);
+}
+
+@media (hover: hover) {
+  .toggle:hover .toggle__track {
+    border-color: var(--color-text-secondary);
+  }
 }
 
 .toggle__thumb {

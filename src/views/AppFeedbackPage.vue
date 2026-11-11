@@ -79,7 +79,7 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
 
 <template>
   <ion-page>
-    <PageHeader title="App feedback" :back-href="backHref" width="wide" />
+    <PageHeader title="App feedback" :back-href="backHref" width="wide" :heading="false" />
     <ion-content>
       <ion-refresher slot="fixed" @ionRefresh="onPullRefresh">
         <ion-refresher-content />
@@ -89,7 +89,7 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
           <section class="feedback__intro ff-stack" aria-labelledby="feedback-title">
             <div class="ff-stack ff-stack--tight">
               <p class="ff-overline">FixFlow app</p>
-              <h2 id="feedback-title" class="ff-h1">Help improve FixFlow</h2>
+              <h1 id="feedback-title" class="ff-h1">Help improve FixFlow</h1>
             </div>
             <p class="ff-lead">
               Tell us what worked, what felt confusing, or what you want to see next.
@@ -108,7 +108,7 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
               <span class="feedback__success-icon" aria-hidden="true">
                 <Check class="ff-icon ff-icon--lg" />
               </span>
-              <h3 ref="successHeading" class="ff-h2" tabindex="-1">Thanks for the feedback</h3>
+              <h2 ref="successHeading" class="ff-h2" tabindex="-1">Thanks for the feedback</h2>
               <p class="ff-meta">Your note helps us improve the Quick check and the app.</p>
               <div class="feedback__success-actions">
                 <AppLink :to="backHref" class="ff-btn ff-btn--primary ff-btn--block">
@@ -126,7 +126,7 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
               @submit.prevent="onSubmit"
             >
               <div class="ff-stack ff-stack--tight">
-                <h3 id="feedback-form-title" class="ff-h2">Your feedback</h3>
+                <h2 id="feedback-form-title" class="ff-h2">Your feedback</h2>
                 <p class="ff-meta">A rating alone helps. Add a note if something needs attention.</p>
               </div>
 
@@ -183,10 +183,6 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
 </template>
 
 <style scoped>
-.feedback {
-  padding-block: var(--space-4) var(--space-10);
-}
-
 .feedback__layout {
   display: flex;
   flex-direction: column;
@@ -194,13 +190,12 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
 }
 
 .feedback__intro {
-  max-width: 42rem;
+  max-width: var(--content-max);
 }
 
 .feedback__card {
   width: 100%;
-  max-width: 40rem;
-  padding: var(--space-4);
+  max-width: var(--content-max);
 }
 
 .feedback__success-icon {
@@ -239,15 +234,10 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
 
   .feedback__intro {
     width: 100%;
-    max-width: 40rem;
   }
 }
 
 @media (min-width: 64rem) {
-  .feedback {
-    padding-block: var(--space-10) var(--space-12);
-  }
-
   .feedback__layout {
     display: grid;
     grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
@@ -257,7 +247,6 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
 
   .feedback__card {
     max-width: none;
-    padding: var(--space-6);
   }
 }
 </style>

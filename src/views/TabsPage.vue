@@ -48,8 +48,8 @@ const badgeText = computed(() => (unreadCount.value > 9 ? '9+' : String(unreadCo
 <style scoped>
 .tab-badge {
   position: absolute;
-  top: var(--space-1);
-  left: calc(50% + var(--space-1));
+  top: 0;
+  left: calc(50% + var(--space-2));
   min-width: var(--icon-md);
   padding: 0 var(--space-1);
   background: var(--color-brand);
@@ -60,15 +60,5 @@ const badgeText = computed(() => (unreadCount.value > 9 ? '9+' : String(unreadCo
   font-weight: var(--weight-bold);
   line-height: var(--icon-sm);
   text-align: center;
-}
-
-@media (min-width: 64rem) {
-  :deep(ion-tab-bar) {
-    width: min(calc(100% - (var(--page-pad) * 2)), 720px);
-    margin: 0 auto var(--space-3);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-md);
-  }
 }
 </style>

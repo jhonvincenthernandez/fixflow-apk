@@ -50,7 +50,7 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
 
 <template>
   <ion-page>
-    <PageHeader title="Profile" />
+    <PageHeader title="Profile" :heading="false" />
     <ion-content>
       <ion-refresher slot="fixed" @ionRefresh="onPullRefresh">
         <ion-refresher-content />
@@ -60,7 +60,7 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
           <span class="profile-head__avatar" aria-hidden="true">{{ initials(user.name) }}</span>
           <div class="profile-head__body">
             <div class="profile-head__identity">
-              <h2 id="profile-name" class="ff-h1">{{ user.name }}</h2>
+              <h1 id="profile-name" class="ff-h1">{{ user.name }}</h1>
               <span class="ff-badge ff-badge--brand">{{ user.role === 'owner' ? 'Business owner' : 'Customer' }}</span>
             </div>
             <dl class="profile-head__contact">
@@ -98,7 +98,7 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
             </div>
 
             <template v-if="availability">
-              <h3 v-if="user.role === 'owner'" class="ff-label">Opening hours</h3>
+              <h3 v-if="user.role === 'owner'" class="ff-h3">Opening hours</h3>
               <dl class="hours">
                 <div v-for="line in hoursLines(availability)" :key="line.days" class="hours__row">
                   <dt>{{ line.days }}</dt>
@@ -139,7 +139,7 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
         </div>
 
         <DisclosureSection title="About FixFlow">
-          <p class="about-copy">
+          <p class="ff-meta about-copy">
             FixFlow keeps accounts, requests, photos and shop hours in a PostgreSQL database through
             Firebase Data Connect, so customers and the shop stay in sync across devices.
           </p>
@@ -202,7 +202,7 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
   gap: var(--space-2) var(--space-3);
 }
 
-.profile-head__identity h2 {
+.profile-head__identity h1 {
   overflow-wrap: anywhere;
 }
 
@@ -336,7 +336,6 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
 
   .profile-head {
     align-items: center;
-    padding: var(--space-6);
     background: var(--color-brand-light);
     border-color: var(--color-brand-border);
   }
@@ -345,7 +344,7 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
     width: calc(var(--avatar-size) + var(--space-4));
     height: calc(var(--avatar-size) + var(--space-4));
     font-size: var(--text-lg);
-    box-shadow: 0 0 0 var(--space-1) var(--color-surface);
+    box-shadow: 0 0 0 var(--focus-ring-width) var(--color-surface);
   }
 
   .profile-head__body {

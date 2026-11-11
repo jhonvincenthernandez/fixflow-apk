@@ -49,8 +49,8 @@ const yourTurn = computed(() => actionOwner(props.request.status) === props.role
       <span v-for="n in STAGES.length" :key="n" class="card__segment" :class="{ 'is-done': n <= step }" />
     </div>
 
-    <p class="card__hint" :class="{ 'is-turn': yourTurn }">
-      <span v-if="yourTurn" class="card__turn">Your turn</span>
+    <p class="ff-meta card__hint" :class="{ 'is-turn': yourTurn }">
+      <span v-if="yourTurn" class="ff-badge ff-badge--brand card__turn">Your turn</span>
       {{ nextStepText(request.status, role) }}
     </p>
     <p class="ff-meta ff-muted card__updated">Updated {{ formatRelative(request.updatedAt, now) }}</p>
@@ -103,7 +103,7 @@ const yourTurn = computed(() => actionOwner(props.request.status) === props.role
 .card__progress {
   display: grid;
   grid-auto-flow: column;
-  grid-auto-columns: 1fr;
+  grid-auto-columns: minmax(0, 1fr);
   gap: var(--space-1);
 }
 
@@ -123,8 +123,6 @@ const yourTurn = computed(() => actionOwner(props.request.status) === props.role
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-2);
-  font-size: var(--text-sm);
-  color: var(--color-text-secondary);
 }
 
 .card__hint.is-turn {
@@ -135,15 +133,5 @@ const yourTurn = computed(() => actionOwner(props.request.status) === props.role
 /* Stretched grid rows keep the timestamp on the bottom edge. */
 .card__updated {
   margin-top: auto;
-}
-
-.card__turn {
-  padding: 0 var(--space-2);
-  background: var(--color-brand-light);
-  border: 1px solid var(--color-brand-border);
-  border-radius: var(--radius-xs);
-  color: var(--color-brand-dark);
-  font-size: var(--text-xs);
-  font-weight: var(--weight-bold);
 }
 </style>

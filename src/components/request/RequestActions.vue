@@ -381,10 +381,13 @@ async function onFeedbackSubmit(): Promise<void> {
 }
 
 .actions__row {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: 1fr;
+  display: flex;
+  flex-wrap: wrap;
   gap: var(--space-2);
+}
+
+.actions__row > * {
+  flex: 1 1 10rem;
 }
 
 @media (min-width: 64rem) {
@@ -394,10 +397,16 @@ async function onFeedbackSubmit(): Promise<void> {
     justify-content: flex-start;
   }
 
+  .actions > .ff-btn--block {
+    width: auto;
+  }
+
   .actions__row {
-    display: flex;
-    flex-wrap: wrap;
     justify-content: flex-end;
+  }
+
+  .actions__row > * {
+    flex: 0 0 auto;
   }
 }
 </style>

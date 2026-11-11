@@ -386,14 +386,10 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
 </template>
 
 <style scoped>
-.diagnose {
-  padding-block: var(--space-5) var(--space-12);
-}
-
 .diagnose > .ff-stack {
   gap: var(--space-6);
   margin-inline: auto;
-  max-width: 760px;
+  max-width: var(--content-column);
 }
 
 /* ------------------------------------------------------------
@@ -475,7 +471,7 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-xs);
 }
 
 .step > .ff-stack--tight {
@@ -497,7 +493,7 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
   width: 100%;
   align-items: flex-start;
   gap: var(--space-3);
-  min-height: 72px;
+  min-height: calc(var(--control-height) + var(--space-6));
   padding: var(--space-4);
   appearance: none;
   background: var(--color-surface);
@@ -522,7 +518,7 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
 .option.is-selected {
   background: var(--color-brand-light);
   border-color: var(--color-brand);
-  box-shadow: 0 0 0 3px var(--color-brand-light);
+  box-shadow: 0 0 0 var(--focus-ring-width) var(--color-brand-light);
 }
 
 .option--row {
@@ -560,7 +556,8 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
   color: var(--color-text-muted);
 }
 
-.back {
+.back,
+.result__restart {
   display: inline-flex;
   align-items: center;
   align-self: flex-start;
@@ -575,7 +572,8 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
   cursor: pointer;
 }
 
-.back:hover {
+.back:hover,
+.result__restart:hover {
   color: var(--color-brand-dark);
 }
 
@@ -602,7 +600,7 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-xs);
 }
 
 .result__intro .ff-h2 {
@@ -721,24 +719,6 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
   justify-content: flex-start;
 }
 
-.result__restart {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-  min-height: var(--touch-min);
-  padding: 0;
-  background: transparent;
-  border: 0;
-  color: var(--color-brand);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
-  cursor: pointer;
-}
-
-.result__restart:hover {
-  color: var(--color-brand-dark);
-}
-
 /* App feedback reads as the quiet footer of the page, not another card. */
 .result__feedback {
   order: 5;
@@ -777,7 +757,7 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  max-width: 760px;
+  max-width: var(--content-column);
   margin-inline: auto;
 }
 
@@ -802,10 +782,6 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
 }
 
 @media (max-width: 30rem) {
-  .diagnose {
-    padding-block: var(--space-3) var(--space-8);
-  }
-
   .progress {
     gap: var(--space-1);
     padding: var(--space-1);
@@ -861,16 +837,12 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
 }
 
 @media (min-width: 64rem) {
-  .diagnose {
-    padding-block: var(--space-10) var(--space-12);
-  }
-
   .diagnose > .ff-stack {
-    max-width: 960px;
+    max-width: var(--content-column-wide);
   }
 
   .result__footer-inner {
-    max-width: 960px;
+    max-width: var(--content-column-wide);
   }
 
   .step {

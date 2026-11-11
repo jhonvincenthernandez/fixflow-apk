@@ -14,10 +14,10 @@ defineEmits<{ retry: [] }>()
 </script>
 
 <template>
-  <div class="error-state" role="alert">
+  <div class="error-state">
     <span class="error-state__icon"><TriangleAlert class="ff-icon ff-icon--lg" aria-hidden="true" /></span>
     <h2 class="ff-h3">{{ title ?? 'Something went wrong' }}</h2>
-    <p class="ff-meta error-state__body">{{ userMessage(error) }}</p>
+    <p class="ff-meta error-state__body" role="alert">{{ userMessage(error) }}</p>
     <AppButton variant="secondary" @click="$emit('retry')">
       <RefreshCw class="ff-icon ff-icon--sm" aria-hidden="true" />
       {{ retryLabel ?? 'Try again' }}
@@ -30,8 +30,8 @@ defineEmits<{ retry: [] }>()
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-8) var(--space-4);
+  gap: var(--space-3);
+  padding: var(--space-8) var(--page-pad);
   text-align: center;
 }
 
@@ -49,6 +49,5 @@ defineEmits<{ retry: [] }>()
 
 .error-state__body {
   max-width: 36ch;
-  margin-bottom: var(--space-3);
 }
 </style>

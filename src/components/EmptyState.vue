@@ -22,8 +22,8 @@ defineProps<{
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-8) var(--space-4);
+  gap: var(--space-3);
+  padding: var(--space-8) var(--page-pad);
   text-align: center;
 }
 
@@ -40,10 +40,6 @@ defineProps<{
 }
 
 .empty__body {
-  max-width: 32ch;
-}
-
-.empty__action {
-  margin-top: var(--space-3);
+  max-width: 36ch;
 }
 </style>

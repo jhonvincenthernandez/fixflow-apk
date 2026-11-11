@@ -149,7 +149,7 @@ function chooseDay(day: number): void {
 
 .slots__times {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(6.5rem, 1fr));
   gap: var(--space-2);
   margin-top: var(--space-2);
 }

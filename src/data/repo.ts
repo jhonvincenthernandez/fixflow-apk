@@ -204,7 +204,7 @@ export async function registerCustomer(input: unknown, now: number = Date.now())
     })
   } catch (error) {
     if (isUniqueViolation(error)) {
-      throw new ConflictError('An account with that email already exists. Sign in instead.')
+      throw new ConflictError('An account with that email already exists. Sign in instead or use different email.')
     }
     throw toStorageError(error, 'create your account')
   }

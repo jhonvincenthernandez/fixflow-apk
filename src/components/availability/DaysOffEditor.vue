@@ -113,7 +113,7 @@ function longDay(key: string): string {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: var(--space-2) 0;
+  padding: var(--space-3) 0;
   border-top: 1px solid var(--color-border);
 }
 

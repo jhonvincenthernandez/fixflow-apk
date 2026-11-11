@@ -117,7 +117,7 @@ function dayOffNotice(weekday: number): string | undefined {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  padding: var(--space-2) 0;
+  padding: var(--space-3) 0;
   border-top: 1px solid var(--color-border);
 }
 
@@ -132,9 +132,14 @@ function dayOffNotice(weekday: number): string | undefined {
   gap: var(--space-2);
 }
 
+.week__times :deep(.ff-select) {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
 .week__day-off {
   margin: 0;
-  color: var(--color-brand-dark);
+  color: var(--color-text-primary);
 }
 
 .week__to {

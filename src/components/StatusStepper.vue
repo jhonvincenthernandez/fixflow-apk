@@ -120,10 +120,9 @@ const steps = computed<Step[]>(() => {
   position: absolute;
   top: var(--stepper-marker);
   bottom: 0;
-  left: calc(var(--stepper-marker) / 2);
-  width: 2px;
+  left: calc(var(--stepper-marker) / 2 + 1px);
+  width: 1px;
   background: var(--color-border);
-  transform: translateX(-50%);
 }
 
 .step--done:not(:last-child)::before {

@@ -14,7 +14,7 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
 
 <template>
   <ion-page>
-    <PageHeader title="Page not found" width="narrow" />
+    <PageHeader title="Page not found" back-href="/tabs/home" width="narrow" />
     <ion-content>
       <ion-refresher slot="fixed" @ionRefresh="onPullRefresh">
         <ion-refresher-content />
@@ -37,6 +37,6 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 70vh;
+  min-height: 100%;
 }
 </style>

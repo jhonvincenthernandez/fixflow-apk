@@ -136,8 +136,11 @@
   --icon-lg: 24px;
   --avatar-size: 48px;
   --thumb-size:  72px;
+  --thumb-size-sm: 56px;
   --content-max: 640px;       /* Reading column: forms, quick check, sheets */
   --content-max-wide: 1280px; /* Data pages, dashboards, landing */
+  --content-column: 760px;      /* Quick check column on phones and tablets */
+  --content-column-wide: 960px; /* Quick check column on large screens */
   --sheet-max-height: 90vh;
   --stepper-marker: 24px;
   --switch-width: 44px;
@@ -616,6 +619,11 @@ a,
   line-height: var(--leading-base);
 }
 
+/* Room for the native dropdown arrow so the value never runs under it. */
+.ff-select {
+  padding-right: var(--space-6);
+}
+
 .ff-input::placeholder,
 .ff-textarea::placeholder {
   color: var(--color-text-muted);
@@ -665,7 +673,7 @@ a,
   border-radius: var(--radius-full);
   background: var(--color-neutral-light);
   color: var(--color-text-secondary);
-  font-size: var(--text-xs);
+  font-size: var(--text-sm);
   font-weight: var(--weight-bold);
   line-height: var(--leading-tight);
   white-space: nowrap;
@@ -773,7 +781,7 @@ ion-modal.ff-sheet {
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
-  padding: var(--surface-pad) var(--surface-pad) var(--space-2) var(--space-4);
+  padding: var(--surface-pad);
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -788,7 +796,7 @@ ion-modal.ff-sheet {
 .ff-sheet__footer {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--space-3);
   padding: var(--surface-pad);
   padding-bottom: calc(var(--surface-pad) + var(--safe-bottom));
   border-top: 1px solid var(--color-border);

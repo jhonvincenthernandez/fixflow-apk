@@ -74,7 +74,7 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
       <ion-refresher slot="fixed" @ionRefresh="onPullRefresh">
         <ion-refresher-content />
       </ion-refresher>
-      <main class="ff-container auth" tabindex="-1">
+      <main class="ff-container ff-container--wide auth" tabindex="-1">
         <header class="auth__intro ff-stack">
           <AppLogo />
           <TypewriterHeading id="auth-title" class="ff-h1" :text="HERO_TITLE" loop />
@@ -186,7 +186,6 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
   display: flex;
   flex-direction: column;
   gap: var(--space-8);
-  padding-block: var(--space-8) var(--space-10);
 }
 
 .auth__intro {
@@ -211,29 +210,27 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
 
 .auth__toggle {
   position: absolute;
-  top: 0;
+  top: calc((var(--control-height) - var(--touch-min)) / 2);
   right: 0;
-  height: var(--control-height);
 }
 
 @media (min-width: 48rem) {
   .auth__panel {
-    padding: var(--space-5);
+    padding: var(--surface-pad);
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow-xs);
   }
 }
 
 @media (min-width: 64rem) {
   .auth {
-    --container-max: calc(var(--content-max-wide) - var(--space-12));
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 30rem);
     align-items: center;
     gap: var(--space-12);
-    padding-block: var(--space-12);
+    padding-block: var(--space-10);
   }
 
   .auth__intro {
@@ -241,8 +238,7 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
   }
 
   .auth__panel {
-    padding: var(--space-6);
-    box-shadow: var(--shadow-md);
+    padding: var(--space-5);
   }
 }
 </style>

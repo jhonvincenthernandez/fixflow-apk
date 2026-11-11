@@ -102,7 +102,7 @@ const formError = computed(() => {
       <main class="ff-container ff-container--wide" tabindex="-1">
         <form class="request" novalidate @submit.prevent="submit.run()">
           <fieldset class="picker">
-            <legend class="ff-label">What needs fixing?</legend>
+            <legend class="ff-h3">What needs fixing?</legend>
             <div class="picker__grid">
               <label
                 v-for="service in SERVICES"
@@ -153,7 +153,7 @@ const formError = computed(() => {
             <ImagePicker v-model="uploads" :error="fieldError('images')" />
 
             <div class="mode ff-stack ff-stack--tight">
-              <p class="ff-label" id="mode-label">How would you like it done?</p>
+              <p class="ff-h3" id="mode-label">How would you like it done?</p>
               <SegmentedControl v-model="mode" :options="MODE_OPTIONS" legend="Drop off or home visit" />
             </div>
 
@@ -217,7 +217,7 @@ const formError = computed(() => {
 
 .picker__grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-2);
   margin: var(--space-2) 0;
 }
@@ -230,7 +230,7 @@ const formError = computed(() => {
   padding: var(--space-2);
   background: var(--color-surface);
   border: 1px solid var(--color-control-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   cursor: pointer;
   outline: var(--focus-ring-width) solid transparent;
   outline-offset: var(--focus-ring-offset);
@@ -274,7 +274,6 @@ const formError = computed(() => {
 
   .submit {
     width: auto;
-    min-width: 14rem;
     align-self: flex-start;
   }
 }
@@ -282,7 +281,7 @@ const formError = computed(() => {
 @media (min-width: 64rem) {
   .request {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr);
+    grid-template-columns: minmax(0, 1fr) minmax(0, var(--content-max));
     gap: var(--space-12);
     align-items: start;
   }
@@ -293,7 +292,7 @@ const formError = computed(() => {
   }
 
   .picker__grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .tile__name {
