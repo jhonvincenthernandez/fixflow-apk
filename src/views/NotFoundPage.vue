@@ -19,7 +19,7 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
       <ion-refresher slot="fixed" @ionRefresh="onPullRefresh">
         <ion-refresher-content />
       </ion-refresher>
-      <main class="ff-container" tabindex="-1">
+      <main class="ff-container not-found" tabindex="-1">
         <EmptyState
           :icon="Compass"
           title="We could not find that page"
@@ -31,3 +31,12 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
     </ion-content>
   </ion-page>
 </template>
+
+<style scoped>
+.not-found {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 70vh;
+}
+</style>

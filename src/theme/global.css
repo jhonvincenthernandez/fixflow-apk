@@ -368,12 +368,6 @@ a,
   }
 }
 
-@media (min-width: 96rem) {
-  .ff-container--wide {
-    max-width: 1360px;
-  }
-}
-
 .ff-stack {
   display: flex;
   flex-direction: column;

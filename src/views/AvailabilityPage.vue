@@ -459,11 +459,30 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
 
 .savebar__buttons {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-2);
 }
 
-.savebar__buttons > :last-child {
+.savebar__buttons > :not(:last-child) {
   flex: 1 1 auto;
+}
+
+.savebar__buttons > :last-child {
+  flex: 1 1 100%;
+}
+
+@media (min-width: 48rem) {
+  .savebar__buttons {
+    flex-wrap: nowrap;
+  }
+
+  .savebar__buttons > :not(:last-child) {
+    flex: 0 0 auto;
+  }
+
+  .savebar__buttons > :last-child {
+    flex: 1 1 auto;
+  }
 }
 
 @media (min-width: 64rem) {

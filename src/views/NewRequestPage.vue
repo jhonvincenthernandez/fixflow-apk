@@ -99,7 +99,7 @@ const formError = computed(() => {
       <ion-refresher slot="fixed" @ionRefresh="onPullRefresh">
         <ion-refresher-content />
       </ion-refresher>
-      <main class="ff-container request-page" tabindex="-1">
+      <main class="ff-container ff-container--wide" tabindex="-1">
         <form class="request" novalidate @submit.prevent="submit.run()">
           <fieldset class="picker">
             <legend class="ff-label">What needs fixing?</legend>
@@ -190,10 +190,6 @@ const formError = computed(() => {
 </template>
 
 <style scoped>
-.request-page {
-  max-width: var(--content-max-wide);
-}
-
 .request {
   display: flex;
   flex-direction: column;
