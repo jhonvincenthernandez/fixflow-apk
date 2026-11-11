@@ -101,6 +101,18 @@ const needsAttention = computed(() =>
   gap: var(--space-3);
 }
 
+@media (max-width: 21rem) {
+  .services {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (min-width: 48rem) and (max-width: 63.999rem) {
+  .services {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
 .services li {
   display: flex;
 }

@@ -134,7 +134,7 @@ async function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
 
       <main class="ff-container ff-container--wide ff-stack" tabindex="-1">
         <ErrorBoundary title="Requests could not load">
-          <div class="ff-stack ff-stack--tight filters">
+          <div class="ff-card ff-stack ff-stack--tight filters">
             <label class="ff-sr-only" for="request-search">Search requests</label>
             <input
               id="request-search"

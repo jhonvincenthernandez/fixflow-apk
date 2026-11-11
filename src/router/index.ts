@@ -57,6 +57,12 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true, role: 'owner' },
   },
   {
+    // Owner only: every customer review the shop received.
+    path: '/customer-feedback',
+    component: () => import('@/views/CustomerFeedbackPage.vue'),
+    meta: { requiresAuth: true, role: 'owner' },
+  },
+  {
     path: '/request/:id',
     component: () => import('@/views/RequestDetailPage.vue'),
     meta: { requiresAuth: true },

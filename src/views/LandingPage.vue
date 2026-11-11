@@ -525,6 +525,8 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
   align-items: flex-start;
   gap: var(--space-4);
   margin-block: var(--space-8);
+  background: var(--color-brand-light);
+  border-color: var(--color-brand-border);
   text-align: left;
 }
 
@@ -571,6 +573,10 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
     width: auto;
   }
 
+  .landing__hero .ff-lead {
+    max-width: 60ch;
+  }
+
   .landing__grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -593,16 +599,22 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
   }
 
   .landing__hero {
-    padding-block: var(--space-12) var(--space-10);
+    align-items: center;
+    margin-block-start: var(--space-6);
+    padding: var(--space-12);
+    background: var(--color-brand-light);
+    border: 1px solid var(--color-brand-border);
+    border-radius: var(--radius-xl);
+    text-align: center;
+  }
+
+  .landing__hero-cta {
+    justify-content: center;
   }
 
   .landing__title {
     max-width: 18ch;
     font-size: var(--text-4xl);
-  }
-
-  .landing__hero .ff-lead {
-    max-width: 60ch;
   }
 
   .landing__section {

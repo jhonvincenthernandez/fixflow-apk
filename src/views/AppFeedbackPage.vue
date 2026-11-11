@@ -245,7 +245,7 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
 
 @media (min-width: 64rem) {
   .feedback {
-    padding-block: var(--space-6) var(--space-12);
+    padding-block: var(--space-10) var(--space-12);
   }
 
   .feedback__layout {
@@ -256,6 +256,7 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
   }
 
   .feedback__card {
+    max-width: none;
     padding: var(--space-6);
   }
 }

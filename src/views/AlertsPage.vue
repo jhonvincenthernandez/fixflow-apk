@@ -133,6 +133,17 @@ async function onOpen(id: string, alreadyRead: boolean): Promise<void> {
   gap: var(--space-3);
 }
 
+.alert.is-unread {
+  background: var(--color-brand-light);
+  border-color: var(--color-brand-border);
+}
+
+@media (hover: hover) {
+  .alert.is-unread:hover {
+    border-color: var(--color-brand);
+  }
+}
+
 .alert__dot {
   flex: none;
   width: var(--space-2);

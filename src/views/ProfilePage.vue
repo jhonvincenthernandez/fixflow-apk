@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue'
 import { IonContent, IonPage, IonRefresher, IonRefresherContent, onIonViewWillEnter } from '@ionic/vue'
 import type { RefresherCustomEvent } from '@ionic/vue'
-import { CalendarClock, LogOut } from '@lucide/vue'
+import { CalendarClock, LogOut, Mail, Phone } from '@lucide/vue'
 import AppearancePanel from '@/components/AppearancePanel.vue'
 import AppButton from '@/components/AppButton.vue'
 import AppLink from '@/components/AppLink.vue'
@@ -66,11 +66,25 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
             <dl class="profile-head__contact">
               <div>
                 <dt class="ff-meta">Email</dt>
-                <dd><a :href="`mailto:${user.email}`">{{ user.email }}</a></dd>
+                <dd>
+                  <a :href="`mailto:${user.email}`">
+                    <span class="profile-head__contact-icon">
+                      <Mail class="ff-icon ff-icon--sm" aria-hidden="true" />
+                    </span>
+                    <span class="profile-head__contact-value">{{ user.email }}</span>
+                  </a>
+                </dd>
               </div>
               <div>
                 <dt class="ff-meta">Mobile</dt>
-                <dd><a :href="`tel:${user.phone}`">{{ user.phone }}</a></dd>
+                <dd>
+                  <a :href="`tel:${user.phone}`">
+                    <span class="profile-head__contact-icon">
+                      <Phone class="ff-icon ff-icon--sm" aria-hidden="true" />
+                    </span>
+                    <span class="profile-head__contact-value">{{ user.phone }}</span>
+                  </a>
+                </dd>
               </div>
             </dl>
           </div>
@@ -112,7 +126,10 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
             <AppearancePanel heading-id="profile-appearance" />
 
             <section class="ff-card ff-stack" aria-labelledby="profile-session">
-              <h2 id="profile-session" class="ff-h3">Session</h2>
+              <div class="ff-stack ff-stack--tight">
+                <h2 id="profile-session" class="ff-h3">Session</h2>
+                <p class="ff-meta">Signing out ends this session on this device only.</p>
+              </div>
               <AppButton variant="secondary" block aria-haspopup="dialog" @click="signOutOpen = true">
                 <LogOut class="ff-icon ff-icon--sm" aria-hidden="true" />
                 Sign out
@@ -210,8 +227,43 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
   display: flex;
   align-items: center;
   align-self: stretch;
+  gap: var(--space-2);
   min-width: 0;
+  margin-inline: calc(var(--space-2) * -1);
+  padding-inline: var(--space-2);
+  border-radius: var(--radius-sm);
   color: var(--color-brand-dark);
+  text-decoration: none;
+}
+
+.profile-head__contact-icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: calc(var(--icon-lg) + var(--space-2));
+  height: calc(var(--icon-lg) + var(--space-2));
+  background: var(--color-overlay);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-brand-dark);
+}
+
+.profile-head__contact-value {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (hover: hover) {
+  .profile-head__contact dd a:hover {
+    background: var(--color-overlay);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+}
+
+.profile-head__contact dd a:active {
+  background: var(--color-overlay);
 }
 
 .profile-grid {
@@ -238,7 +290,6 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
 .hours {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
   margin: 0;
 }
 
@@ -246,6 +297,19 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
   display: flex;
   justify-content: space-between;
   gap: var(--space-3);
+  padding-block: var(--space-2);
+}
+
+.hours__row + .hours__row {
+  border-top: 1px solid var(--color-border);
+}
+
+.hours__row:first-child {
+  padding-block-start: 0;
+}
+
+.hours__row:last-child {
+  padding-block-end: 0;
 }
 
 .hours dt {
@@ -255,6 +319,7 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
 .hours dd {
   margin: 0;
   text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 
 @media (min-width: 48rem) {
@@ -280,6 +345,7 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
     width: calc(var(--avatar-size) + var(--space-4));
     height: calc(var(--avatar-size) + var(--space-4));
     font-size: var(--text-lg);
+    box-shadow: 0 0 0 var(--space-1) var(--color-surface);
   }
 
   .profile-head__body {
@@ -289,9 +355,16 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
     gap: var(--space-6);
   }
 
+  .profile-head__contact-icon {
+    background: var(--color-surface);
+    border-color: var(--color-brand-border);
+  }
+
   .profile-head__contact {
     grid-template-columns: minmax(0, 1fr);
     gap: var(--space-3);
+    padding-inline-start: var(--space-6);
+    border-inline-start: 1px solid var(--color-brand-border);
   }
 
   .profile-grid {

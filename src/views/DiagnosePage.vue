@@ -714,6 +714,10 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
 }
 
 @media (min-width: 64rem) {
+  .diagnose {
+    padding-block: var(--space-10) var(--space-12);
+  }
+
   .diagnose > .ff-stack {
     max-width: 960px;
   }

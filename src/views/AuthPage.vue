@@ -216,6 +216,16 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
   height: var(--control-height);
 }
 
+@media (min-width: 48rem) {
+  .auth__panel {
+    padding: var(--space-5);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-sm);
+  }
+}
+
 @media (min-width: 64rem) {
   .auth {
     --container-max: calc(var(--content-max-wide) - var(--space-12));
@@ -226,11 +236,12 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
     padding-block: var(--space-12);
   }
 
+  .auth__intro {
+    max-width: 38rem;
+  }
+
   .auth__panel {
     padding: var(--space-6);
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-xl);
     box-shadow: var(--shadow-md);
   }
 }

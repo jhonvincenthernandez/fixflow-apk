@@ -167,6 +167,9 @@ const averageRating = computed(() => {
               </AppLink>
             </li>
           </ul>
+          <AppLink to="/customer-feedback" class="ff-btn ff-btn--ghost feedback__more">
+            See all {{ feedback.length }} {{ feedback.length === 1 ? 'review' : 'reviews' }}
+          </AppLink>
         </div>
       </section>
     </template>
@@ -326,6 +329,11 @@ const averageRating = computed(() => {
     grid-template-columns: auto minmax(0, 1fr);
     align-items: start;
     gap: var(--space-6);
+  }
+
+  .feedback__more {
+    grid-column: 1 / -1;
+    justify-self: start;
   }
 }
 </style>
