@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
-import { IonContent, IonPage, IonRefresher, IonRefresherContent } from '@ionic/vue'
+import { IonContent, IonFooter, IonPage, IonRefresher, IonRefresherContent } from '@ionic/vue'
 import type { RefresherCustomEvent } from '@ionic/vue'
 import { ArrowLeft, ArrowRight, Check, ShieldAlert, Star, Stethoscope } from '@lucide/vue'
 import { useRoute } from 'vue-router'
@@ -10,6 +10,7 @@ import ServiceIcon from '@/components/ServiceIcon.vue'
 import { useSession } from '@/composables/useSession'
 import { refreshPage } from '@/composables/usePageRefresh'
 import {
+  NONE_OF_THESE_ID,
   URGENCY_OPTIONS,
   diagnose,
   findSymptom,
@@ -49,6 +50,22 @@ const result = computed(() => {
 const requestLink = computed(() => {
   if (result.value === null) return '/request/new'
   return requestHref(result.value.serviceId, result.value.symptom.id, result.value.urgency)
+})
+
+/** One badge per result, so the screen never shows two labels that disagree. */
+const badgeClass = computed(() => {
+  if (result.value === null) return ''
+  if (result.value.variant === 'safety') return 'ff-badge--danger'
+  if (result.value.variant === 'known') return 'ff-badge--brand'
+  return ''
+})
+
+const requestCtaLabel = computed(() => {
+  if (result.value === null) return 'Send this as a request'
+  if (result.value.variant === 'unknown') {
+    return signedIn.value ? 'Describe the problem' : 'Sign in and describe the problem'
+  }
+  return signedIn.value ? 'Send this as a request' : 'Sign in and send this request'
 })
 
 const appFeedbackLink = computed(() => {
@@ -134,7 +151,7 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
       </ion-refresher>
       <main class="ff-container ff-container--wide diagnose" tabindex="-1">
         <div class="ff-stack ff-stack--loose">
-          <ol v-if="step !== 'result'" class="progress" aria-label="Quick check progress">
+          <ol class="progress" aria-label="Quick check progress">
             <li
               v-for="(label, index) in PROGRESS"
               :key="label"
@@ -149,7 +166,6 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
               <span class="progress__label">{{ label }}</span>
             </li>
           </ol>
-          <p v-else class="ff-badge ff-badge--success">Check complete</p>
 
           <section v-if="step === 'service'" class="ff-stack step" aria-labelledby="service-step-title">
             <div class="ff-stack ff-stack--tight">
@@ -204,12 +220,24 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
                 type="button"
                 class="option option--row"
                 :class="{ 'is-selected': symptomId === symptom.id }"
-                :aria-pressed="symptomId === symptom.id"
+                :aria-pressed="symptom.id === symptomId"
                 @click="selectSymptom(symptom.id)"
               >
                 <span class="option__text">
                   <span class="option__label">{{ symptom.label }}</span>
                   <span class="option__hint">{{ symptom.hint }}</span>
+                </span>
+                <ArrowRight class="ff-icon ff-icon--sm option__arrow" aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                class="option option--row option--escape"
+                :aria-pressed="symptomId === NONE_OF_THESE_ID"
+                @click="selectSymptom(NONE_OF_THESE_ID)"
+              >
+                <span class="option__text">
+                  <span class="option__label">None of these match</span>
+                  <span class="option__hint">Describe it in your own words and the shop will check it.</span>
                 </span>
                 <ArrowRight class="ff-icon ff-icon--sm option__arrow" aria-hidden="true" />
               </button>
@@ -256,79 +284,72 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
           <section
             v-else-if="result !== null"
             class="ff-stack result"
-            :class="{ 'result--has-safety': result.safetyNote.length > 0 }"
             aria-labelledby="result-title"
           >
-            <div class="ff-stack ff-stack--tight result__intro">
-              <p
-                class="ff-badge"
-                :class="result.safety === 'urgent' ? 'ff-badge--danger' : 'ff-badge--brand'"
-              >
-                {{ result.safety === 'urgent' ? 'Safety check recommended' : 'Likely issue' }}
-              </p>
-              <h2 id="result-title" ref="heading" class="ff-h2" tabindex="-1">
-                {{ result.symptom.label }}
-              </h2>
-              <p class="ff-lead">{{ result.symptom.likelyCause }}</p>
-            </div>
-
-            <aside
-              v-if="result.safetyNote.length > 0"
-              class="result__safety"
-              :class="{ 'is-urgent': result.safety === 'urgent' }"
-              aria-labelledby="safety-title"
-            >
-              <ShieldAlert class="ff-icon ff-icon--lg" aria-hidden="true" />
-              <div class="ff-stack ff-stack--tight">
-                <h3 id="safety-title" class="ff-h3">
-                  {{ result.safety === 'urgent' ? 'Stop and get this checked' : 'Use it with care' }}
-                </h3>
-                <p class="ff-meta">{{ result.safetyNote }}</p>
+            <div class="result__lead">
+              <div class="result__intro">
+                <div class="result__tags">
+                  <p class="ff-badge" :class="badgeClass">{{ result.badgeLabel }}</p>
+                  <p class="ff-overline">{{ selectedService?.name }}</p>
+                </div>
+                <h2 id="result-title" ref="heading" class="ff-h2" tabindex="-1">
+                  {{ result.title }}
+                </h2>
+                <p class="ff-lead">{{ result.symptom.likelyCause }}</p>
               </div>
-            </aside>
 
-            <div class="ff-inset ff-stack ff-stack--tight result__prep">
-              <h3 class="ff-h3">Before you book</h3>
-              <p class="ff-meta">A few details help the shop quote faster.</p>
-              <ul class="prep">
-                <li v-for="tip in result.prepTips" :key="tip">
-                  <Check class="ff-icon ff-icon--sm" aria-hidden="true" />
-                  <span>{{ tip }}</span>
-                </li>
-              </ul>
+              <aside
+                v-if="result.safetyNote.length > 0"
+                class="result__safety"
+                :class="{ 'is-urgent': result.safety === 'urgent' }"
+                aria-labelledby="safety-title"
+              >
+                <ShieldAlert class="ff-icon ff-icon--lg" aria-hidden="true" />
+                <div class="result__safety-body">
+                  <h3 id="safety-title" class="ff-h3">{{ result.safetyTitle }}</h3>
+                  <p class="ff-meta">{{ result.safetyNote }}</p>
+                </div>
+              </aside>
+
+              <div class="result__restart-row">
+                <button type="button" class="result__restart" @click="restart">
+                  <ArrowLeft class="ff-icon ff-icon--sm" aria-hidden="true" />
+                  Check another problem
+                </button>
+              </div>
             </div>
 
-            <div class="ff-inset ff-stack ff-stack--tight result__inset result__inset--do">
-              <h3 class="ff-h3">What you can do now</h3>
-              <p class="ff-meta">{{ result.symptom.safeStep }}</p>
+            <div class="result__detail">
+              <section class="result__section">
+                <h3 class="ff-h3">What you can do now</h3>
+                <p class="result__text">{{ result.symptom.safeStep }}</p>
+              </section>
+
+              <section class="result__section">
+                <h3 class="ff-h3">Before you book</h3>
+                <p class="ff-meta">A few details help the shop quote faster.</p>
+                <ul class="prep">
+                  <li v-for="tip in result.prepTips" :key="tip">
+                    <Check class="ff-icon ff-icon--sm" aria-hidden="true" />
+                    <span>{{ tip }}</span>
+                  </li>
+                </ul>
+              </section>
+
+              <section class="result__section">
+                <h3 class="ff-h3">What happens next</h3>
+                <p class="result__text">
+                  {{ result.nextStep }} You will review an itemized quotation before any work starts.
+                </p>
+                <p class="ff-meta result__disclaimer">
+                  This is general guidance, not a final diagnosis. The shop confirms the fault after
+                  inspection.
+                </p>
+              </section>
             </div>
 
-            <div class="ff-inset ff-stack ff-stack--tight result__inset result__inset--next">
-              <h3 class="ff-h3">What happens next</h3>
-              <p class="ff-meta">
-                {{ result.nextStep }} You will review an itemized quotation before any work starts.
-              </p>
-              <p class="ff-meta result__disclaimer">
-                This is general guidance, not a final diagnosis. The shop confirms the fault after
-                inspection.
-              </p>
-            </div>
-
-            <div class="result__actions">
-              <AppLink :to="requestLink" class="ff-btn ff-btn--primary ff-btn--block">
-                {{ signedIn ? 'Send this as a request' : 'Sign in and send this request' }}
-                <ArrowRight class="ff-icon ff-icon--sm" aria-hidden="true" />
-              </AppLink>
-              <button type="button" class="ff-btn ff-btn--secondary ff-btn--block" @click="restart">
-                Check another problem
-              </button>
-              <p class="ff-meta result__hint">
-                Add photos on the next screen to help the shop quote faster.
-              </p>
-            </div>
-
-            <section class="result__app-feedback" aria-labelledby="result-app-feedback-title">
-              <div class="ff-stack ff-stack--tight">
+            <section class="result__feedback" aria-labelledby="result-app-feedback-title">
+              <div class="result__feedback-body">
                 <p class="ff-overline">App feedback</p>
                 <h3 id="result-app-feedback-title" class="ff-h3">Did this quick check help?</h3>
                 <p class="ff-meta">
@@ -337,7 +358,7 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
               </div>
               <AppLink
                 :to="appFeedbackLink"
-                class="ff-btn ff-btn--secondary result__app-feedback-btn"
+                class="ff-btn ff-btn--secondary result__feedback-btn"
               >
                 <Star class="ff-icon ff-icon--sm" aria-hidden="true" />
                 Rate this app
@@ -347,6 +368,20 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
         </div>
       </main>
     </ion-content>
+
+    <ion-footer v-if="step === 'result' && result !== null" class="result__footer-bar">
+      <div class="ff-container ff-container--wide result__footer">
+        <div class="result__footer-inner">
+          <AppLink :to="requestLink" class="ff-btn ff-btn--primary ff-btn--block">
+            {{ requestCtaLabel }}
+            <ArrowRight class="ff-icon ff-icon--sm" aria-hidden="true" />
+          </AppLink>
+          <p class="ff-meta result__hint">
+            Add photos on the next screen to help the shop quote faster.
+          </p>
+        </div>
+      </div>
+    </ion-footer>
   </ion-page>
 </template>
 
@@ -361,17 +396,18 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
   max-width: 760px;
 }
 
+/* ------------------------------------------------------------
+   Progress
+   ------------------------------------------------------------ */
 .progress {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: var(--space-3);
   margin: 0;
   padding: var(--space-2);
-  background: var(--color-surface);
+  background: var(--color-track);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-full);
-  box-shadow: var(--shadow-xs);
   list-style: none;
 }
 
@@ -431,6 +467,25 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
   color: var(--color-brand-dark);
 }
 
+/* ------------------------------------------------------------
+   Steps
+   ------------------------------------------------------------ */
+.step {
+  padding: var(--space-6);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+}
+
+.step > .ff-stack--tight {
+  gap: var(--space-2);
+}
+
+.step .options {
+  margin-top: var(--space-2);
+}
+
 .options {
   display: flex;
   flex-direction: column;
@@ -474,6 +529,12 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
   align-items: center;
 }
 
+/* The escape option sits apart from the listed symptoms, so a miss never looks like a match. */
+.option--escape {
+  background: transparent;
+  border-style: dashed;
+}
+
 .option__text {
   display: flex;
   flex: 1 1 auto;
@@ -495,6 +556,7 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
 }
 
 .option__arrow {
+  flex: none;
   color: var(--color-text-muted);
 }
 
@@ -513,30 +575,58 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
   cursor: pointer;
 }
 
-.step {
-  padding: var(--space-6);
+.back:hover {
+  color: var(--color-brand-dark);
+}
+
+/* ------------------------------------------------------------
+   Result
+   Every block on this screen uses the same radius and border
+   language, so the eye reads one system, not five boxes.
+   ------------------------------------------------------------ */
+.result {
+  gap: var(--space-5);
+}
+
+/* On phones the lead column dissolves, so its blocks join the main flow in reading order. */
+.result__lead {
+  display: contents;
+}
+
+.result__intro {
+  order: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-5);
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-sm);
 }
 
-.step > .ff-stack--tight {
-  gap: var(--space-2);
+.result__intro .ff-h2 {
+  max-width: 28rem;
+  text-wrap: balance;
 }
 
-.step .options {
-  margin-top: var(--space-2);
+.result__tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-3);
 }
 
 .result__safety {
+  order: 2;
   display: flex;
   align-items: flex-start;
   gap: var(--space-3);
-  padding: var(--space-4);
+  padding: var(--space-4) var(--space-5);
   background: var(--color-overlay);
   border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-xl);
   color: var(--color-text-secondary);
 }
 
@@ -546,12 +636,55 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
   color: var(--color-danger);
 }
 
+.result__safety .ff-icon {
+  flex: none;
+  margin-top: 2px;
+}
+
+.result__safety-body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
 .result__safety .ff-h3 {
   color: inherit;
 }
 
 .result__safety.is-urgent .ff-meta {
   color: var(--color-danger);
+}
+
+/* One card, three sections, hairline dividers between them. */
+.result__detail {
+  order: 3;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xs);
+  overflow: hidden;
+}
+
+.result__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5);
+}
+
+.result__section + .result__section {
+  border-top: 1px solid var(--color-border);
+}
+
+.result__text {
+  max-width: 62ch;
+  color: var(--color-text-secondary);
+  font-size: var(--text-base);
+  line-height: var(--leading-base);
 }
 
 .prep {
@@ -568,71 +701,88 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
   gap: var(--space-2);
   color: var(--color-text-secondary);
   font-size: var(--text-sm);
+  line-height: var(--leading-base);
 }
 
 .prep .ff-icon {
+  flex: none;
   margin-top: 2px;
   color: var(--color-brand);
 }
 
-.result__app-feedback {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  padding: var(--space-4);
-  background: var(--color-brand-light);
-  border: 1px solid var(--color-brand-border);
-  border-radius: var(--radius-md);
-}
-
-.result {
-  gap: var(--space-4);
-}
-
-.result__intro {
-  padding: var(--space-6);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-sm);
-}
-
-.result__intro .ff-h2 {
-  max-width: 28rem;
-}
-
-.result__prep,
-.result__inset {
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-}
-
-.result__app-feedback .ff-overline {
-  color: var(--color-brand-dark);
-}
-
-.result__app-feedback-btn {
-  width: 100%;
-}
-
 .result__disclaimer {
-  padding-top: var(--space-2);
-  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-1);
   font-size: var(--text-xs);
 }
 
-.result__actions {
+.result__restart-row {
+  order: 4;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.result__restart {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--touch-min);
+  padding: 0;
+  background: transparent;
+  border: 0;
+  color: var(--color-brand);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+}
+
+.result__restart:hover {
+  color: var(--color-brand-dark);
+}
+
+/* App feedback reads as the quiet footer of the page, not another card. */
+.result__feedback {
+  order: 5;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-border);
+}
+
+.result__feedback-body {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
 }
 
-.result__hint {
-  text-align: center;
+.result__feedback-btn {
+  width: 100%;
 }
 
-.diagnose .ff-badge {
-  align-self: flex-start;
+/* ------------------------------------------------------------
+   Footer action
+   ------------------------------------------------------------ */
+.result__footer-bar {
+  --background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+}
+
+/* The footer reuses the page container so the action lines up with the content column. */
+.result__footer.ff-container {
+  padding-block: var(--space-3);
+  padding-bottom: calc(var(--space-3) + var(--safe-bottom));
+}
+
+.result__footer-inner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 760px;
+  margin-inline: auto;
+}
+
+.result__hint {
+  text-align: center;
 }
 
 .diagnose__note {
@@ -645,9 +795,9 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
 @media (hover: hover) {
   .option:hover:not(.is-selected) {
     background: var(--color-overlay);
-    border-color: var(--color-text-secondary);
+    border-color: var(--color-border-strong);
     box-shadow: var(--shadow-sm);
-    transform: translateY(-1px);
+    transform: translateY(-2px);
   }
 }
 
@@ -677,7 +827,14 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
   .step,
   .result__intro {
     padding: var(--space-4);
-    border-radius: var(--radius-lg);
+  }
+
+  .result__section {
+    padding: var(--space-4);
+  }
+
+  .result__safety {
+    padding: var(--space-4);
   }
 }
 
@@ -686,28 +843,18 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
     gap: var(--space-8);
   }
 
-  .result__actions {
-    flex-direction: row;
-    flex-wrap: wrap;
+  .result {
+    gap: var(--space-6);
   }
 
-  .result__actions .ff-btn {
-    width: auto;
-    flex: 1 1 16rem;
-  }
-
-  .result__hint {
-    flex-basis: 100%;
-  }
-
-  .result__app-feedback {
+  .result__feedback {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
     gap: var(--space-6);
   }
 
-  .result__app-feedback-btn {
+  .result__feedback-btn {
     width: auto;
     flex: none;
   }
@@ -719,6 +866,10 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
   }
 
   .diagnose > .ff-stack {
+    max-width: 960px;
+  }
+
+  .result__footer-inner {
     max-width: 960px;
   }
 
@@ -736,45 +887,25 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
 
   .result {
     display: grid;
-    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-    gap: var(--space-6) var(--space-12);
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+    gap: var(--space-6) var(--space-10);
     align-items: start;
   }
 
-  .result__intro {
+  .result__lead {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
     grid-column: 1;
     grid-row: 1;
   }
 
-  .result__safety {
-    grid-column: 1;
-    grid-row: 2;
-  }
-
-  .result__inset--do {
+  .result__detail {
     grid-column: 2;
     grid-row: 1;
   }
 
-  .result__inset--next {
-    grid-column: 2;
-    grid-row: 2;
-  }
-
-  .result__prep {
-    grid-column: 1;
-  }
-
-  .result__actions {
-    grid-column: 1 / -1;
-  }
-
-  .result--has-safety .result__actions {
-    grid-column: 2;
-    grid-row: 3;
-  }
-
-  .result__app-feedback {
+  .result__feedback {
     grid-column: 1 / -1;
   }
 }

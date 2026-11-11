@@ -13,13 +13,13 @@ const SERVICE_BY_ID = {
     id: 'phone',
     name: 'Phone and tablet',
     blurb: 'Screens, batteries, charging ports, water damage',
-    examples: 'Cracked screen, battery drains fast, will not charge',
+    examples: 'Cracked screen, battery drains fast, water damage',
   },
   computer: {
     id: 'computer',
     name: 'Laptop and desktop',
     blurb: 'Slow or dead machines, keyboards, upgrades',
-    examples: 'Will not boot, overheating, needs a new SSD',
+    examples: 'Will not boot, overheating, needs more storage',
   },
   appliance: {
     id: 'appliance',
@@ -30,7 +30,7 @@ const SERVICE_BY_ID = {
   tv_audio: {
     id: 'tv_audio',
     name: 'TV and audio',
-    blurb: 'No picture, no sound, remote problems',
+    blurb: 'No picture, no sound, remote and speaker problems',
     examples: 'Screen goes black, speaker crackles',
   },
   electrical: {
