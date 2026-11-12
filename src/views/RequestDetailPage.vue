@@ -30,7 +30,7 @@ import { formatDate, formatDateTime, formatLongDay, formatRelative, formatTime }
 import { logger } from '@/domain/logger'
 import { getService } from '@/domain/services'
 import type { ServiceRequest } from '@/domain/types'
-import { actionOwner, availableActions, nextStepText, pendingRevision } from '@/domain/workflow'
+import { actionOwner, availableActions, isTerminal, nextStepText, pendingRevision } from '@/domain/workflow'
 
 // Props instead of useRoute(): see the route definition.
 const props = defineProps<{ id: string }>()
@@ -95,17 +95,15 @@ onIonViewWillEnter(() => {
   void Promise.all(jobs)
 })
 
-// Keeps the screen in step with the other device. A finished request cannot change, so the reads stop.
+// Keeps the screen in step with the other device. The request can still change after
+// completed, because the customer can still leave feedback. Only a closed request stops.
 useAutoRefresh(
   () => {
     now.value = Date.now()
     return loadRequest({ silent: true })
   },
   8000,
-  () => {
-    const status = request.value?.status
-    return status !== 'completed' && status !== 'declined'
-  },
+  () => request.value !== null && !isTerminal(request.value.status),
 )
 
 function onUpdated(next: ServiceRequest): void {
