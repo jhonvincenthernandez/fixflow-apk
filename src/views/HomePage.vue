@@ -13,7 +13,7 @@ import OwnerDashboard from './home/OwnerDashboard.vue'
 
 const { user } = useSession()
 
-/** One clock per visit, so every relative time on the page agrees. */
+/** One clock per visit, so every relative time on the page agrees... */
 const now = ref(Date.now())
 
 onIonViewWillEnter(() => {
