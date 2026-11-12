@@ -18,6 +18,7 @@ import StatusBadge from '@/components/StatusBadge.vue'
 import StatusStepper from '@/components/StatusStepper.vue'
 import RequestActions from '@/components/request/RequestActions.vue'
 import { refreshPage } from '@/composables/usePageRefresh'
+import { useAutoRefresh } from '@/composables/useAutoRefresh'
 import { loadRequests, upsertRequest, useRequests } from '@/composables/useRequests'
 import { requireActor, useSession } from '@/composables/useSession'
 import { showToast } from '@/composables/useToast'
@@ -52,20 +53,25 @@ const yourTurn = computed(() => request.value !== null && actionOwner(request.va
 const revision = computed(() => (request.value === null ? null : pendingRevision(request.value)))
 
 /** Shows the cached copy at once, then refreshes it. A failed refresh keeps what is on screen. */
-async function loadRequest(): Promise<void> {
+async function loadRequest(options: { silent?: boolean } = {}): Promise<void> {
   if (detail.value.status !== 'success') {
     const cached = list.value.find((item) => item.id === props.id)
     detail.value = cached === undefined ? { status: 'loading' } : { status: 'success', data: cached }
   }
   try {
     const fresh = await getRequest(requireActor(), props.id)
+    // A read that started earlier can finish later. It must not undo a newer change.
+    if (detail.value.status === 'success' && detail.value.data.updatedAt > fresh.updatedAt) return
     upsertRequest(fresh)
     detail.value = { status: 'success', data: fresh }
   } catch (error) {
     const appError = toAppError(error)
     logger.error('Loading a request failed', appError, { requestId: props.id })
-    if (detail.value.status === 'success') showToast('error', `Could not refresh. ${userMessage(appError)}`)
-    else detail.value = { status: 'error', error: appError }
+    if (detail.value.status !== 'success') {
+      detail.value = { status: 'error', error: appError }
+      return
+    }
+    if (options.silent !== true) showToast('error', `Could not refresh. ${userMessage(appError)}`)
   }
 }
 
@@ -89,13 +95,26 @@ onIonViewWillEnter(() => {
   void Promise.all(jobs)
 })
 
+// Keeps the screen in step with the other device. A finished request cannot change, so the reads stop.
+useAutoRefresh(
+  () => {
+    now.value = Date.now()
+    return loadRequest({ silent: true })
+  },
+  8000,
+  () => {
+    const status = request.value?.status
+    return status !== 'completed' && status !== 'declined'
+  },
+)
+
 function onUpdated(next: ServiceRequest): void {
   detail.value = { status: 'success', data: next }
   now.value = Date.now()
 }
 
 function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
-  return refreshPage(event)
+  return refreshPage(event, () => loadRequest())
 }
 </script>
 

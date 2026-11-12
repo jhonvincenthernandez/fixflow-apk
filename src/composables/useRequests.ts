@@ -56,6 +56,9 @@ export function loadRequests(options: { silent?: boolean } = {}): Promise<void> 
 export function upsertRequest(next: ServiceRequest): void {
   const current = requestsState.value
   if (current.status !== 'success') return
+  const existing = current.data.find((request) => request.id === next.id)
+  // A read that started earlier can finish later. It must not undo a newer change.
+  if (existing !== undefined && existing.updatedAt > next.updatedAt) return
   const without = current.data.filter((request) => request.id !== next.id)
   requestsState.value = { status: 'success', data: sortNewestFirst([...without, next]) }
 }

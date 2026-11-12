@@ -12,6 +12,7 @@ import PageHeader from '@/components/PageHeader.vue'
 import SkeletonList from '@/components/SkeletonList.vue'
 import { loadNotifications, markAllRead, markRead, useNotifications } from '@/composables/useNotifications'
 import { refreshPage } from '@/composables/usePageRefresh'
+import { useAutoRefresh } from '@/composables/useAutoRefresh'
 import { useAsyncAction } from '@/composables/useAsyncAction'
 import { showToast } from '@/composables/useToast'
 import { toAppError, userMessage } from '@/domain/errors'
@@ -26,8 +27,14 @@ onIonViewWillEnter(() => {
   void loadNotifications({ silent: true })
 })
 
+// Keeps the screen in step with the other device.
+useAutoRefresh(() => {
+  now.value = Date.now()
+  return loadNotifications({ silent: true })
+}, 15000)
+
 function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
-  return refreshPage(event)
+  return refreshPage(event, () => loadNotifications({ silent: true }))
 }
 
 const markAll = useAsyncAction(async () => {

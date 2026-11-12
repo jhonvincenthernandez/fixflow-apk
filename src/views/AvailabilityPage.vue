@@ -174,7 +174,7 @@ function useDefaultSettings(): void {
 }
 
 function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
-  return refreshPage(event)
+  return refreshPage(event, () => Promise.all([loadAvailability({ silent: true }), loadRequests({ silent: true })]))
 }
 </script>
 

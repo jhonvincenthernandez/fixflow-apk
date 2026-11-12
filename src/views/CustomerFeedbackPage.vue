@@ -58,7 +58,7 @@ const distribution = computed(() => {
 })
 
 function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
-  return refreshPage(event)
+  return refreshPage(event, () => loadRequests({ silent: true }))
 }
 </script>
 

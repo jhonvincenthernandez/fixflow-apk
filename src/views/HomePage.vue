@@ -6,6 +6,7 @@ import ErrorBoundary from '@/components/ErrorBoundary.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import { loadRequests } from '@/composables/useRequests'
 import { refreshPage } from '@/composables/usePageRefresh'
+import { useAutoRefresh } from '@/composables/useAutoRefresh'
 import { useSession } from '@/composables/useSession'
 import CustomerHome from './home/CustomerHome.vue'
 import OwnerDashboard from './home/OwnerDashboard.vue'
@@ -21,8 +22,14 @@ onIonViewWillEnter(() => {
   void loadRequests({ silent: true })
 })
 
+// Keeps the screen in step with the other device.
+useAutoRefresh(() => {
+  now.value = Date.now()
+  return loadRequests({ silent: true })
+}, 15000)
+
 function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
-  return refreshPage(event)
+  return refreshPage(event, () => loadRequests({ silent: true }))
 }
 </script>
 

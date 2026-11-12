@@ -19,6 +19,7 @@ import PageHeader from '@/components/PageHeader.vue'
 import RequestCard from '@/components/RequestCard.vue'
 import SkeletonList from '@/components/SkeletonList.vue'
 import { loadRequests, useRequests } from '@/composables/useRequests'
+import { useAutoRefresh } from '@/composables/useAutoRefresh'
 import { useSession } from '@/composables/useSession'
 import { getService } from '@/domain/services'
 import { StatusSchema } from '@/domain/types'
@@ -107,6 +108,12 @@ async function refresh(): Promise<void> {
     refreshing.value = false
   }
 }
+
+// Keeps the screen in step with the other device.
+useAutoRefresh(() => {
+  now.value = Date.now()
+  return loadRequests({ silent: true })
+}, 15000)
 
 async function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
   await refresh()

@@ -44,7 +44,7 @@ function onSignOut(): void {
 }
 
 function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
-  return refreshPage(event)
+  return refreshPage(event, () => loadAvailability({ silent: true }))
 }
 </script>
 
