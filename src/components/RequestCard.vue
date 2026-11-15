@@ -51,7 +51,7 @@ const yourTurn = computed(() => actionOwner(props.request.status) === props.role
 
     <p class="ff-meta card__hint" :class="{ 'is-turn': yourTurn }">
       <span v-if="yourTurn" class="ff-badge ff-badge--brand card__turn">Your turn</span>
-      {{ nextStepText(request, role) }}
+      {{ nextStepText(request, role, now) }}
     </p>
     <p class="ff-meta ff-muted card__updated">Updated {{ formatRelative(request.updatedAt, now) }}</p>
   </AppLink>

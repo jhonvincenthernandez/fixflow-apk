@@ -34,6 +34,11 @@ export function centavosToPesosText(centavos: number): string {
   return fraction === 0 ? String(whole) : `${whole}.${String(fraction).padStart(2, '0')}`
 }
 
+/** True when the quotation is past its valid date and still has no answer. */
+export function isExpired(quotation: Quotation, now: number): boolean {
+  return quotation.response === null && now > quotation.validUntil
+}
+
 /** Validates a draft and freezes it into a sendable quotation. */
 export function buildQuotation(draft: unknown, now: number): Quotation {
   const parsed = parseOrThrow(QuotationDraftSchema, draft)

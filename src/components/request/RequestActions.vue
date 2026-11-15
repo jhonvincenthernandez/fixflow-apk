@@ -30,11 +30,12 @@ import type { ScheduleContext } from '@/data/repo'
 import type { AsyncState } from '@/domain/async'
 import { toAppError, userMessage } from '@/domain/errors'
 import { logger } from '@/domain/logger'
+import { isExpired } from '@/domain/quotation'
 import type { QuotationDraft, Role, ServiceRequest } from '@/domain/types'
 import { actionLabel, availableActions, hasRevisionRequest } from '@/domain/workflow'
 import type { ActionId, ActionInput } from '@/domain/workflow'
 
-const props = defineProps<{ request: ServiceRequest; role: Role }>()
+const props = defineProps<{ request: ServiceRequest; role: Role; now: number }>()
 
 const emit = defineEmits<{
   /** The request changed. The parent swaps it in without another round trip. */
@@ -136,19 +137,32 @@ const schedule = shallowRef<AsyncState<ScheduleContext>>({ status: 'idle' })
 
 const runner = useAsyncAction((input: ActionInput) => runAction(props.request.id, input))
 
+/** The quotation is past its valid date, so the customer has to ask for a new one. */
+const expired = computed(() => {
+  const quotation = props.request.quotation
+  return quotation !== null && isExpired(quotation, props.now)
+})
+
 const actions = computed(() => {
   const all = availableActions(props.request.status, props.role)
   // Declining a quotation already closes the request, so a second "cancel" would be redundant.
   const withoutCancel = all.includes('decline_quotation') ? all.filter((action) => action !== 'cancel') : all
   // One revision round per request, so the customer cannot ask for a second one.
-  return withoutCancel.filter((action) => action !== 'request_revision' || !hasRevisionRequest(props.request))
+  // An expired quotation is a dead quote, not a negotiation round, so it can be revised again.
+  const withoutSecondRevision = withoutCancel.filter(
+    (action) => action !== 'request_revision' || !hasRevisionRequest(props.request) || expired.value,
+  )
+  // An expired quotation cannot be accepted, so that button would only fail.
+  return withoutSecondRevision.filter((action) => action !== 'accept_quotation' || !expired.value)
 })
 
 const reasonCopy = computed(() => REASON_SHEET[reasonAction.value])
 
 function variantOf(action: ActionId): 'primary' | 'secondary' | 'danger' {
   if (action === 'cancel' || action === 'decline_quotation') return 'danger'
-  if (action === 'revise_quotation' || action === 'request_revision' || action === 'reschedule') return 'secondary'
+  if (action === 'revise_quotation' || action === 'reschedule') return 'secondary'
+  // With an expired quotation, asking for a new one is the way forward.
+  if (action === 'request_revision') return expired.value ? 'primary' : 'secondary'
   return 'primary'
 }
 

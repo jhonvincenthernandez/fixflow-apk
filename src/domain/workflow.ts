@@ -1,6 +1,6 @@
 import { ConflictError, ForbiddenError } from './errors'
 import { formatDateTime } from './format'
-import { buildQuotation } from './quotation'
+import { buildQuotation, isExpired } from './quotation'
 import type { Availability } from './availability'
 import { validateSlot } from './schedule'
 import type { Booking } from './schedule'
@@ -115,9 +115,15 @@ const NEXT_STEP: Record<Role, Record<RequestStatus, string>> = {
   },
 }
 
-export function nextStepText(request: ServiceRequest, role: Role): string {
+export function nextStepText(request: ServiceRequest, role: Role, now: number): string {
   if (pendingRevision(request) !== null) {
     return role === 'owner' ? 'Prepare a revised quotation' : 'The shop is preparing a revised quotation'
+  }
+  // An expired quotation cannot be accepted, so waiting for an answer would be wrong.
+  if (request.quotation !== null && isExpired(request.quotation, now)) {
+    return role === 'owner'
+      ? 'The quotation expired. Send a new one.'
+      : 'This quotation expired. Ask for a new one.'
   }
   return NEXT_STEP[role][request.status]
 }
@@ -293,7 +299,9 @@ function computePatch(request: ServiceRequest, input: ActionInput, actor: Actor,
     }
     case 'request_revision': {
       const quotation = requireQuotation(request)
-      if (hasRevisionRequest(request)) {
+      // An expired quotation is not a negotiation round, it is a dead quote,
+      // so the customer may always ask for a fresh one.
+      if (hasRevisionRequest(request) && !isExpired(quotation, now)) {
         throw new ConflictError('A revised quotation was already requested. Accept it or decline it.')
       }
       const reason = parseOrThrow(RevisionReasonSchema, input.reason)

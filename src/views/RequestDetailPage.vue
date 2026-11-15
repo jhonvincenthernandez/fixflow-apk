@@ -155,7 +155,7 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
                 <p class="ff-meta">{{ service.name }}, submitted {{ formatDate(request.createdAt) }}</p>
               </div>
               <p class="ff-inset next" :class="{ 'is-turn': yourTurn }">
-                <strong v-if="yourTurn" class="next__turn">Your turn: </strong>{{ nextStepText(request, role) }}
+                <strong v-if="yourTurn" class="next__turn">Your turn: </strong>{{ nextStepText(request, role, now) }}
               </p>
             </header>
 
@@ -246,7 +246,7 @@ function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
     </ion-content>
 
     <ion-footer v-if="request && role && hasActions">
-      <RequestActions :request="request" :role="role" @updated="onUpdated" @stale="loadRequest" />
+      <RequestActions :request="request" :role="role" :now="now" @updated="onUpdated" @stale="loadRequest" />
     </ion-footer>
   </ion-page>
 </template>

@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { formatDate, formatMoney } from '@/domain/format'
-import { lineTotal } from '@/domain/quotation'
+import { isExpired, lineTotal } from '@/domain/quotation'
 import type { Quotation } from '@/domain/types'
 
 const props = defineProps<{ quotation: Quotation; now: number }>()
 
-const expired = computed(() => props.quotation.response === null && props.now > props.quotation.validUntil)
+const expired = computed(() => isExpired(props.quotation, props.now))
 </script>
 
 <template>
