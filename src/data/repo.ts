@@ -458,7 +458,8 @@ export async function performAction(
 
   let bookings: Booking[] = []
   let availability = defaultAvailability()
-  if (input.action === 'schedule') {
+  // Booking and moving a visit both need the real hours and the visits already taken.
+  if (input.action === 'schedule' || input.action === 'reschedule') {
     availability = await readAvailability()
     try {
       const { data } = await listScheduledServiceRequests(dataConnect, freshRead)

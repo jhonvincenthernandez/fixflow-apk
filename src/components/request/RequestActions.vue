@@ -54,6 +54,7 @@ const ICONS: Record<ActionId, Component> = {
   request_revision: PencilLine,
   decline_quotation: CircleX,
   schedule: CalendarCheck,
+  reschedule: CalendarCheck,
   start_service: Play,
   complete_service: CircleCheck,
   submit_feedback: Star,
@@ -68,6 +69,7 @@ const SUCCESS_TEXT: Record<ActionId, string> = {
   request_revision: 'Revision requested. The shop was notified.',
   decline_quotation: 'Quotation declined.',
   schedule: 'Appointment saved.',
+  reschedule: 'Appointment moved. The other side was notified.',
   start_service: 'Service started.',
   complete_service: 'Marked as completed. The customer can now leave feedback.',
   submit_feedback: 'Thanks for your feedback.',
@@ -126,6 +128,9 @@ const rating = ref(0)
 const comment = ref('')
 const selectedStart = ref<number | null>(null)
 const slotsNow = ref(Date.now())
+/** Whether the schedule sheet books a new time or moves the booked one. */
+const scheduleAction = ref<'schedule' | 'reschedule'>('schedule')
+const scheduleReason = ref('')
 /** The owner's availability plus the appointments already booked, read together. */
 const schedule = shallowRef<AsyncState<ScheduleContext>>({ status: 'idle' })
 
@@ -143,8 +148,7 @@ const reasonCopy = computed(() => REASON_SHEET[reasonAction.value])
 
 function variantOf(action: ActionId): 'primary' | 'secondary' | 'danger' {
   if (action === 'cancel' || action === 'decline_quotation') return 'danger'
-  if (action === 'revise_quotation' || action === 'request_revision') return 'secondary'
-  if (action === 'schedule' && props.request.status === 'scheduled') return 'secondary'
+  if (action === 'revise_quotation' || action === 'request_revision' || action === 'reschedule') return 'secondary'
   return 'primary'
 }
 
@@ -174,6 +178,7 @@ function immediateInput(action: ActionId): ActionInput | null {
     case 'request_revision':
     case 'decline_quotation':
     case 'schedule':
+    case 'reschedule':
     case 'submit_feedback':
     case 'cancel':
       return null
@@ -229,8 +234,11 @@ async function onAction(action: ActionId): Promise<void> {
       sheet.value = 'quotation'
       return
     case 'schedule':
+    case 'reschedule':
+      scheduleAction.value = action
       selectedStart.value = null
       slotsNow.value = Date.now()
+      scheduleReason.value = ''
       sheet.value = 'schedule'
       await loadSchedule()
       return
@@ -258,12 +266,16 @@ async function onQuotationSubmit(draft: QuotationDraft): Promise<void> {
 async function onScheduleConfirm(): Promise<void> {
   const startAt = selectedStart.value
   if (startAt === null) return
-  if (await perform({ action: 'schedule', startAt })) {
+  const input: ActionInput =
+    scheduleAction.value === 'reschedule'
+      ? { action: 'reschedule', startAt, reason: scheduleReason.value }
+      : { action: 'schedule', startAt }
+  if (await perform(input)) {
     closeSheet()
     return
   }
   const code = runner.error.value?.code
-  if (code === 'CONFLICT' || code === 'VALIDATION_FAILED') {
+  if (code === 'CONFLICT' || runner.fieldErrors.value['startAt'] !== undefined) {
     // Someone took the slot first, or the shop changed its hours. Show fresh times and let the user choose again.
     selectedStart.value = null
     await loadSchedule()
@@ -307,7 +319,7 @@ async function onFeedbackSubmit(): Promise<void> {
       @click="onAction(primaryAction)"
     >
       <component :is="ICONS[primaryAction]" class="ff-icon ff-icon--sm" aria-hidden="true" />
-      {{ actionLabel(primaryAction, request.status) }}
+      {{ actionLabel(primaryAction) }}
     </AppButton>
 
     <div v-if="otherActions.length > 0" class="actions__row">
@@ -320,7 +332,7 @@ async function onFeedbackSubmit(): Promise<void> {
         @click="onAction(action)"
       >
         <component :is="ICONS[action]" class="ff-icon ff-icon--sm" aria-hidden="true" />
-        {{ actionLabel(action, request.status) }}
+        {{ actionLabel(action) }}
       </AppButton>
     </div>
   </div>
@@ -340,7 +352,7 @@ async function onFeedbackSubmit(): Promise<void> {
 
   <SheetModal
     :open="sheet === 'schedule'"
-    :title="request.status === 'scheduled' ? 'Reschedule appointment' : 'Schedule appointment'"
+    :title="scheduleAction === 'reschedule' ? 'Reschedule appointment' : 'Schedule appointment'"
     @close="closeSheet"
   >
     <div class="ff-stack">
@@ -358,11 +370,33 @@ async function onFeedbackSubmit(): Promise<void> {
         :bookings="schedule.data.bookings"
         :now="slotsNow"
       />
-      <p v-if="inlineError" class="ff-error-text" role="alert">{{ inlineError }}</p>
+      <FormField
+        v-if="scheduleAction === 'reschedule'"
+        v-slot="field"
+        label="Reason"
+        :optional="role !== 'owner'"
+        :hint="role === 'owner' ? 'The customer will see this reason.' : 'The shop will see this reason.'"
+        :error="runner.fieldErrors.value['_form']?.[0]"
+      >
+        <textarea
+          :id="field.id"
+          v-model="scheduleReason"
+          class="ff-textarea"
+          maxlength="200"
+          :placeholder="
+            role === 'owner'
+              ? 'Tell the customer why the time is changing'
+              : 'Tell the shop why you are moving it'
+          "
+          :aria-invalid="field.invalid"
+          :aria-describedby="field.describedBy"
+        />
+      </FormField>
+      <p v-if="inlineError && !runner.fieldErrors.value['_form']" class="ff-error-text" role="alert">{{ inlineError }}</p>
     </div>
     <template #footer>
       <AppButton block :disabled="selectedStart === null" :loading="runner.loading.value" @click="onScheduleConfirm">
-        Confirm appointment
+        {{ scheduleAction === 'reschedule' ? 'Move appointment' : 'Confirm appointment' }}
       </AppButton>
     </template>
   </SheetModal>

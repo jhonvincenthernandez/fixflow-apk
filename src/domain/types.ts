@@ -253,6 +253,13 @@ export const RevisionReasonSchema = z
   .min(5, 'Tell the shop what you want changed')
   .max(200, 'Keep the reason under 200 characters')
 
+/** The shop must say why a booked appointment is moving. */
+export const RescheduleReasonSchema = z
+  .string()
+  .trim()
+  .min(5, 'Tell the customer why the time is changing')
+  .max(200, 'Keep the reason under 200 characters')
+
 /* ------------------------------------------------------------
    Parsing helper
    ------------------------------------------------------------ */

@@ -4,7 +4,7 @@ import { buildQuotation } from './quotation'
 import type { Availability } from './availability'
 import { validateSlot } from './schedule'
 import type { Booking } from './schedule'
-import { FeedbackInputSchema, ReasonSchema, RevisionReasonSchema, parseOrThrow } from './types'
+import { FeedbackInputSchema, ReasonSchema, RescheduleReasonSchema, RevisionReasonSchema, parseOrThrow } from './types'
 import type { FeedbackInput, HistoryEntry, Quotation, QuotationDraft, RequestStatus, Role, ServiceRequest } from './types'
 
 /* ------------------------------------------------------------
@@ -133,6 +133,7 @@ export const ACTION_IDS = [
   'request_revision',
   'decline_quotation',
   'schedule',
+  'reschedule',
   'start_service',
   'complete_service',
   'submit_feedback',
@@ -161,7 +162,8 @@ export const ACTION_RULES: Record<ActionId, ActionRule> = {
   accept_quotation: { from: ['quotation_sent'], to: 'quotation_accepted', roles: ['customer'] },
   request_revision: { from: ['quotation_sent'], to: 'under_review', roles: ['customer'] },
   decline_quotation: { from: ['quotation_sent'], to: 'declined', roles: ['customer'] },
-  schedule: { from: ['quotation_accepted', 'scheduled'], to: 'scheduled', roles: ['customer', 'owner'] },
+  schedule: { from: ['quotation_accepted'], to: 'scheduled', roles: ['customer'] },
+  reschedule: { from: ['scheduled'], to: 'scheduled', roles: ['customer', 'owner'] },
   start_service: { from: ['scheduled'], to: 'in_progress', roles: ['owner'] },
   complete_service: { from: ['in_progress'], to: 'completed', roles: ['owner'] },
   submit_feedback: { from: ['completed'], to: 'feedback', roles: ['customer'] },
@@ -200,7 +202,7 @@ function lastRevisionEntry(request: ServiceRequest): HistoryEntry | null {
   return entry ?? null
 }
 
-export function actionLabel(action: ActionId, status: RequestStatus): string {
+export function actionLabel(action: ActionId): string {
   switch (action) {
     case 'start_review':
       return 'Start review'
@@ -215,7 +217,9 @@ export function actionLabel(action: ActionId, status: RequestStatus): string {
     case 'decline_quotation':
       return 'Decline quotation'
     case 'schedule':
-      return status === 'scheduled' ? 'Reschedule' : 'Schedule appointment'
+      return 'Schedule appointment'
+    case 'reschedule':
+      return 'Reschedule'
     case 'start_service':
       return 'Start service'
     case 'complete_service':
@@ -240,6 +244,7 @@ export type ActionInput =
   | { readonly action: 'request_revision'; readonly reason: string }
   | { readonly action: 'decline_quotation'; readonly reason: string }
   | { readonly action: 'schedule'; readonly startAt: number }
+  | { readonly action: 'reschedule'; readonly startAt: number; readonly reason: string }
   | { readonly action: 'start_service' }
   | { readonly action: 'complete_service' }
   | { readonly action: 'submit_feedback'; readonly feedback: FeedbackInput }
@@ -319,7 +324,28 @@ function computePatch(request: ServiceRequest, input: ActionInput, actor: Actor,
             updatedAt: now,
           },
         },
-        note: request.status === 'scheduled' ? 'Rescheduled' : '',
+        note: '',
+      }
+    }
+    case 'reschedule': {
+      validateSlot(input.startAt, now, context.bookings, context.availability)
+      const reason =
+        actor.role === 'owner'
+          ? parseOrThrow(RescheduleReasonSchema, input.reason)
+          : parseOrThrow(ReasonSchema, input.reason)
+      const booked = request.appointment
+      return {
+        patch: {
+          appointment: {
+            startAt: input.startAt,
+            // The slot length and the booker stay as they were, so a later schedule change
+            // cannot alter an appointment that is already booked.
+            durationMinutes: booked?.durationMinutes ?? context.availability.slotMinutes,
+            createdBy: booked?.createdBy ?? actor.role,
+            updatedAt: now,
+          },
+        },
+        note: reason,
       }
     }
     case 'start_service':
@@ -416,6 +442,14 @@ function messageFor(request: ServiceRequest, input: ActionInput, actor: Actor): 
       return {
         title: 'Appointment scheduled',
         body: `${ref}: ${item} on ${formatDateTime(input.startAt)}.`,
+      }
+    case 'reschedule':
+      return {
+        title: 'Appointment rescheduled',
+        body: withReason(
+          `${ref}: ${actor.role === 'owner' ? 'the shop moved' : 'the customer moved'} the appointment for ${item} to ${formatDateTime(input.startAt)}.`,
+          input.reason.trim(),
+        ),
       }
     case 'start_service':
       return { title: 'Repair started', body: `${ref}: work on your ${item} has started.` }
