@@ -53,12 +53,23 @@ export function loadNotifications(options: { silent?: boolean; quiet?: boolean; 
 /**
  * Tells the user about an alert that arrived on another device.
  * The newest one is enough: the badge on the Alerts tab carries the full count.
+ * Tapping it opens the request and marks the alert as read.
  */
 function announce(fresh: readonly AppNotification[]): void {
   const newest = fresh[0]
   if (newest === undefined) return
   const extra = fresh.length > 1 ? ` (+${fresh.length - 1} more)` : ''
-  showToast('info', `${newest.title}. ${newest.body}${extra}`, 6000)
+  showToast('info', `${newest.title}. ${newest.body}${extra}`, {
+    durationMs: 6000,
+    to: `/request/${newest.requestId}`,
+    onSelect: () => {
+      void markRead(newest.id).catch((error: unknown) => {
+        const appError = toAppError(error)
+        logger.error('Marking an alert as read failed', appError, { id: newest.id })
+        showToast('error', userMessage(appError))
+      })
+    },
+  })
 }
 
 function replaceAll(update: (items: readonly AppNotification[]) => AppNotification[]): void {

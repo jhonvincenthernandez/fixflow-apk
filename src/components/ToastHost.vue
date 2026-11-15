@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import type { Component } from 'vue'
 import { CircleCheck, Info, TriangleAlert, X } from '@lucide/vue'
+import AppLink from '@/components/AppLink.vue'
 import { useToasts } from '@/composables/useToast'
-import type { ToastKind } from '@/composables/useToast'
+import type { Toast, ToastKind } from '@/composables/useToast'
 
 const { toasts, dismissToast } = useToasts()
 
@@ -10,6 +11,12 @@ const ICONS: Record<ToastKind, Component> = {
   success: CircleCheck,
   error: TriangleAlert,
   info: Info,
+}
+
+/** Runs what the toast was about, then closes it right away. */
+function onSelect(toast: Toast): void {
+  toast.onSelect?.()
+  dismissToast(toast.id)
 }
 </script>
 
@@ -22,10 +29,16 @@ const ICONS: Record<ToastKind, Component> = {
         class="toast"
         :class="`toast--${toast.kind}`"
       >
-        <component :is="ICONS[toast.kind]" class="ff-icon" aria-hidden="true" />
-        <p class="toast__message">
-          {{ toast.message }}
-        </p>
+        <AppLink v-if="toast.to !== undefined" :to="toast.to" class="toast__link" @click="onSelect(toast)">
+          <component :is="ICONS[toast.kind]" class="ff-icon" aria-hidden="true" />
+          <span class="toast__message">{{ toast.message }}</span>
+        </AppLink>
+        <template v-else>
+          <component :is="ICONS[toast.kind]" class="ff-icon" aria-hidden="true" />
+          <p class="toast__message">
+            {{ toast.message }}
+          </p>
+        </template>
         <button type="button" class="ff-icon-btn toast__close" aria-label="Dismiss notification" @click="dismissToast(toast.id)">
           <X class="ff-icon" aria-hidden="true" />
         </button>
@@ -85,6 +98,20 @@ const ICONS: Record<ToastKind, Component> = {
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
   line-height: var(--leading-base);
+}
+
+.toast__link {
+  display: flex;
+  flex: 1;
+  align-items: flex-start;
+  gap: var(--space-3);
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+.toast__link:hover .toast__message {
+  text-decoration: underline;
 }
 
 .toast__close {

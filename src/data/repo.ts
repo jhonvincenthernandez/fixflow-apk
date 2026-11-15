@@ -62,6 +62,18 @@ import { hashPassword, verifyPassword } from './password'
 /* ------------------------------------------------------------
    Shared helpers
    ------------------------------------------------------------ */
+/**
+ * The most requests the list query returns.
+ * Keep in sync with the limit in dataconnect/example/queries.gql.
+ */
+export const REQUEST_LIST_LIMIT = 100
+
+/**
+ * The most alerts the notification query returns.
+ * Keep in sync with the limit in dataconnect/example/queries.gql.
+ */
+export const ALERT_LIST_LIMIT = 50
+
 export interface StoredImage {
   readonly id: string
   readonly requestId: string

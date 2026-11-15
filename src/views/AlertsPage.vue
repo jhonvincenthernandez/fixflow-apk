@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { IonContent, IonPage, IonRefresher, IonRefresherContent, onIonViewWillEnter } from '@ionic/vue'
 import type { RefresherCustomEvent } from '@ionic/vue'
 import { BellOff, CheckCheck } from '@lucide/vue'
@@ -16,11 +16,26 @@ import { useAutoRefresh } from '@/composables/useAutoRefresh'
 import { useAsyncAction } from '@/composables/useAsyncAction'
 import { showToast } from '@/composables/useToast'
 import { toAppError, userMessage } from '@/domain/errors'
-import { formatRelative } from '@/domain/format'
+import { countLine, formatRelative } from '@/domain/format'
 import { logger } from '@/domain/logger'
+import { ALERT_LIST_LIMIT } from '@/data/repo'
 
 const { state, list, unreadCount } = useNotifications()
 const now = ref(Date.now())
+
+type Filter = 'all' | 'unread'
+
+const FILTERS: readonly { value: Filter; label: string }[] = [
+  { value: 'all', label: 'All' },
+  { value: 'unread', label: 'Unread' },
+]
+
+const filter = ref<Filter>('all')
+
+/** The alerts the current filter keeps. */
+const visible = computed(() =>
+  filter.value === 'unread' ? list.value.filter((item) => item.readAt === null) : list.value,
+)
 
 onIonViewWillEnter(() => {
   now.value = Date.now()
@@ -82,9 +97,18 @@ async function onOpen(id: string, alreadyRead: boolean): Promise<void> {
 
             <template v-else>
               <div class="toolbar">
-                <p class="ff-meta" aria-live="polite">
-                  {{ unreadCount === 0 ? 'All caught up' : `${unreadCount} unread` }}
-                </p>
+                <div class="chips" role="group" aria-label="Filter alerts">
+                  <button
+                    v-for="option in FILTERS"
+                    :key="option.value"
+                    type="button"
+                    class="ff-chip"
+                    :aria-pressed="filter === option.value"
+                    @click="filter = option.value"
+                  >
+                    {{ option.label }}
+                  </button>
+                </div>
                 <AppButton
                   v-if="unreadCount > 0"
                   variant="ghost"
@@ -99,8 +123,13 @@ async function onOpen(id: string, alreadyRead: boolean): Promise<void> {
                 {{ userMessage(markAll.error.value) }} Try again.
               </p>
 
-              <ul class="ff-stack ff-stack--tight alert-list">
-                <li v-for="item in list" :key="item.id">
+              <p class="ff-meta" aria-live="polite">
+                {{ countLine(visible.length, list.length, ALERT_LIST_LIMIT, 'alert') }}
+              </p>
+              <p v-if="visible.length === 0" class="ff-meta">Nothing unread. You are all caught up.</p>
+
+              <ul v-else class="ff-stack ff-stack--tight alert-list">
+                <li v-for="item in visible" :key="item.id">
                   <AppLink
                     :to="`/request/${item.requestId}`"
                     class="ff-card ff-card--interactive alert"
@@ -133,6 +162,13 @@ async function onOpen(id: string, alreadyRead: boolean): Promise<void> {
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2) var(--space-3);
+}
+
+.chips {
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+  padding-bottom: var(--space-1);
 }
 
 .alert {

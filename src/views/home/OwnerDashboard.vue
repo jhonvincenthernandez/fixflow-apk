@@ -7,6 +7,7 @@ import RatingStars from '@/components/RatingStars.vue'
 import RequestCard from '@/components/RequestCard.vue'
 import SkeletonList from '@/components/SkeletonList.vue'
 import { loadRequests, useRequests } from '@/composables/useRequests'
+import { useNotifications } from '@/composables/useNotifications'
 import { formatDateTime, formatRelative } from '@/domain/format'
 import type { RequestStatus, ServiceRequest } from '@/domain/types'
 import { actionOwner } from '@/domain/workflow'
@@ -32,6 +33,7 @@ function isTileStatus(status: RequestStatus): status is TileStatus {
 }
 
 const { state, list, customerName } = useRequests()
+const { unreadCount } = useNotifications()
 
 const firstName = computed(() => props.name.trim().split(WHITESPACE)[0] ?? props.name)
 
@@ -102,6 +104,12 @@ const averageRating = computed(() => {
             <AppLink :to="`/tabs/requests?status=${tile.status}`" class="ff-card ff-card--interactive tile">
               <span class="tile__count">{{ counts[tile.status] }}</span>
               <span class="tile__label">{{ tile.label }}</span>
+            </AppLink>
+          </li>
+          <li>
+            <AppLink to="/tabs/alerts" class="ff-card ff-card--interactive tile">
+              <span class="tile__count">{{ unreadCount }}</span>
+              <span class="tile__label">Unread alerts</span>
             </AppLink>
           </li>
         </ul>
@@ -213,7 +221,7 @@ const averageRating = computed(() => {
 
 @media (min-width: 48rem) {
   .tiles {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
   }
 }
 

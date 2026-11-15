@@ -22,7 +22,7 @@ export function useAsyncAction<Args extends unknown[], Result>(operation: (...ar
     state.value = { status: 'loading' }
     let slowStatusToast: number | null = null
     const slowStatusTimer = setTimeout(() => {
-      slowStatusToast = showToast('info', SLOW_OPERATION_MESSAGE, 12000)
+      slowStatusToast = showToast('info', SLOW_OPERATION_MESSAGE, { durationMs: 12000 })
     }, SLOW_OPERATION_DELAY_MS)
     try {
       const data = await operation(...args)

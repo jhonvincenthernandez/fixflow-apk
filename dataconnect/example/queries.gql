@@ -85,7 +85,7 @@ query ListAllServiceRequests @auth(
   level: PUBLIC
   insecureReason: "Public: the shop owner sees every request; restrict this before public launch."
 ) {
-  serviceRequests(orderBy: [{ updatedAt: DESC }]) {
+  serviceRequests(orderBy: [{ updatedAt: DESC }], limit: 100) {
     id
     ref
     customerId
@@ -110,7 +110,7 @@ query ListServiceRequestsByCustomer($customerId: UUID!) @auth(
   level: PUBLIC
   insecureReason: "Public: customers read requests by customer id; restrict this before public launch."
 ) {
-  serviceRequests(where: { customerId: { eq: $customerId } }, orderBy: [{ updatedAt: DESC }]) {
+  serviceRequests(where: { customerId: { eq: $customerId } }, orderBy: [{ updatedAt: DESC }], limit: 50) {
     id
     ref
     customerId
@@ -174,7 +174,7 @@ query ListNotifications($userId: UUID!) @auth(
   level: PUBLIC
   insecureReason: "Public: notifications are read by their owning client today; restrict this before public launch."
 ) {
-  notifications(where: { userId: { eq: $userId } }, orderBy: [{ createdAt: DESC }]) {
+  notifications(where: { userId: { eq: $userId } }, orderBy: [{ createdAt: DESC }], limit: 50) {
     id
     userId
     requestId

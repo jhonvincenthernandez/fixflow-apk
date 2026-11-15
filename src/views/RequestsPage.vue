@@ -19,8 +19,10 @@ import PageHeader from '@/components/PageHeader.vue'
 import RequestCard from '@/components/RequestCard.vue'
 import SkeletonList from '@/components/SkeletonList.vue'
 import { loadRequests, useRequests } from '@/composables/useRequests'
+import { REQUEST_LIST_LIMIT } from '@/data/repo'
 import { useAutoRefresh } from '@/composables/useAutoRefresh'
 import { useSession } from '@/composables/useSession'
+import { countLine } from '@/domain/format'
 import { getService } from '@/domain/services'
 import { StatusSchema } from '@/domain/types'
 import type { RequestStatus, ServiceRequest } from '@/domain/types'
@@ -185,7 +187,9 @@ async function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
           />
 
           <template v-else>
-            <p class="ff-meta" aria-live="polite">Showing {{ visible.length }} of {{ list.length }} requests</p>
+            <p class="ff-meta" aria-live="polite">
+              {{ countLine(visible.length, list.length, REQUEST_LIST_LIMIT, 'request') }}
+            </p>
 
             <EmptyState
               v-if="list.length === 0"

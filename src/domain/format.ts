@@ -68,3 +68,21 @@ export function initials(name: string): string {
   const last = parts.length > 1 ? (parts[parts.length - 1]?.[0] ?? '') : ''
   return (first + last).toUpperCase()
 }
+
+/**
+ * The count line above a list.
+ *
+ * It says how many of the loaded rows are on screen, and it admits when the
+ * query limit is holding older rows back, so the count never reads as the
+ * total that exists.
+ */
+export function countLine(shown: number, total: number, limit: number, noun: string): string {
+  const label = total === 1 ? noun : `${noun}s`
+  const capped = total >= limit
+  if (shown < total) {
+    return capped
+      ? `Showing ${shown} of the ${limit} most recent ${label}`
+      : `Showing ${shown} of ${total} ${label}`
+  }
+  return capped ? `Showing the ${limit} most recent ${label}` : `${total} ${label}`
+}
