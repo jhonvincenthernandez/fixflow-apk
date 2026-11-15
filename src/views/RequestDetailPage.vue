@@ -53,7 +53,7 @@ const yourTurn = computed(() => request.value !== null && actionOwner(request.va
 const revision = computed(() => (request.value === null ? null : pendingRevision(request.value)))
 
 /** Shows the cached copy at once, then refreshes it. A failed refresh keeps what is on screen. */
-async function loadRequest(options: { silent?: boolean } = {}): Promise<void> {
+async function loadRequest(options: { quiet?: boolean } = {}): Promise<void> {
   if (detail.value.status !== 'success') {
     const cached = list.value.find((item) => item.id === props.id)
     detail.value = cached === undefined ? { status: 'loading' } : { status: 'success', data: cached }
@@ -71,7 +71,7 @@ async function loadRequest(options: { silent?: boolean } = {}): Promise<void> {
       detail.value = { status: 'error', error: appError }
       return
     }
-    if (options.silent !== true) showToast('error', `Could not refresh. ${userMessage(appError)}`)
+    if (options.quiet !== true) showToast('error', `Could not refresh. ${userMessage(appError)}`)
   }
 }
 
@@ -100,9 +100,9 @@ onIonViewWillEnter(() => {
 useAutoRefresh(
   () => {
     now.value = Date.now()
-    return loadRequest({ silent: true })
+    return loadRequest({ quiet: true })
   },
-  8000,
+  5000,
   () => request.value !== null && !isTerminal(request.value.status),
 )
 

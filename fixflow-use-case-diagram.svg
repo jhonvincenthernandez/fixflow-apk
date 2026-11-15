@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1500" height="980" viewBox="0 0 1500 980" role="img" aria-labelledby="title desc">
   <title id="title">FixFlow use-case diagram</title>
-  <desc id="desc">Use-case diagram showing customer and business owner actions in FixFlow.</desc>
+  <desc id="desc">Use-case diagram showing customer and business owner actions in the FixFlow service request, quotation, appointment, and tracking workflow.</desc>
   <defs>
     <linearGradient id="header" x1="0" x2="1" y1="0" y2="1">
       <stop offset="0" stop-color="#123b5d"/>
@@ -59,11 +59,11 @@
     <text x="405" y="289"><tspan x="405">Run quick</tspan><tspan x="405" dy="19">repair check</tspan></text>
     <text x="405" y="367"><tspan x="405">View services and</tspan><tspan x="405" dy="19">submit request/photos</tspan></text>
     <text x="405" y="445"><tspan x="405">Review, accept, decline,</tspan><tspan x="405" dy="19">or request revision</tspan></text>
-    <text x="405" y="523"><tspan x="405">Book appointment and</tspan><tspan x="405" dy="19">track service status</tspan></text>
-    <text x="405" y="601"><tspan x="405">View request</tspan><tspan x="405" dy="19">history</tspan></text>
-    <text x="405" y="679"><tspan x="405">Submit service</tspan><tspan x="405" dy="19">feedback</tspan></text>
-    <text x="405" y="757"><tspan x="405">View alerts and</tspan><tspan x="405" dy="19">notifications</tspan></text>
-    <text x="405" y="835"><tspan x="405">Manage profile and</tspan><tspan x="405" dy="19">submit app feedback</tspan></text>
+    <text x="405" y="523"><tspan x="405">Book an appointment</tspan><tspan x="405" dy="19">after quotation acceptance</tspan></text>
+    <text x="405" y="601"><tspan x="405">Reschedule or cancel</tspan><tspan x="405" dy="19">an appointment</tspan></text>
+    <text x="405" y="679"><tspan x="405">Track service status and</tspan><tspan x="405" dy="19">view request history</tspan></text>
+    <text x="405" y="757"><tspan x="405">Submit service feedback</tspan><tspan x="405" dy="19">and app feedback</tspan></text>
+    <text x="405" y="835"><tspan x="405">View alerts and</tspan><tspan x="405" dy="19">manage profile</tspan></text>
   </g>
 
   <!-- Owner use cases -->
@@ -83,11 +83,11 @@
     <text x="1095" y="289"><tspan x="1095">Review requests and</tspan><tspan x="1095" dy="19">uploaded images</tspan></text>
     <text x="1095" y="367"><tspan x="1095">Prepare and send</tspan><tspan x="1095" dy="19">quotations</tspan></text>
     <text x="1095" y="445"><tspan x="1095">Review revision requests</tspan><tspan x="1095" dy="19">and resend quotations</tspan></text>
-    <text x="1095" y="523"><tspan x="1095">Manage availability,</tspan><tspan x="1095" dy="19">appointments, and job limits</tspan></text>
-    <text x="1095" y="601"><tspan x="1095">Start service and</tspan><tspan x="1095" dy="19">update progress</tspan></text>
-    <text x="1095" y="679"><tspan x="1095">Complete service and</tspan><tspan x="1095" dy="19">view customer feedback</tspan></text>
-    <text x="1095" y="757"><tspan x="1095">View alerts and</tspan><tspan x="1095" dy="19">notifications</tspan></text>
-    <text x="1095" y="835"><tspan x="1095">Cancel service</tspan><tspan x="1095" dy="19">requests</tspan></text>
+    <text x="1095" y="523"><tspan x="1095">Manage shop availability,</tspan><tspan x="1095" dy="19">booking rules, and slots</tspan></text>
+    <text x="1095" y="601"><tspan x="1095">Reschedule scheduled</tspan><tspan x="1095" dy="19">appointments with a reason</tspan></text>
+    <text x="1095" y="679"><tspan x="1095">Start service and</tspan><tspan x="1095" dy="19">update repair progress</tspan></text>
+    <text x="1095" y="757"><tspan x="1095">Complete service and</tspan><tspan x="1095" dy="19">view customer feedback</tspan></text>
+    <text x="1095" y="835"><tspan x="1095">View alerts and cancel</tspan><tspan x="1095" dy="19">service requests</tspan></text>
   </g>
 
   <!-- Actor associations -->

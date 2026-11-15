@@ -20,8 +20,9 @@ function sortNewestFirst(requests: readonly ServiceRequest[]): ServiceRequest[] 
 /**
  * Loads requests (and, for the owner, customer names) in parallel.
  * `silent` keeps the current list on screen while refreshing, and reports a failure as a toast.
+ * `quiet` keeps that failure out of a toast, for the background refresh that runs every few seconds.
  */
-export function loadRequests(options: { silent?: boolean } = {}): Promise<void> {
+export function loadRequests(options: { silent?: boolean; quiet?: boolean } = {}): Promise<void> {
   if (inflight !== null) return inflight
 
   const run = async (): Promise<void> => {
@@ -39,7 +40,7 @@ export function loadRequests(options: { silent?: boolean } = {}): Promise<void> 
       const appError = toAppError(error)
       logger.error('Loading requests failed', appError)
       if (hadData && options.silent === true) {
-        showToast('error', `Could not refresh. ${userMessage(appError)}`)
+        if (options.quiet !== true) showToast('error', `Could not refresh. ${userMessage(appError)}`)
         return
       }
       requestsState.value = { status: 'error', error: appError }

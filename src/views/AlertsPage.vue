@@ -27,11 +27,11 @@ onIonViewWillEnter(() => {
   void loadNotifications({ silent: true })
 })
 
-// Keeps the screen in step with the other device.
+// The alerts themselves refresh from the app shell, so the badge stays live on
+// every screen. This only keeps the relative times on screen honest.
 useAutoRefresh(() => {
   now.value = Date.now()
-  return loadNotifications({ silent: true })
-}, 15000)
+}, 5000)
 
 function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
   return refreshPage(event, () => loadNotifications({ silent: true }))

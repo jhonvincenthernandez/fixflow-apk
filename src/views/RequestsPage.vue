@@ -112,8 +112,8 @@ async function refresh(): Promise<void> {
 // Keeps the screen in step with the other device.
 useAutoRefresh(() => {
   now.value = Date.now()
-  return loadRequests({ silent: true })
-}, 15000)
+  return loadRequests({ silent: true, quiet: true })
+}, 5000)
 
 async function onPullRefresh(event: RefresherCustomEvent): Promise<void> {
   await refresh()

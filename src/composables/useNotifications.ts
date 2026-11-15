@@ -9,8 +9,16 @@ import { showToast } from './useToast'
 
 const notificationsState = shallowRef<AsyncState<AppNotification[]>>({ status: 'idle' })
 let inflight: Promise<void> | null = null
+/** The ids of the alerts the user has already been told about. Null until the first load. */
+let seenIds: Set<string> | null = null
 
-export function loadNotifications(options: { silent?: boolean } = {}): Promise<void> {
+/**
+ * Loads the alerts.
+ * `silent` keeps the current list on screen while refreshing.
+ * `quiet` keeps a failure out of a toast, for the background refresh that runs every few seconds.
+ * `announce` tells the user about an alert that arrived while they were on another screen.
+ */
+export function loadNotifications(options: { silent?: boolean; quiet?: boolean; announce?: boolean } = {}): Promise<void> {
   if (inflight !== null) return inflight
 
   const run = async (): Promise<void> => {
@@ -18,12 +26,18 @@ export function loadNotifications(options: { silent?: boolean } = {}): Promise<v
     if (!(options.silent === true && hadData)) notificationsState.value = { status: 'loading' }
     try {
       const actor = requireActor()
-      notificationsState.value = { status: 'success', data: await listNotifications(actor.id) }
+      const items = await listNotifications(actor.id)
+      // A local copy, because seenIds is replaced on the next line.
+      const known = seenIds
+      const fresh = known === null ? [] : items.filter((item) => !known.has(item.id))
+      seenIds = new Set(items.map((item) => item.id))
+      notificationsState.value = { status: 'success', data: items }
+      if (options.announce === true) announce(fresh)
     } catch (error) {
       const appError = toAppError(error)
       logger.error('Loading notifications failed', appError)
       if (hadData && options.silent === true) {
-        showToast('error', `Could not refresh alerts. ${userMessage(appError)}`)
+        if (options.quiet !== true) showToast('error', `Could not refresh alerts. ${userMessage(appError)}`)
         return
       }
       notificationsState.value = { status: 'error', error: appError }
@@ -34,6 +48,17 @@ export function loadNotifications(options: { silent?: boolean } = {}): Promise<v
     inflight = null
   })
   return inflight
+}
+
+/**
+ * Tells the user about an alert that arrived on another device.
+ * The newest one is enough: the badge on the Alerts tab carries the full count.
+ */
+function announce(fresh: readonly AppNotification[]): void {
+  const newest = fresh[0]
+  if (newest === undefined) return
+  const extra = fresh.length > 1 ? ` (+${fresh.length - 1} more)` : ''
+  showToast('info', `${newest.title}. ${newest.body}${extra}`, 6000)
 }
 
 function replaceAll(update: (items: readonly AppNotification[]) => AppNotification[]): void {
@@ -62,6 +87,8 @@ watch(
   () => user.value?.id,
   (id) => {
     notificationsState.value = { status: 'idle' }
+    // A different account has not been told about its alerts yet, so its first load only fills the badge.
+    seenIds = null
     // Load right away so the tab badge is correct before the Alerts tab is ever opened.
     if (id !== undefined) void loadNotifications({ silent: true })
   },

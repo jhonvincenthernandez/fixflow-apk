@@ -4,10 +4,20 @@ import { useRouter } from 'vue-router'
 import AppLogo from '@/components/AppLogo.vue'
 import ErrorState from '@/components/ErrorState.vue'
 import ToastHost from '@/components/ToastHost.vue'
+import { useAppRefresh } from '@/composables/useAutoRefresh'
+import { loadNotifications } from '@/composables/useNotifications'
 import { retryBootstrap, useSession } from '@/composables/useSession'
 
-const { state } = useSession()
+const { state, user } = useSession()
 const router = useRouter()
+
+// Keeps the alerts live from any screen: the tab badge updates on its own, and
+// an alert that arrives while the user is elsewhere is announced right away.
+useAppRefresh(
+  () => loadNotifications({ silent: true, quiet: true, announce: true }),
+  5000,
+  () => user.value !== null,
+)
 
 async function retry(): Promise<void> {
   await retryBootstrap()
