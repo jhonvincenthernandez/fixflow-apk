@@ -2,7 +2,7 @@ const { queryRef, executeQuery, validateArgsWithOptions, mutationRef, executeMut
 
 const connectorConfig = {
   connector: 'example',
-  service: 'fixflow-5d7c5-service',
+  service: 'fixflow-2a566-service',
   location: 'asia-southeast1'
 };
 exports.connectorConfig = connectorConfig;
